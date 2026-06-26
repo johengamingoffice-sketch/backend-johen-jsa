@@ -1,0 +1,154 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\PayrollDetail;
+use App\Models\PayrollImport;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
+class PayrollImportService
+{
+    public function import(string $filePath, string $periode, int $uploadedBy): PayrollImport
+    {
+        $spreadsheet = IOFactory::load($filePath);
+        $worksheet = $spreadsheet->getActiveSheet();
+        $rows = $worksheet->toArray();
+
+        $header = array_shift($rows);
+        $data = collect($rows)->filter(fn($row) => !empty(array_filter($row)));
+
+        $errors = [];
+        $validData = [];
+
+        foreach ($data as $index => $row) {
+            $rowNumber = $index + 2;
+            $rowData = [
+                'nik' => trim($row[0] ?? ''),
+                'nama' => trim($row[1] ?? ''),
+                'email' => trim($row[2] ?? ''),
+                'divisi' => trim($row[3] ?? ''),
+                'jabatan' => trim($row[4] ?? ''),
+                'gaji_pokok' => (float) ($row[5] ?? 0),
+                'tambahan_upah' => (float) ($row[6] ?? 0),
+                'bonus' => (float) ($row[7] ?? 0),
+                'thr' => (float) ($row[8] ?? 0),
+                'apresiasi' => (float) ($row[9] ?? 0),
+                'tunjangan_jabatan' => (float) ($row[10] ?? 0),
+                'thr_dibayarkan' => (float) ($row[11] ?? 0),
+                'potongan_pinjaman' => (float) ($row[12] ?? 0),
+                'potongan_absensi' => (float) ($row[13] ?? 0),
+                'pdf_password' => trim($row[14] ?? ''),
+            ];
+
+            $validator = Validator::make($rowData, [
+                'nik' => 'required|string',
+                'nama' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'divisi' => 'nullable|string|max:255',
+                'jabatan' => 'required|string|max:255',
+                'gaji_pokok' => 'required|numeric|min:0',
+                'tambahan_upah' => 'numeric|min:0',
+                'bonus' => 'numeric|min:0',
+                'thr' => 'numeric|min:0',
+                'apresiasi' => 'numeric|min:0',
+                'tunjangan_jabatan' => 'numeric|min:0',
+                'thr_dibayarkan' => 'numeric|min:0',
+                'potongan_pinjaman' => 'numeric|min:0',
+                'potongan_absensi' => 'numeric|min:0',
+                'pdf_password' => 'required|string|min:1|max:50',
+            ]);
+
+            if ($validator->fails()) {
+                $errors[] = [
+                    'row' => $rowNumber,
+                    'data' => $rowData,
+                    'errors' => $validator->errors()->toArray(),
+                ];
+            } else {
+                $rowData['take_home_pay'] = $rowData['gaji_pokok'] + $rowData['tambahan_upah'] + $rowData['bonus'] + $rowData['thr'] + $rowData['apresiasi'] + $rowData['tunjangan_jabatan'] - $rowData['thr_dibayarkan'] - $rowData['potongan_pinjaman'] - $rowData['potongan_absensi'];
+                $validData[] = $rowData;
+            }
+        }
+
+        $payrollImport = DB::transaction(function () use ($validData, $periode, $filePath, $uploadedBy, $errors) {
+            $import = PayrollImport::create([
+                'periode' => $periode,
+                'file_name' => 'Payroll ' . $periode,
+                'total_employee' => count($validData),
+                'total_payroll' => collect($validData)->sum('take_home_pay'),
+                'uploaded_by' => $uploadedBy,
+            ]);
+
+            foreach ($validData as $data) {
+                $detail = PayrollDetail::create([
+                    'payroll_import_id' => $import->id,
+                    'nik' => $data['nik'],
+                    'nama' => $data['nama'],
+                    'email' => $data['email'],
+                    'divisi' => $data['divisi'],
+                    'jabatan' => $data['jabatan'],
+                    'gaji_pokok' => $data['gaji_pokok'],
+                    'tambahan_upah' => $data['tambahan_upah'],
+                    'bonus' => $data['bonus'],
+                    'thr' => $data['thr'],
+                    'apresiasi' => $data['apresiasi'],
+                    'tunjangan_jabatan' => $data['tunjangan_jabatan'],
+                    'thr_dibayarkan' => $data['thr_dibayarkan'],
+                    'potongan_pinjaman' => $data['potongan_pinjaman'],
+                    'potongan_absensi' => $data['potongan_absensi'],
+                    'take_home_pay' => $data['take_home_pay'],
+                    'pdf_password' => $data['pdf_password'],
+                ]);
+            }
+
+            return $import;
+        });
+
+        $payrollImport->setAttribute('errors', $errors);
+        $payrollImport->setAttribute('invalid_rows', count($errors));
+
+        return $payrollImport;
+    }
+
+    public function validate(array $data): array
+    {
+        $errors = [];
+        $validData = [];
+
+        foreach ($data as $index => $row) {
+            $rowNumber = $index + 2;
+            $validator = Validator::make($row, [
+                'nik' => 'required|string',
+                'nama' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'divisi' => 'nullable|string|max:255',
+                'jabatan' => 'required|string|max:255',
+                'gaji_pokok' => 'required|numeric|min:0',
+                'tambahan_upah' => 'numeric|min:0',
+                'bonus' => 'numeric|min:0',
+                'thr' => 'numeric|min:0',
+                'apresiasi' => 'numeric|min:0',
+                'tunjangan_jabatan' => 'numeric|min:0',
+                'thr_dibayarkan' => 'numeric|min:0',
+                'potongan_pinjaman' => 'numeric|min:0',
+                'potongan_absensi' => 'numeric|min:0',
+                'pdf_password' => 'required|string|min:1|max:50',
+            ]);
+
+            if ($validator->fails()) {
+                $errors[] = [
+                    'row' => $rowNumber,
+                    'data' => $row,
+                    'errors' => $validator->errors()->toArray(),
+                ];
+            } else {
+                $validData[] = $row;
+            }
+        }
+
+        return compact('validData', 'errors');
+    }
+}
