@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -14,6 +16,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Gate::define('create-data', fn(User $user) => $user->canCreateData());
+        Gate::define('update-data', fn(User $user) => $user->canUpdateData());
+        Gate::define('delete-data', fn(User $user) => $user->canDeleteData());
+        Gate::define('view-all', fn(User $user) => $user->canViewAll());
+
         Blade::directive('assets', function () {
             $manifestPath = public_path('build/manifest.json');
 

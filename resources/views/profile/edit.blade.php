@@ -31,9 +31,6 @@
                 </div>
             </div>
 
-            <div class="card p-6">
-                @include('profile.partials.delete-user-form')
-            </div>
         </div>
     </div>
 

@@ -1,4 +1,3 @@
-
 // Alpine.js sudah termasuk dalam bundle Livewire 4 (@livewireScripts)
 // Tidak perlu import terpisah untuk menghindari konflik dua instance Alpine.
 //

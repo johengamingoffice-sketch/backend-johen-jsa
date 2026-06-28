@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Employee extends Model
 {
     protected $fillable = [
+        'user_id',
         'nik',
         'nama',
         'email',
@@ -43,6 +44,11 @@ class Employee extends Model
         ];
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function division(): BelongsTo
     {
         return $this->belongsTo(Division::class);
@@ -63,4 +69,18 @@ class Employee extends Model
         return $this->hasMany(PositionHistory::class);
     }
 
+    public function payrollDetails(): HasMany
+    {
+        return $this->hasMany(PayrollDetail::class, 'nik', 'nik');
+    }
+
+    public function promotions(): HasMany
+    {
+        return $this->hasMany(Promotion::class);
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
 }

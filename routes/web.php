@@ -5,18 +5,26 @@ use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\EmailLogController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\ManualBookController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PayrollImportController;
 use App\Http\Controllers\PayrollPreviewController;
-
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StrukturOrganisasiController;
+use App\Livewire\AbsensiTable;
+use App\Livewire\CutiIzinTable;
+use App\Livewire\KontrakKerjaTable;
+use App\Livewire\UserTable;
+use App\Http\Controllers\ExportController;
+use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\PromotionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return auth()->check() ? redirect('/dashboard') : redirect('/login');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('hris')->name('hris.')->group(function () {
@@ -34,7 +42,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/employees/{employee}/position-histories', [EmployeeController::class, 'storePositionHistory'])->name('employees.store-position-history');
         Route::delete('/employees/{employee}/position-histories/{positionHistory}', [EmployeeController::class, 'destroyPositionHistory'])->name('employees.destroy-position-history');
 
+        Route::post('/employees/{employee}/promotions', [PromotionController::class, 'store'])->name('employees.store-promotion');
+        Route::delete('/employees/{employee}/promotions/{promotion}', [PromotionController::class, 'destroy'])->name('employees.destroy-promotion');
+        Route::get('/employees/{employee}/promotions/{promotion}/download', [PromotionController::class, 'downloadPdf'])->name('employees.download-promotion-pdf');
+
         Route::get('/divisions', [DivisionController::class, 'index'])->name('divisions.index');
+        Route::get('/struktur-organisasi', [StrukturOrganisasiController::class, 'index'])->name('struktur-organisasi');
+        Route::get('/absensi', AbsensiTable::class)->name('absensi');
+        Route::get('/cuti-izin', CutiIzinTable::class)->name('cuti-izin');
+        Route::get('/kontrak-kerja', KontrakKerjaTable::class)->name('kontrak-kerja');
+        Route::get('/manual-book', [ManualBookController::class, 'index'])->name('manual-book');
+
+        Route::prefix('export')->name('export.')->group(function () {
+            Route::get('/employees', [ExportController::class, 'employees'])->name('employees');
+            Route::get('/divisions', [ExportController::class, 'divisions'])->name('divisions');
+            Route::get('/kontrak-kerja', [ExportController::class, 'kontrakKerja'])->name('kontrak-kerja');
+        });
     });
 
     Route::prefix('payroll')->name('payroll.')->group(function () {
@@ -56,12 +79,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [HistoryController::class, 'index'])->name('index');
         Route::get('/{import}', [HistoryController::class, 'show'])->name('show');
     });
+
+    Route::prefix('meeting')->name('meeting.')->group(function () {
+        Route::get('/jadwal', [MeetingController::class, 'jadwal'])->name('jadwal');
+        Route::get('/permintaan', [MeetingController::class, 'permintaan'])->name('permintaan');
+    });
+
+    Route::get('/kelola-akun', UserTable::class)->name('kelola-akun');
 });
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
 });
 
 require __DIR__.'/auth.php';

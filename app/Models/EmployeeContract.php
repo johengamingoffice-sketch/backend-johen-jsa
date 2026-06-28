@@ -16,6 +16,7 @@ class EmployeeContract extends Model
         'tanggal_berakhir',
         'status',
         'keterangan',
+        'is_addendum',
     ];
 
     protected function casts(): array
@@ -23,6 +24,7 @@ class EmployeeContract extends Model
         return [
             'tanggal_mulai' => 'date',
             'tanggal_berakhir' => 'date',
+            'is_addendum' => 'boolean',
         ];
     }
 

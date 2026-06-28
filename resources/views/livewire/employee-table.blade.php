@@ -26,10 +26,19 @@
             </select>
         </div>
 
-        <button wire:click="openCreateModal" class="btn-primary text-xs py-2 shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-            Tambah Karyawan
-        </button>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('hris.export.employees') }}"
+               class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                Export Excel
+            </a>
+            @can('create-data')
+            <button wire:click="openCreateModal" class="btn-primary text-xs py-2 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                Tambah Karyawan
+            </button>
+            @endcan
+        </div>
     </div>
 
     <div class="overflow-x-auto">
@@ -67,9 +76,13 @@
                         <td class="table-cell font-mono font-medium text-gray-900 dark:text-gray-100">{{ $emp->nik }}</td>
                         <td class="table-cell">
                             <div class="flex items-center gap-2">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 font-semibold text-xs">
-                                    {{ strtoupper(substr($emp->nama, 0, 1)) }}
-                                </div>
+                                @if($emp->foto)
+                                    <img src="{{ asset('storage/employees/' . $emp->foto) }}" alt="{{ $emp->nama }}" class="w-10 h-10 rounded-lg object-contain bg-gray-50">
+                                @else
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 font-semibold text-xs">
+                                        {{ strtoupper(substr($emp->nama, 0, 1)) }}
+                                    </div>
+                                @endif
                                 <span class="font-medium text-gray-900 dark:text-gray-100">{{ $emp->nama }}</span>
                             </div>
                         </td>
@@ -97,14 +110,18 @@
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
                                     </button>
                                     <div x-show="open" x-cloak @click.outside="open = false" class="absolute right-0 z-50 mt-1 w-40 rounded-xl bg-white dark:bg-gray-800 shadow-xl border border-gray-100 dark:border-gray-700 py-1.5">
+                                        @can('update-data')
                                         <button wire:click="openEditModal({{ $emp->id }})" @click="open = false" class="flex w-full items-center gap-2.5 px-4 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
                                             Edit
                                         </button>
+                                        @endcan
+                                        @can('delete-data')
                                         <button wire:click="delete({{ $emp->id }})" wire:confirm="Yakin ingin menghapus {{ $emp->nama }}?" @click="open = false" class="flex w-full items-center gap-2.5 px-4 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
                                             Hapus
                                         </button>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -119,10 +136,12 @@
                                 </div>
                                 <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Belum ada data karyawan</h3>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tambah karyawan pertama untuk memulai</p>
+                                @can('create-data')
                                 <button wire:click="openCreateModal" class="btn-primary mt-4 text-xs">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                                     Tambah Karyawan
                                 </button>
+                                @endcan
                             </div>
                         </td>
                     </tr>
@@ -665,18 +684,31 @@
                 </div>
             </div>
 
+            @if($errors->any())
+                <div class="mt-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900">
+                    <div class="flex items-start gap-2">
+                        <svg class="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+                        <div class="text-xs text-red-700 dark:text-red-400">
+                            @foreach($errors->all() as $error)
+                                <p>{{ $error }}</p>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <div class="flex items-center justify-between pt-6 border-t border-gray-100 dark:border-gray-700 mt-6">
-                <button type="button" wire:click="backToForm" class="btn-secondary text-xs">
+                <button type="button" @click="$wire.backToForm()" class="btn-secondary text-xs">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
                     Kembali Edit
                 </button>
                 @if($editId)
-                    <button type="button" wire:click="update" class="btn-primary text-xs">
+                    <button type="button" @click="$wire.update()" class="btn-primary text-xs">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 12.75l6 6 9-13.5"/></svg>
                         Simpan Perubahan
                     </button>
                 @else
-                    <button type="button" wire:click="save" class="btn-primary text-xs">
+                    <button type="button" @click="$wire.save()" class="btn-primary text-xs">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 12.75l6 6 9-13.5"/></svg>
                         Simpan
                     </button>

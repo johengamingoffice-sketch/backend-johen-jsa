@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Division;
 use App\Models\Employee;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -16,6 +17,11 @@ class EmployeeTable extends Component
     public string $sortDirection = 'asc';
     public string $filterDivision = '';
     public string $filterStatus = '';
+
+    public function mount(): void
+    {
+        $this->filterDivision = request('division', '');
+    }
 
     public bool $showCreateModal = false;
     public bool $showEditModal = false;
@@ -109,6 +115,7 @@ class EmployeeTable extends Component
 
     public function openCreateModal(): void
     {
+        Gate::authorize('create-data');
         $this->resetForm();
         $this->step = 1;
         $this->showCreateModal = true;
@@ -116,6 +123,7 @@ class EmployeeTable extends Component
 
     public function openEditModal(int $id): void
     {
+        Gate::authorize('update-data');
         $emp = Employee::findOrFail($id);
         $this->editId = $emp->id;
         $this->nik = $emp->nik;
@@ -189,6 +197,7 @@ class EmployeeTable extends Component
 
     public function save(): void
     {
+        Gate::authorize('create-data');
         $rules = $this->rules();
         $rules['nik'] = ['required', 'string', 'max:30', 'unique:employees,nik'];
         $this->validate($rules);
@@ -201,6 +210,7 @@ class EmployeeTable extends Component
 
     public function update(): void
     {
+        Gate::authorize('update-data');
         $emp = Employee::findOrFail($this->editId);
 
         $rules = $this->rules();
@@ -215,6 +225,7 @@ class EmployeeTable extends Component
 
     public function delete(int $id): void
     {
+        Gate::authorize('delete-data');
         Employee::findOrFail($id)->delete();
         $this->dispatch('notify', type: 'success', message: 'Karyawan berhasil dihapus.');
     }
@@ -236,7 +247,11 @@ class EmployeeTable extends Component
             ->when($this->filterStatus, function ($query) {
                 $query->where('status', $this->filterStatus);
             })
-            ->orderBy($this->sortField, $this->sortDirection)
+            ->when($this->sortField === 'nik', function ($query) {
+                $query->orderByRaw('CAST(nik AS INTEGER) ' . ($this->sortDirection === 'asc' ? 'asc' : 'desc'));
+            }, function ($query) {
+                $query->orderBy($this->sortField, $this->sortDirection);
+            })
             ->paginate(10);
 
         $divisions = Division::where('is_active', true)->orderBy('nama')->get();

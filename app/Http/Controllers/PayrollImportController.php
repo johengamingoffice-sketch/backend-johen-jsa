@@ -8,6 +8,7 @@ use App\Models\PayrollImport;
 use App\Services\PayrollImportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class PayrollImportController extends Controller
@@ -23,6 +24,7 @@ class PayrollImportController extends Controller
 
     public function store(UploadPayrollRequest $request)
     {
+        Gate::authorize('create-data');
         $file = $request->file('file');
         $periode = $request->input('bulan') . ' ' . $request->input('tahun');
 
@@ -49,6 +51,7 @@ class PayrollImportController extends Controller
 
     public function destroy(PayrollImport $import): RedirectResponse
     {
+        Gate::authorize('delete-data');
         foreach ($import->payrollDetails as $detail) {
             if ($detail->pdf_path && Storage::disk('public')->exists($detail->pdf_path)) {
                 Storage::disk('public')->delete($detail->pdf_path);

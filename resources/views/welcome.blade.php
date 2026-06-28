@@ -3,7 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ config('app.name', 'Payroll') }}</title>
+        <title>{{ config('app.name', 'Johen Sukses Abadi') }}</title>
+        <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
         <style>
@@ -23,7 +24,7 @@
     </head>
     <body>
         <div class="container">
-            <div class="logo">P</div>
+            <img src="{{ asset('logo.png') }}" alt="Johen Sukses Abadi" class="logo" style="width: 64px; height: 64px; object-fit: contain; border-radius: 16px; margin: 0 auto 1.5rem; display: block; box-shadow: 0 8px 32px rgba(99,102,241,0.3);">
             <h1>{{ config('app.name', 'Payroll') }}</h1>
             <p>Kelola payroll, generate slip gaji, dan kirim email ke karyawan dengan mudah dalam satu platform.</p>
             <div class="buttons">

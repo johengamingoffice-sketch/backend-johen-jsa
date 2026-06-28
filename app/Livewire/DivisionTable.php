@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Division;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -59,12 +60,14 @@ class DivisionTable extends Component
 
     public function openCreateModal(): void
     {
+        Gate::authorize('create-data');
         $this->resetForm();
         $this->showCreateModal = true;
     }
 
     public function openEditModal(int $id): void
     {
+        Gate::authorize('update-data');
         $div = Division::findOrFail($id);
         $this->editId = $div->id;
         $this->nama = $div->nama;
@@ -84,6 +87,7 @@ class DivisionTable extends Component
 
     public function save(): void
     {
+        Gate::authorize('create-data');
         $this->validate($this->rules());
 
         Division::create($this->buildData());
@@ -94,6 +98,7 @@ class DivisionTable extends Component
 
     public function update(): void
     {
+        Gate::authorize('update-data');
         $div = Division::findOrFail($this->editId);
 
         $this->validate($this->rules());
@@ -106,6 +111,7 @@ class DivisionTable extends Component
 
     public function delete(int $id): void
     {
+        Gate::authorize('delete-data');
         $div = Division::withCount('employees')->findOrFail($id);
 
         if ($div->employees_count > 0) {
@@ -119,6 +125,7 @@ class DivisionTable extends Component
 
     public function toggleActive(int $id): void
     {
+        Gate::authorize('update-data');
         $div = Division::findOrFail($id);
         $div->update(['is_active' => !$div->is_active]);
         $this->dispatch('notify', type: 'success', message: 'Status divisi berhasil diubah.');

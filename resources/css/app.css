@@ -165,4 +165,137 @@
     .preview-value {
         @apply block text-sm font-medium text-gray-900 dark:text-gray-100 mt-0.5;
     }
+
+    .login-card {
+        @apply bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-2xl;
+        will-change: transform;
+    }
+
+    .login-input {
+        @apply block w-full rounded-xl border bg-white dark:bg-gray-800 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none transition-all duration-300;
+        border-color: theme('colors.gray.200');
+    }
+
+    .dark .login-input {
+        border-color: theme('colors.gray.700');
+    }
+
+    .login-input:focus-visible {
+        border-color: theme('colors.primary.400');
+        box-shadow: 0 0 0 3px rgba(9, 135, 245, 0.12);
+    }
+
+    .dark .login-input:focus-visible {
+        border-color: theme('colors.primary.500');
+        box-shadow: 0 0 0 3px rgba(9, 135, 245, 0.2);
+    }
+
+    .login-input-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-input-wrapper::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: theme('colors.primary.500');
+        transition: width 0.3s ease, left 0.3s ease;
+        border-radius: 1px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .login-input-wrapper::after {
+            transition: none;
+        }
+    }
+
+    .login-input-wrapper:focus-within::after {
+        width: 100%;
+        left: 0;
+    }
+
+    .login-btn {
+        @apply relative inline-flex items-center justify-center gap-2 w-full rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 overflow-hidden;
+        background: linear-gradient(135deg, #0987F5, #036bd1);
+    }
+
+    .login-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(9, 135, 245, 0.35);
+    }
+
+    .login-btn:active {
+        transform: translateY(0) scale(0.98);
+    }
+
+    .login-btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(9, 135, 245, 0.4), 0 8px 25px rgba(9, 135, 245, 0.35);
+    }
+
+    .login-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+        transition: left 0.5s ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .login-btn::before {
+            transition: none;
+        }
+    }
+
+    .login-btn:hover::before {
+        left: 100%;
+    }
+
+    .login-btn.loading {
+        pointer-events: none;
+        opacity: 0.85;
+    }
+
+    .login-stagger-1,
+    .login-stagger-2,
+    .login-stagger-3,
+    .login-stagger-4,
+    .login-stagger-5,
+    .login-stagger-6 {
+        opacity: 0;
+        animation: staggerFadeIn 0.5s ease-out forwards;
+    }
+
+    .login-stagger-1 { animation-delay: 0ms; }
+    .login-stagger-2 { animation-delay: 100ms; }
+    .login-stagger-3 { animation-delay: 200ms; }
+    .login-stagger-4 { animation-delay: 300ms; }
+    .login-stagger-5 { animation-delay: 400ms; }
+    .login-stagger-6 { animation-delay: 500ms; }
+
+    @keyframes staggerFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .login-stagger-1,
+        .login-stagger-2,
+        .login-stagger-3,
+        .login-stagger-4,
+        .login-stagger-5,
+        .login-stagger-6 {
+            opacity: 1;
+            animation: none;
+        }
+    }
+
+
 }
