@@ -18,6 +18,11 @@ use App\Livewire\UserTable;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\BonusController;
+use App\Http\Controllers\DigitalAssetController;
+use App\Http\Controllers\ElectricityController;
+use App\Http\Controllers\InternetController;
+use App\Http\Controllers\IplRukoController;
+use App\Http\Controllers\PaymentSubmissionController;
 use App\Http\Controllers\PromotionController;
 use Illuminate\Support\Facades\Route;
 
@@ -91,6 +96,72 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('bonus')->name('bonus.')->group(function () {
         Route::get('/', [BonusController::class, 'index'])->name('index');
+    });
+
+    Route::prefix('electricity')->name('electricity.')->group(function () {
+        Route::get('/', [ElectricityController::class, 'index'])->name('index');
+        Route::get('/topups-data', [ElectricityController::class, 'topupsData'])->name('topups.data');
+        Route::get('/checks-data', [ElectricityController::class, 'checksData'])->name('checks.data');
+        Route::get('/stats', [ElectricityController::class, 'stats'])->name('stats');
+        Route::post('/topups', [ElectricityController::class, 'storeTopup'])->name('store.topup');
+        Route::delete('/topups/{electricityTopup}', [ElectricityController::class, 'destroyTopup'])->name('destroy.topup');
+        Route::post('/checks', [ElectricityController::class, 'storeCheck'])->name('store.check');
+        Route::delete('/checks/{electricityTokenCheck}', [ElectricityController::class, 'destroyCheck'])->name('destroy.check');
+        Route::put('/settings', [ElectricityController::class, 'updateSettings'])->name('update.settings');
+        Route::get('/export/topups', [ElectricityController::class, 'exportTopups'])->name('export.topups');
+        Route::get('/export/checks', [ElectricityController::class, 'exportChecks'])->name('export.checks');
+    });
+
+    Route::prefix('internet')->name('internet.')->group(function () {
+        Route::get('/', [InternetController::class, 'index'])->name('index');
+        Route::get('/payments-data', [InternetController::class, 'paymentsData'])->name('payments.data');
+        Route::get('/checks-data', [InternetController::class, 'checksData'])->name('checks.data');
+        Route::post('/', [InternetController::class, 'storePayment'])->name('store.payment');
+        Route::put('/{internetPayment}', [InternetController::class, 'updatePayment'])->name('update.payment');
+        Route::delete('/{internetPayment}', [InternetController::class, 'destroyPayment'])->name('destroy.payment');
+        Route::post('/checks', [InternetController::class, 'storeCheck'])->name('store.check');
+        Route::delete('/checks/{internetUsageCheck}', [InternetController::class, 'destroyCheck'])->name('destroy.check');
+        Route::get('/export/payments', [InternetController::class, 'exportPayments'])->name('export.payments');
+        Route::get('/export/checks', [InternetController::class, 'exportChecks'])->name('export.checks');
+    });
+
+    Route::prefix('digital')->name('digital.')->group(function () {
+        Route::get('/', [DigitalAssetController::class, 'index'])->name('index');
+        Route::get('/data', [DigitalAssetController::class, 'data'])->name('data');
+        Route::post('/', [DigitalAssetController::class, 'store'])->name('store');
+        Route::put('/{digitalAsset}', [DigitalAssetController::class, 'update'])->name('update');
+        Route::delete('/{digitalAsset}', [DigitalAssetController::class, 'destroy'])->name('destroy');
+        Route::patch('/{digitalAsset}/mark-paid', [DigitalAssetController::class, 'markPaid'])->name('mark-paid');
+        Route::get('/export', [DigitalAssetController::class, 'export'])->name('export');
+    });
+
+    Route::prefix('ipl')->name('ipl.')->group(function () {
+        Route::get('/', [IplRukoController::class, 'index'])->name('index');
+        Route::get('/data', [IplRukoController::class, 'data'])->name('data');
+        Route::post('/', [IplRukoController::class, 'store'])->name('store');
+        Route::put('/{iplRukoPayment}', [IplRukoController::class, 'update'])->name('update');
+        Route::delete('/{iplRukoPayment}', [IplRukoController::class, 'destroy'])->name('destroy');
+        Route::patch('/{iplRukoPayment}/mark-paid', [IplRukoController::class, 'markPaid'])->name('mark-paid');
+        Route::post('/generate', [IplRukoController::class, 'generateYear'])->name('generate');
+        Route::get('/export', [IplRukoController::class, 'export'])->name('export');
+    });
+
+    Route::prefix('payment-submissions')->name('payment-submissions.')->group(function () {
+        Route::get('/tagihan', [PaymentSubmissionController::class, 'tagihan'])->name('tagihan');
+        Route::get('/pengajuan', [PaymentSubmissionController::class, 'pengajuan'])->name('pengajuan');
+        Route::get('/persetujuan', [PaymentSubmissionController::class, 'persetujuan'])->name('persetujuan');
+        Route::post('/', [PaymentSubmissionController::class, 'store'])->name('store');
+        Route::patch('/{paymentSubmission}/approve', [PaymentSubmissionController::class, 'approve'])->name('approve');
+        Route::patch('/{paymentSubmission}/reject', [PaymentSubmissionController::class, 'reject'])->name('reject');
+        Route::post('/{paymentSubmission}/upload-bukti', [PaymentSubmissionController::class, 'uploadBukti'])->name('upload-bukti');
+        Route::patch('/{paymentSubmission}/mark-paid', [PaymentSubmissionController::class, 'markPaid'])->name('mark-paid');
+        Route::delete('/{paymentSubmission}', [PaymentSubmissionController::class, 'destroy'])->name('destroy');
+        Route::get('/export/tagihan', [PaymentSubmissionController::class, 'exportTagihan'])->name('export.tagihan');
+        Route::get('/export/pengajuan', [PaymentSubmissionController::class, 'exportPengajuan'])->name('export.pengajuan');
+        Route::get('/export/persetujuan', [PaymentSubmissionController::class, 'exportPersetujuan'])->name('export.persetujuan');
+        Route::get('/data/tagihan', [PaymentSubmissionController::class, 'dataTagihan'])->name('data.tagihan');
+        Route::get('/data/pengajuan', [PaymentSubmissionController::class, 'dataPengajuan'])->name('data.pengajuan');
+        Route::get('/data/persetujuan', [PaymentSubmissionController::class, 'dataPersetujuan'])->name('data.persetujuan');
     });
 
     Route::get('/kelola-akun', UserTable::class)->name('kelola-akun');
