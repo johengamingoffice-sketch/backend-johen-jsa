@@ -6,6 +6,14 @@
     display: none !important;
 }
 
+html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 @layer base {
     html.dark body {
         @apply bg-gray-950 text-gray-100;
@@ -42,6 +50,7 @@
 @layer components {
     .card {
         @apply rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200;
+        will-change: transform;
     }
 
     .dark .card {
@@ -118,6 +127,7 @@
 
     .stat-card {
         @apply relative overflow-hidden rounded-2xl bg-white border border-gray-100 p-5 shadow-sm hover:shadow-lg transition-all duration-300;
+        will-change: transform;
     }
 
     .dark .stat-card {
@@ -199,11 +209,12 @@
         content: '';
         position: absolute;
         bottom: 0;
-        left: 50%;
-        width: 0;
+        left: 0;
+        width: 100%;
         height: 2px;
         background: theme('colors.primary.500');
-        transition: width 0.3s ease, left 0.3s ease;
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
         border-radius: 1px;
     }
 
@@ -214,13 +225,13 @@
     }
 
     .login-input-wrapper:focus-within::after {
-        width: 100%;
-        left: 0;
+        transform: scaleX(1);
     }
 
     .login-btn {
         @apply relative inline-flex items-center justify-center gap-2 w-full rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 overflow-hidden;
         background: linear-gradient(135deg, #0987F5, #036bd1);
+        will-change: transform;
     }
 
     .login-btn:hover {
@@ -241,11 +252,12 @@
         content: '';
         position: absolute;
         top: 0;
-        left: -100%;
+        left: 0;
         width: 100%;
         height: 100%;
         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
-        transition: left 0.5s ease;
+        transform: translateX(-100%);
+        transition: transform 0.5s ease;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -255,7 +267,7 @@
     }
 
     .login-btn:hover::before {
-        left: 100%;
+        transform: translateX(100%);
     }
 
     .login-btn.loading {
