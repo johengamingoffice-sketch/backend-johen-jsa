@@ -91,7 +91,9 @@ class EmployeeController extends Controller
 
     public function update(StoreEmployeeRequest $request, Employee $employee)
     {
-        Gate::authorize('update-data');
+        if ($employee->user_id !== auth()->id()) {
+            Gate::authorize('update-data');
+        }
         $employee->update($request->validated());
 
         if ($request->input('_redirect') === 'show') {
@@ -105,7 +107,9 @@ class EmployeeController extends Controller
 
     public function uploadPhoto(Request $request, Employee $employee)
     {
-        Gate::authorize('update-data');
+        if ($employee->user_id !== auth()->id()) {
+            Gate::authorize('update-data');
+        }
         $request->validate([
             'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
@@ -122,7 +126,9 @@ class EmployeeController extends Controller
 
     public function storeDocument(Request $request, Employee $employee)
     {
-        Gate::authorize('create-data');
+        if ($employee->user_id !== auth()->id()) {
+            Gate::authorize('create-data');
+        }
         $request->validate([
             'nama_dokumen' => 'required|string|max:255',
             'jenis_dokumen' => 'required|string|max:100',
@@ -160,7 +166,9 @@ class EmployeeController extends Controller
 
     public function destroyDocument(Employee $employee, EmployeeDocument $document)
     {
-        Gate::authorize('delete-data');
+        if ($employee->user_id !== auth()->id()) {
+            Gate::authorize('delete-data');
+        }
         $filePath = 'documents/' . $document->file;
 
         if (Storage::disk('public')->exists($filePath)) {
@@ -175,7 +183,9 @@ class EmployeeController extends Controller
 
     public function storeContract(Request $request, Employee $employee)
     {
-        Gate::authorize('create-data');
+        if ($employee->user_id !== auth()->id()) {
+            Gate::authorize('create-data');
+        }
         $request->validate([
             'jenis_kontrak' => 'required|string|max:100',
             'posisi' => 'required|string|max:255',
@@ -207,7 +217,9 @@ class EmployeeController extends Controller
 
     public function destroyContract(Employee $employee, EmployeeContract $contract)
     {
-        Gate::authorize('delete-data');
+        if ($employee->user_id !== auth()->id()) {
+            Gate::authorize('delete-data');
+        }
         $contract->delete();
 
         return redirect(route('hris.employees.show', $employee) . '#kontrak')
@@ -216,7 +228,9 @@ class EmployeeController extends Controller
 
     public function storePositionHistory(Request $request, Employee $employee)
     {
-        Gate::authorize('create-data');
+        if ($employee->user_id !== auth()->id()) {
+            Gate::authorize('create-data');
+        }
         $request->validate([
             'jabatan' => 'required|string|max:255',
             'divisi' => 'required|string|max:255',
@@ -242,7 +256,9 @@ class EmployeeController extends Controller
 
     public function destroyPositionHistory(Employee $employee, PositionHistory $positionHistory)
     {
-        Gate::authorize('delete-data');
+        if ($employee->user_id !== auth()->id()) {
+            Gate::authorize('delete-data');
+        }
         $positionHistory->delete();
 
         return redirect(route('hris.employees.show', $employee) . '#jabatan')
@@ -251,7 +267,9 @@ class EmployeeController extends Controller
 
     public function updateContract(Request $request, Employee $employee, EmployeeContract $contract)
     {
-        Gate::authorize('update-data');
+        if ($employee->user_id !== auth()->id()) {
+            Gate::authorize('update-data');
+        }
         $request->validate([
             'jenis_kontrak' => 'required|string|max:100',
             'posisi' => 'required|string|max:255',

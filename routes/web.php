@@ -24,6 +24,8 @@ use App\Http\Controllers\InternetController;
 use App\Http\Controllers\IplRukoController;
 use App\Http\Controllers\PaymentSubmissionController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\AssetViewController;
+use App\Http\Controllers\JobdeskController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -58,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/cuti-izin', CutiIzinTable::class)->name('cuti-izin');
         Route::get('/kontrak-kerja', KontrakKerjaTable::class)->name('kontrak-kerja');
         Route::get('/manual-book', [ManualBookController::class, 'index'])->name('manual-book');
+        Route::get('/jobdesk', [JobdeskController::class, 'index'])->name('jobdesk');
 
         Route::prefix('export')->name('export.')->group(function () {
             Route::get('/employees', [ExportController::class, 'employees'])->name('employees');
@@ -163,6 +166,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/data/pengajuan', [PaymentSubmissionController::class, 'dataPengajuan'])->name('data.pengajuan');
         Route::get('/data/persetujuan', [PaymentSubmissionController::class, 'dataPersetujuan'])->name('data.persetujuan');
     });
+
+    Route::prefix('assets')->name('assets.')->group(function () {
+        Route::get('/', [AssetViewController::class, 'index'])->name('index');
+        Route::get('/{category}', [AssetViewController::class, 'index'])->name('category');
+    });
+
+    Route::get('/reimbursement', function () {
+        return redirect()->route('payment-submissions.pengajuan');
+    })->name('reimbursement');
 
     Route::get('/kelola-akun', UserTable::class)->name('kelola-akun');
 });

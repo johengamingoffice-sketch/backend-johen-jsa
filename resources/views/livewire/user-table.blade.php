@@ -22,9 +22,11 @@
 
                 <select wire:model.live="filterRole" class="rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
                     <option value="">Semua Role</option>
-                    <option value="admin">Admin</option>
-                    <option value="direksi">Direksi</option>
-                    <option value="karyawan">Karyawan</option>
+                    <option value="super_admin">Super Admin</option>
+                    <option value="gm_ceo">GM / CEO</option>
+                    <option value="manager">Manager</option>
+                    <option value="koordinator">Koordinator</option>
+                    <option value="staff">Staff</option>
                 </select>
             </div>
 
@@ -56,12 +58,16 @@
                             <td class="table-cell font-medium text-gray-900 dark:text-gray-100">{{ $u->name }}</td>
                             <td class="table-cell text-gray-600 dark:text-gray-400 font-mono">{{ $u->username }}</td>
                             <td class="table-cell">
-                                @if($u->role === 'admin')
-                                    <span class="badge-success">Admin</span>
-                                @elseif($u->role === 'direksi')
-                                    <span class="badge-warning">Direksi</span>
+                                @if($u->role === 'super_admin')
+                                    <span class="badge-success">Super Admin</span>
+                                @elseif($u->role === 'gm_ceo')
+                                    <span class="badge-warning">GM / CEO</span>
+                                @elseif($u->role === 'manager')
+                                    <span class="badge-primary">Manager</span>
+                                @elseif($u->role === 'koordinator')
+                                    <span class="badge-info">Koordinator</span>
                                 @else
-                                    <span class="badge-info">Karyawan</span>
+                                    <span class="badge-secondary">Staff</span>
                                 @endif
                             </td>
                             <td class="table-cell text-gray-600 dark:text-gray-400">
@@ -151,9 +157,11 @@
                 <div>
                     <x-input-label for="create-role" value="Role *" />
                     <select id="create-role" wire:model="role" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
-                        <option value="karyawan">Karyawan</option>
-                        <option value="admin">Admin</option>
-                        <option value="direksi">Direksi</option>
+                        <option value="staff">Staff</option>
+                        <option value="koordinator">Koordinator</option>
+                        <option value="manager">Manager</option>
+                        <option value="gm_ceo">GM / CEO</option>
+                        <option value="super_admin">Super Admin</option>
                     </select>
                     @error('role') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                 </div>
@@ -222,9 +230,11 @@
                 <div>
                     <x-input-label for="edit-role" value="Role *" />
                     <select id="edit-role" wire:model="role" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
-                        <option value="karyawan">Karyawan</option>
-                        <option value="admin">Admin</option>
-                        <option value="direksi">Direksi</option>
+                        <option value="staff">Staff</option>
+                        <option value="koordinator">Koordinator</option>
+                        <option value="manager">Manager</option>
+                        <option value="gm_ceo">GM / CEO</option>
+                        <option value="super_admin">Super Admin</option>
                     </select>
                     @error('role') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                 </div>

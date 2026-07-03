@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             StrukturOrganisasiSeeder::class,
             AttendanceSeeder::class,
+            AssetCategorySeeder::class,
         ]);
     }
 }

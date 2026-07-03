@@ -17,7 +17,7 @@ class AdminUserSeeder extends Seeder
                 'name' => 'Administrator',
                 'email' => 'gonzaga@johen.com',
                 'password' => Hash::make('password'),
-                'role' => 'admin',
+                'role' => 'super_admin',
             ]
         );
 
@@ -27,12 +27,12 @@ class AdminUserSeeder extends Seeder
                 'name' => 'General Manager',
                 'email' => 'gm@johen.com',
                 'password' => Hash::make('password'),
-                'role' => 'direksi',
+                'role' => 'gm_ceo',
             ]
         );
 
-        User::where('username', 'admin')->where('role', 'karyawan')->update(['role' => 'admin']);
-        User::where('username', 'gm')->where('role', 'karyawan')->update(['role' => 'direksi']);
+        User::where('username', 'admin')->where('role', 'staff')->update(['role' => 'super_admin']);
+        User::where('username', 'gm')->where('role', 'staff')->update(['role' => 'gm_ceo']);
 
         if (!$admin->employee) {
             Employee::firstOrCreate(

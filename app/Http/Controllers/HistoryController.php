@@ -18,9 +18,7 @@ class HistoryController extends Controller
             ->latest()
             ->paginate(12);
 
-        $stats = $dashboardService->getStats();
-
-        return view('history.index', compact('imports', 'availableYears', 'selectedYear', 'stats'));
+        return view('history.index', compact('imports', 'availableYears', 'selectedYear'));
     }
 
     public function show(PayrollImport $import)

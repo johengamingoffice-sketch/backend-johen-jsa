@@ -207,7 +207,7 @@ class CutiIzinTable extends Component
     {
         $user = auth()->user();
 
-        if ($user->isKaryawan()) {
+        if ($user->isStaff()) {
             $employee = $user->employee;
             if (!$employee) {
                 $this->dispatch('notify', type: 'error', message: 'Akun Anda tidak terhubung ke data karyawan.');
@@ -237,7 +237,7 @@ class CutiIzinTable extends Component
         $user = auth()->user();
         $lr = LeaveRequest::findOrFail($this->deleteId);
 
-        if ($user->isKaryawan()) {
+        if ($user->isStaff()) {
             $employee = $user->employee;
             if (!$employee || $lr->employee_id !== $employee->id) {
                 abort(403);
@@ -268,7 +268,7 @@ class CutiIzinTable extends Component
         $user = auth()->user();
         $userEmployee = $user->employee;
 
-        if ($user->isKaryawan()) {
+        if ($user->isStaff()) {
             $employee = $userEmployee;
 
             if (!$employee) {
@@ -333,11 +333,10 @@ class CutiIzinTable extends Component
             ))->with('karyawanView', true);
         }
 
-        $isDireksi = $user->isDireksi();
         $isHr = $userEmployee && in_array($userEmployee->position, [
             'Human Resource Generalist', 'Admin HR', 'Admin GA', 'OB'
         ]);
-        $lihatSemua = $user->id === 4 || $isHr || $isDireksi;
+        $lihatSemua = $user->id === 4 || $isHr || $user->canViewAll();
 
         $totalPengajuan = LeaveRequest::count();
         $totalCuti = LeaveRequest::where('jenis', 'cuti_tahunan')->count();

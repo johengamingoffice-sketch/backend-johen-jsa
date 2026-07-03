@@ -35,7 +35,7 @@ class MeetingController extends Controller
         $user = auth()->user();
         $employee = $user->employee;
 
-        if ($user->isKaryawan()) {
+        if ($user->isStaff()) {
             $requests = MeetingRequest::with('employee')
                 ->where('employee_id', $employee?->id)
                 ->latest()
@@ -44,6 +44,15 @@ class MeetingController extends Controller
             $requests = MeetingRequest::with(['employee', 'approver'])
                 ->when($request->status, function ($q, $status) {
                     $q->where('status', $status);
+                })
+                ->when($request->search, function ($q, $search) {
+                    $q->where(function ($q) use ($search) {
+                        $q->where('title', 'like', "%{$search}%")
+                            ->orWhere('room', 'like', "%{$search}%")
+                            ->orWhereHas('employee', function ($q) use ($search) {
+                                $q->where('nama', 'like', "%{$search}%");
+                            });
+                    });
                 })
                 ->latest()
                 ->paginate(10);

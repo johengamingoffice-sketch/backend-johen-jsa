@@ -243,12 +243,12 @@
                 <div class="flex items-center justify-between relative z-10 pt-5">
                     <div class="sm:ml-[148px] text-white text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">{{ $employee->position ?? '—' }}</div>
                     <div class="flex items-center gap-2.5">
-                        @can('update-data')
+                        @if(auth()->user()->can('update-data') || $employee->user_id === auth()->id())
                                     <button @click="editModal = true" class="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             Edit Informasi
                         </button>
-                        @endcan
+                        @endif
                         <div class="relative" @click.outside="aksiOpen = false">
                             <button @click="aksiOpen = !aksiOpen" class="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white border border-white/60 hover:bg-white/20 transition-all">
                                 Aksi Lainnya
@@ -283,17 +283,18 @@
 
             <div class="px-7 pb-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 -mt-12 sm:-mt-20">
                 <div class="w-[120px] h-[120px] sm:w-[140px] sm:h-[140px] rounded-2xl bg-gray-100 dark:bg-gray-700 border-4 border-white dark:border-gray-800 shadow-xl flex-shrink-0 overflow-hidden relative group">
-                    @can('update-data')
+                    @php $canEditPhoto = auth()->user()->can('update-data') || $employee->user_id === auth()->id(); @endphp
+                    @if($canEditPhoto)
                     <form method="POST" action="{{ route('hris.employees.upload-photo', $employee) }}" enctype="multipart/form-data" id="photo-form-{{ $employee->id }}">
                         @csrf
                         <label for="photo-input-{{ $employee->id }}" class="block w-full h-full cursor-pointer">
-                    @endcan
+                    @endif
                             @if($employee->foto)
                                 <img src="{{ asset('storage/employees/' . $employee->foto) }}" alt="{{ $employee->nama }}" class="w-full h-full object-cover">
                             @else
                                 <span class="text-4xl sm:text-5xl font-bold text-white bg-gradient-to-br from-primary-500 to-violet-600 w-full h-full flex items-center justify-center">{{ strtoupper(substr($employee->nama, 0, 1)) }}</span>
                             @endif
-                    @can('update-data')
+                    @if($canEditPhoto)
                             <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl">
                                 <div class="flex flex-col items-center gap-1">
                                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.72a2 2 0 0 0 2-2 .996.996 0 0 1 1-.88h2.66M15 13a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path d="M21 16v4"/><path d="M19 18h4"/></svg>
@@ -303,7 +304,7 @@
                         </label>
                         <input id="photo-input-{{ $employee->id }}" type="file" name="foto" accept="image/*" class="hidden" onchange="this.form.submit()">
                     </form>
-                    @endcan
+                    @endif
                 </div>
                 <div class="text-center sm:text-left sm:pt-20 pt-2">
                     <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 mb-1.5">

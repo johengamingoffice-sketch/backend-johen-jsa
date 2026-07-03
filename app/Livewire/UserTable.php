@@ -20,7 +20,7 @@ class UserTable extends Component
     public string $username = '';
     public string $password = '';
     public string $password_confirmation = '';
-    public string $role = 'karyawan';
+    public string $role = 'staff';
     public ?int $linkEmployeeId = null;
     public string $filterRole = '';
     public string $search = '';
@@ -41,7 +41,7 @@ class UserTable extends Component
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'regex:/^\S*$/', 'unique:users,username' . ($this->editId ? ',' . $this->editId : '')],
             'password' => [$this->editId ? 'nullable' : 'required', 'string', 'min:4', 'confirmed'],
-            'role' => ['required', 'in:admin,direksi,karyawan'],
+            'role' => ['required', 'in:super_admin,gm_ceo,manager,koordinator,staff'],
         ];
     }
 
@@ -178,7 +178,7 @@ class UserTable extends Component
         $this->username = '';
         $this->password = '';
         $this->password_confirmation = '';
-        $this->role = 'karyawan';
+        $this->role = 'staff';
         $this->linkEmployeeId = null;
         $this->resetErrorBag();
     }

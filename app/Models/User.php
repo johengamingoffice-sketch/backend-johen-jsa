@@ -65,39 +65,85 @@ class User extends Authenticatable
         return $this->hasMany(MeetingRequest::class, 'approved_by');
     }
 
+    public const ROLE_SUPER_ADMIN = 'super_admin';
+    public const ROLE_GM_CEO = 'gm_ceo';
+    public const ROLE_MANAGER = 'manager';
+    public const ROLE_KOORDINATOR = 'koordinator';
+    public const ROLE_STAFF = 'staff';
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === self::ROLE_SUPER_ADMIN;
+    }
+
+    public function isGmCeo(): bool
+    {
+        return $this->role === self::ROLE_GM_CEO;
+    }
+
+    public function isManager(): bool
+    {
+        return $this->role === self::ROLE_MANAGER;
+    }
+
+    public function isKoordinator(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR;
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->role === self::ROLE_STAFF;
+    }
+
+    public function roleLevel(): int
+    {
+        return match ($this->role) {
+            self::ROLE_SUPER_ADMIN => 5,
+            self::ROLE_GM_CEO => 4,
+            self::ROLE_MANAGER => 3,
+            self::ROLE_KOORDINATOR => 2,
+            self::ROLE_STAFF => 1,
+            default => 0,
+        };
+    }
+
+    /** @deprecated Use isSuperAdmin() instead */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->isSuperAdmin();
     }
 
+    /** @deprecated Use isGmCeo() instead */
     public function isDireksi(): bool
     {
-        return $this->role === 'direksi';
+        return $this->isGmCeo();
     }
 
+    /** @deprecated Use isStaff() instead */
     public function isKaryawan(): bool
     {
-        return $this->role === 'karyawan';
+        return $this->isStaff();
     }
 
     public function canCreateData(): bool
     {
-        return in_array($this->role, ['admin', 'direksi']);
+        return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_GM_CEO]);
     }
 
     public function canUpdateData(): bool
     {
-        return in_array($this->role, ['admin', 'direksi']);
+        return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_GM_CEO, self::ROLE_MANAGER]);
     }
 
     public function canDeleteData(): bool
     {
-        return in_array($this->role, ['admin', 'direksi']);
+        return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_GM_CEO]);
     }
 
     public function canViewAll(): bool
     {
-        return in_array($this->role, ['admin', 'direksi']);
+        return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_GM_CEO, self::ROLE_MANAGER, self::ROLE_KOORDINATOR]);
     }
 
     /**

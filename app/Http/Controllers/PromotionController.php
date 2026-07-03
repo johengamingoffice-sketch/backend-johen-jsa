@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Division;
 use App\Models\Employee;
 use App\Models\Promotion;
 use App\Services\PromotionService;
@@ -61,12 +60,5 @@ class PromotionController extends Controller
 
         return redirect(route('hris.employees.show', $employee) . '#jabatan')
             ->with('promotion_success', 'Promosi berhasil dibatalkan. Data dikembalikan ke posisi semula.');
-    }
-
-    public function create(Employee $employee)
-    {
-        $divisions = Division::orderBy('nama')->get();
-
-        return view('employees.promotion-form', compact('employee', 'divisions'));
     }
 }

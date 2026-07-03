@@ -77,7 +77,7 @@ class AbsensiTable extends Component
         $user = auth()->user();
         $today = $this->date;
 
-        if ($user->isKaryawan()) {
+        if ($user->isStaff()) {
             $employee = $user->employee;
 
             if (!$employee) {

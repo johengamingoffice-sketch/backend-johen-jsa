@@ -37,4 +37,14 @@ class Position extends Model
     {
         return $this->hasMany(Employee::class);
     }
+
+    public function notesGiven(): HasMany
+    {
+        return $this->hasMany(PositionNote::class, 'from_position_id');
+    }
+
+    public function notesReceived(): HasMany
+    {
+        return $this->hasMany(PositionNote::class, 'to_position_id');
+    }
 }

@@ -15,7 +15,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->isKaryawan()) {
+        if ($user->isStaff()) {
             $employee = $user->employee;
 
             if (!$employee) {

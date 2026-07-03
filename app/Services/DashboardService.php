@@ -3,12 +3,14 @@
 namespace App\Services;
 
 use App\Models\Attendance;
+use App\Models\Announcement;
 use App\Models\Division;
 use App\Models\EmailLog;
 use App\Models\Employee;
 use App\Models\EmployeeContract;
 use App\Models\LeaveRequest;
 use App\Models\Meeting;
+use App\Models\MeetingRequest;
 use App\Models\PayrollDetail;
 use App\Models\PayrollImport;
 use Illuminate\Support\Facades\DB;
@@ -98,7 +100,7 @@ class DashboardService
         $userEmployee = $user->employee;
         if (!$userEmployee) return $query;
 
-        $lihatSemua = $user->id === 4 || $user->isDireksi() || in_array($userEmployee->position, [
+        $lihatSemua = $user->id === 4 || $user->canViewAll() || in_array($userEmployee->position, [
             'Human Resource Generalist', 'Admin HR', 'Admin GA', 'OB'
         ]);
 
@@ -165,6 +167,11 @@ class DashboardService
     {
         $now = now();
         $tahunIni = $now->year;
+        $employee = Employee::with('division')->find($employeeId);
+
+        if (!$employee) {
+            return [];
+        }
 
         $usedCuti = LeaveRequest::where('employee_id', $employeeId)
             ->where('jenis', 'cuti_tahunan')
@@ -184,10 +191,6 @@ class DashboardService
             })->count();
 
         $pendingRequests = LeaveRequest::where('employee_id', $employeeId)
-            ->where(function ($q) {
-                $q->where('persetujuan_koor', 'menunggu')
-                  ->orWhere('persetujuan_hr', 'menunggu');
-            })
             ->latest()
             ->take(5)
             ->get()
@@ -198,6 +201,7 @@ class DashboardService
                 'durasi' => $lr->durasi,
                 'status_koor' => $lr->persetujuan_koor,
                 'status_hr' => $lr->persetujuan_hr,
+                'status_akhir' => $lr->persetujuan_koor === 'disetujui' && $lr->persetujuan_hr === 'disetujui' ? 'disetujui' : ($lr->persetujuan_koor === 'ditolak' || $lr->persetujuan_hr === 'ditolak' ? 'ditolak' : 'menunggu'),
             ]);
 
         $recentAttendance = Attendance::where('employee_id', $employeeId)
@@ -209,23 +213,77 @@ class DashboardService
                 'status' => $a->display_status,
                 'time_in' => $a->time_in ? \Carbon\Carbon::parse($a->time_in)->format('H:i') : '-',
                 'time_out' => $a->time_out ? \Carbon\Carbon::parse($a->time_out)->format('H:i') : '-',
+                'work_duration' => $a->time_in && $a->time_out
+                    ? \Carbon\Carbon::parse($a->time_in)->diff(\Carbon\Carbon::parse($a->time_out))->format('%h Jam %i Menit')
+                    : '-',
             ]);
 
         $totalHadir = Attendance::where('employee_id', $employeeId)
             ->whereBetween('date', [$now->startOfMonth()->format('Y-m-d'), $now->endOfMonth()->format('Y-m-d')])
-            ->where('status', 'hadir')
+            ->where(function ($q) {
+                $q->where('status', 'hadir')->orWhere('status', 'present');
+            })
             ->count();
 
-        $totalAbsen = Attendance::where('employee_id', $employeeId)
+        $totalTerlambat = Attendance::where('employee_id', $employeeId)
             ->whereBetween('date', [$now->startOfMonth()->format('Y-m-d'), $now->endOfMonth()->format('Y-m-d')])
-            ->whereIn('status', ['alpha', 'izin', 'sakit', 'cuti'])
+            ->where('status', 'hadir')
+            ->whereNotNull('time_in')
+            ->where('time_in', '>', '09:00:00')
             ->count();
 
-        $latestPayroll = PayrollDetail::where('nik', Employee::find($employeeId)?->nik)
+        $attendanceToday = Attendance::where('employee_id', $employeeId)
+            ->whereDate('date', today())
+            ->first();
+
+        $latestPayroll = PayrollDetail::where('nik', $employee->nik)
             ->latest()
             ->first();
 
+        $meetingRequests = MeetingRequest::where('employee_id', $employeeId)
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn($mr) => [
+                'title' => $mr->title,
+                'status' => $mr->status,
+                'date' => $mr->date->isoFormat('D MMM YYYY'),
+            ]);
+
+        try {
+            $announcements = Announcement::where('is_published', true)->latest()->take(5)->get()->map(fn($a) => [
+                'title' => $a->title,
+                'date' => $a->created_at->isoFormat('D MMM YYYY'),
+                'summary' => $a->summary ?? $a->content,
+                'id' => $a->id,
+            ]);
+
+            $upcomingEvents = Announcement::whereNotNull('event_date')
+                ->where('event_date', '>=', today())
+                ->where('is_published', true)
+                ->orderBy('event_date')
+                ->take(5)
+                ->get()
+                ->map(fn($a) => [
+                    'title' => $a->title,
+                    'date' => $a->event_date->isoFormat('D MMM'),
+                    'time' => $a->event_time ?? '',
+                ]);
+        } catch (\Exception $e) {
+            $announcements = collect();
+            $upcomingEvents = collect();
+        }
+
         return [
+            'employee' => [
+                'nama' => $employee->nama,
+                'nik' => $employee->nik,
+                'position' => $employee->position ?? '-',
+                'division' => $employee->division?->nama ?? '-',
+                'lokasi_kerja' => $employee->lokasi_kerja ?? '-',
+                'foto' => $employee->foto,
+                'status' => $employee->status,
+            ],
             'sisa_cuti' => $sisaCuti,
             'jatah_cuti' => $jatahCuti,
             'used_cuti' => $usedCuti,
@@ -233,12 +291,22 @@ class DashboardService
             'pending_requests' => $pendingRequests,
             'recent_attendance' => $recentAttendance,
             'total_hadir_bulan_ini' => $totalHadir,
-            'total_absen_bulan_ini' => $totalAbsen,
+            'total_terlambat_bulan_ini' => $totalTerlambat,
+            'attendance_today' => $attendanceToday ? [
+                'time_in' => $attendanceToday->time_in ? \Carbon\Carbon::parse($attendanceToday->time_in)->format('H:i') : '-',
+                'time_out' => $attendanceToday->time_out ? \Carbon\Carbon::parse($attendanceToday->time_out)->format('H:i') : '-',
+                'status' => $attendanceToday->display_status,
+                'location' => $attendanceToday->location ?? '-',
+                'method' => $attendanceToday->method ?? 'GPS',
+            ] : null,
             'latest_payroll' => $latestPayroll ? [
                 'periode' => $latestPayroll->payrollImport?->periode ?? '-',
                 'take_home_pay' => (int) $latestPayroll->take_home_pay,
                 'gaji_pokok' => (int) $latestPayroll->gaji_pokok,
             ] : null,
+            'meeting_requests' => $meetingRequests,
+            'announcements' => $announcements,
+            'upcoming_events' => $upcomingEvents,
         ];
     }
 
