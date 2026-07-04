@@ -17,7 +17,7 @@
             @if(count($roots) > 0)
                 <div class="flex flex-col items-center min-w-max">
                     @foreach($roots as $root)
-                        @include('livewire.struktur-organisasi-tree', ['node' => $root, 'level' => 1, 'notesByPosition' => $notesByPosition, 'myPositionId' => $myPositionId])
+                        @include('livewire.struktur-organisasi-tree', ['node' => $root, 'level' => 1, 'notesByPosition' => $notesByPosition, 'myPositionId' => $myPositionId, 'canGiveNotesByPosition' => $canGiveNotesByPosition])
                     @endforeach
                 </div>
             @else
@@ -64,33 +64,49 @@
                 </div>
             </template>
 
-            {{-- Focused position --}}
-            <div :class="children.length > 4 ? 'w-48 p-3.5' : 'w-64 p-4'"
-                 class="relative rounded-xl bg-gradient-to-br from-primary-50 to-blue-50 dark:from-primary-950 dark:to-blue-950 border-2 border-primary-500 shadow-lg shadow-primary-100 dark:shadow-primary-900/30 text-center ring-2 ring-primary-200 dark:ring-primary-800">
-                <div class="flex items-center justify-center gap-1.5 mb-1">
-                    <template x-if="focused.employee_foto">
-                        <img :src="'/storage/employees/' + focused.employee_foto" :alt="focused.employee_nama"
-                             :class="children.length > 4 ? 'w-6 h-6' : 'w-8 h-8'"
-                             class="rounded object-cover bg-gray-50 dark:bg-gray-700 shrink-0 shadow-sm">
-                    </template>
-                    <template x-if="!focused.employee_foto">
-                        <div :class="children.length > 4 ? 'w-6 h-6 text-[11px]' : 'w-8 h-8 text-[13px]'"
-                             class="flex items-center justify-center rounded text-white font-bold shrink-0 bg-primary-600">
-                            <span x-text="focused.nama.charAt(0).toUpperCase()"></span>
-                        </div>
-                    </template>
-                    <span class="text-[9px] font-medium text-primary-600 dark:text-primary-400 uppercase tracking-wider">Terfokus</span>
-                </div>
-                <p :class="children.length > 4 ? 'text-xs' : 'text-sm'" class="font-bold text-primary-800 dark:text-primary-200 leading-tight" x-text="focused.nama"></p>
-                <p class="text-[10px] text-primary-600 dark:text-primary-400 mt-0.5 truncate font-medium" x-text="focused.employee_nama || ''"></p>
+             {{-- Focused position --}}
+             <div :class="children.length > 4 ? 'w-48 p-3.5' : 'w-64 p-4'"
+                  class="relative rounded-xl bg-gradient-to-br from-primary-50 to-blue-50 dark:from-primary-950 dark:to-blue-950 border-2 border-primary-500 shadow-lg shadow-primary-100 dark:shadow-primary-900/30 text-center ring-2 ring-primary-200 dark:ring-primary-800">
+                 <div class="flex items-center justify-center gap-1.5 mb-1">
+                     <template x-if="focused.employee_foto">
+                         <img :src="'/storage/employees/' + focused.employee_foto" :alt="focused.employee_nama"
+                              :class="children.length > 4 ? 'w-6 h-6' : 'w-8 h-8'"
+                              class="rounded object-cover bg-gray-50 dark:bg-gray-700 shrink-0 shadow-sm">
+                     </template>
+                     <template x-if="!focused.employee_foto">
+                         <div :class="children.length > 4 ? 'w-6 h-6 text-[11px]' : 'w-8 h-8 text-[13px]'"
+                              class="flex items-center justify-center rounded text-white font-bold shrink-0 bg-primary-600">
+                             <span x-text="focused.nama.charAt(0).toUpperCase()"></span>
+                         </div>
+                     </template>
+                     <span class="text-[9px] font-medium text-primary-600 dark:text-primary-400 uppercase tracking-wider">Terfokus</span>
+                 </div>
+                 <p :class="children.length > 4 ? 'text-xs' : 'text-sm'" class="font-bold text-primary-800 dark:text-primary-200 leading-tight" x-text="focused.nama"></p>
+                 <p class="text-[10px] text-primary-600 dark:text-primary-400 mt-0.5 truncate font-medium" x-text="focused.employee_nama || ''"></p>
 
-                {{-- Note button for focused --}}
-                <button @click.stop="Livewire.dispatch('openNoteModal', { positionId: focused.id })"
-                        class="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-sm hover:bg-primary-50 dark:hover:bg-primary-900/50 hover:border-primary-300 transition-all"
-                        title="Lihat catatan & rekomendasi">
-                    <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
-                </button>
-            </div>
+                 {{-- Note buttons for focused --}}
+                  <div class="flex items-center justify-center gap-2 mt-2.5">
+                      <template x-if="canGiveNotes[focused.id]">
+                          <button @click.stop="$wire.openNoteModal(focused.id, 'form')"
+                                  class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-[10px] font-medium transition-colors">
+                              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                              Catatan
+                          </button>
+                          <button @click.stop="$wire.openNoteModal(focused.id, 'history')"
+                                  class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 text-[10px] font-medium transition-colors">
+                              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                              Riwayat Catatan
+                          </button>
+                      </template>
+                      <template x-if="!canGiveNotes[focused.id] && focused.id === myPositionId">
+                          <button @click.stop="$wire.openNoteModal(focused.id, 'history')"
+                                  class="flex items-center justify-center w-7 h-7 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-400 hover:text-primary-600 hover:border-primary-400 dark:hover:border-primary-500 transition-colors"
+                                  title="Lihat catatan">
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                          </button>
+                      </template>
+                  </div>
+             </div>
 
             {{-- Children --}}
             <template x-if="children.length > 0">
@@ -103,33 +119,49 @@
                         <template x-for="child in children" :key="child.id">
                             <div class="flex flex-col items-center shrink-0">
                                 <div class="w-0.5 h-6 bg-gray-300 dark:bg-gray-600"></div>
-                                <div @click="focusedId = child.id"
-                                     :class="children.length > 4 ? 'w-48 p-3.5' : 'w-64 p-4'"
-                                     class="relative cursor-pointer rounded-xl bg-white dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 shadow-sm text-center hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md transition-all">
-                                    <div class="flex items-center justify-center gap-1.5 mb-1">
-                                        <template x-if="child.employee_foto">
-                                            <img :src="'/storage/employees/' + child.employee_foto" :alt="child.employee_nama"
-                                                 :class="children.length > 4 ? 'w-6 h-6' : 'w-8 h-8'"
-                                                 class="rounded object-cover bg-gray-50 dark:bg-gray-700 shrink-0 shadow-sm">
-                                        </template>
-                                        <template x-if="!child.employee_foto">
-                                            <div :class="children.length > 4 ? 'w-6 h-6 text-[11px]' : 'w-8 h-8 text-[13px]'"
-                                                 class="flex items-center justify-center rounded text-white font-bold shrink-0 bg-purple-500">
-                                                <span x-text="child.nama.charAt(0).toUpperCase()"></span>
-                                            </div>
-                                        </template>
-                                        <span class="text-[9px] font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider">Bawahan</span>
-                                    </div>
-                                    <p :class="children.length > 4 ? 'text-xs' : 'text-sm'" class="font-semibold text-gray-900 dark:text-gray-100 leading-tight" x-text="child.nama"></p>
-                                    <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 truncate" x-text="child.employee_nama || ''"></p>
+                                 <div @click="focusedId = child.id"
+                                      :class="children.length > 4 ? 'w-48 p-3.5' : 'w-64 p-4'"
+                                      class="relative cursor-pointer rounded-xl bg-white dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 shadow-sm text-center hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md transition-all">
+                                     <div class="flex items-center justify-center gap-1.5 mb-1">
+                                         <template x-if="child.employee_foto">
+                                             <img :src="'/storage/employees/' + child.employee_foto" :alt="child.employee_nama"
+                                                  :class="children.length > 4 ? 'w-6 h-6' : 'w-8 h-8'"
+                                                  class="rounded object-cover bg-gray-50 dark:bg-gray-700 shrink-0 shadow-sm">
+                                         </template>
+                                         <template x-if="!child.employee_foto">
+                                             <div :class="children.length > 4 ? 'w-6 h-6 text-[11px]' : 'w-8 h-8 text-[13px]'"
+                                                  class="flex items-center justify-center rounded text-white font-bold shrink-0 bg-purple-500">
+                                                 <span x-text="child.nama.charAt(0).toUpperCase()"></span>
+                                             </div>
+                                         </template>
+                                         <span class="text-[9px] font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider">Bawahan</span>
+                                     </div>
+                                     <p :class="children.length > 4 ? 'text-xs' : 'text-sm'" class="font-semibold text-gray-900 dark:text-gray-100 leading-tight" x-text="child.nama"></p>
+                                     <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 truncate" x-text="child.employee_nama || ''"></p>
 
-                                    {{-- Note button for child --}}
-                                    <button @click.stop="Livewire.dispatch('openNoteModal', { positionId: child.id })"
-                                            class="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-sm hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 transition-all"
-                                            title="Lihat catatan & rekomendasi">
-                                        <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
-                                    </button>
-                                </div>
+                                        {{-- Note buttons for child --}}
+                                       <div class="flex items-center justify-center gap-2 mt-2.5">
+                                           <template x-if="canGiveNotes[child.id]">
+                                               <button @click.stop="$wire.openNoteModal(child.id, 'form')"
+                                                       class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-[10px] font-medium transition-colors">
+                                                   <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                                   Catatan
+                                               </button>
+                                               <button @click.stop="$wire.openNoteModal(child.id, 'history')"
+                                                       class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 text-[10px] font-medium transition-colors">
+                                                   <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                   Riwayat Catatan
+                                               </button>
+                                           </template>
+                                           <template x-if="!canGiveNotes[child.id] && child.id === myPositionId">
+                                               <button @click.stop="$wire.openNoteModal(child.id, 'history')"
+                                                       class="flex items-center justify-center w-7 h-7 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-400 hover:text-primary-600 hover:border-primary-400 dark:hover:border-primary-500 transition-colors"
+                                                       title="Lihat catatan">
+                                                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                               </button>
+                                           </template>
+                                       </div>
+                                 </div>
                             </div>
                         </template>
                     </div>
@@ -150,8 +182,16 @@
             {{-- Header --}}
             <div class="flex items-center justify-between mb-5 pb-4 border-b border-gray-100 dark:border-gray-700">
                 <div>
-                    <h3 class="text-base font-bold text-gray-900 dark:text-gray-100">{{ $selectedPositionName ?: 'Catatan & Rekomendasi' }}</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">Catatan & Rekomendasi Jabatan</p>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-gray-100">
+                        @if($viewState === 'detail')
+                            Detail Catatan
+                        @elseif($viewState === 'history')
+                            Riwayat Catatan
+                        @else
+                            {{ $existingNote ? 'Edit Catatan' : 'Tambah Catatan' }}
+                        @endif
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ $selectedPositionName ?: 'Catatan & Rekomendasi Jabatan' }}</p>
                 </div>
                 <button @click="$dispatch('close-modal', { name: 'note-modal' })"
                         class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
@@ -160,136 +200,328 @@
             </div>
 
             @if($selectedPositionId)
-                {{-- Info --}}
-                <div class="mb-4 flex items-center gap-3 text-xs text-gray-500">
-                    <span class="flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6A2.25 2.25 0 016 3.75h1.5m9 0h-9"/></svg>
-                        <span>Total {{ count($notesHistory) }} catatan</span>
-                    </span>
+                {{-- FORM VIEW --}}
+                @if($viewState === 'form')
+                    <div class="mb-4 flex items-center gap-3 text-xs text-gray-500">
+                        <span class="flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6A2.25 2.25 0 016 3.75h1.5m9 0h-9"/></svg>
+                            <span>{{ count($notesHistory) }} catatan tersimpan</span>
+                        </span>
+                        @if($isSuperior)
+                            <span class="px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 font-medium">Anda dapat memberi catatan</span>
+                        @endif
+                    </div>
+
+                    {{-- Period selector --}}
+                    <div class="flex items-center gap-3 mb-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Bulan</label>
+                            <select wire:model.live="bulan"
+                                    class="text-xs rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-800 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50">
+                                @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $i => $nama)
+                                    <option value="{{ $i + 1 }}">{{ $nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Tahun</label>
+                            <select wire:model.live="tahun"
+                                    class="text-xs rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-800 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50">
+                                @for($t = now()->year - 2; $t <= now()->year + 2; $t++)
+                                    <option value="{{ $t }}">{{ $t }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- Form --}}
                     @if($isSuperior)
-                        <span class="px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 font-medium">Anda atasan langsung</span>
+                        <div class="space-y-3 mb-5">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Situasi</label>
+                                <textarea wire:model="situasi" rows="2"
+                                          class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+                                          placeholder="Situasi jabatan..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Catatan</label>
+                                <textarea wire:model="catatan" rows="2"
+                                          class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+                                          placeholder="Catatan untuk jabatan ini..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Komitmen</label>
+                                <textarea wire:model="komitmen" rows="2"
+                                          class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+                                          placeholder="Komitmen..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Rekomendasi Jenjang</label>
+                                <textarea wire:model="rekomendasi_jenjang" rows="2"
+                                          class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+                                          placeholder="Rekomendasi jenjang..."></textarea>
+                            </div>
+                            <div class="flex items-center justify-end gap-2 pt-1">
+                                <button @click="$dispatch('close-modal', { name: 'note-modal' })"
+                                        class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Batal</button>
+                                <button wire:click="saveNote"
+                                        class="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">Simpan</button>
+                            </div>
+                        </div>
+                    @else
+                        <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 mb-5">
+                            <p class="text-xs text-gray-400 italic">Anda tidak berwenang memberi catatan untuk jabatan ini.</p>
+                        </div>
                     @endif
-                </div>
 
-                {{-- Period selector --}}
-                <div class="flex items-center gap-3 mb-4">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Bulan</label>
-                        <select wire:model.live="bulan"
-                                class="text-xs rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-800 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50">
-                            @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $i => $nama)
-                                <option value="{{ $i + 1 }}">{{ $nama }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Tahun</label>
-                        <select wire:model.live="tahun"
-                                class="text-xs rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-800 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50">
-                            @for($t = now()->year - 2; $t <= now()->year + 2; $t++)
-                                <option value="{{ $t }}">{{ $t }}</option>
-                            @endfor
-                        </select>
-                    </div>
-                </div>
-
-                {{-- Current note display / form --}}
-                <div class="mb-5">
+                    {{-- Comments in form --}}
                     @if($existingNote)
-                        <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Catatan Bulan Ini</h4>
-                                <span class="text-[10px] text-gray-400">
-                                    oleh {{ $existingNote['creator']['employee']['nama'] ?? $existingNote['from_position']['nama'] ?? '-' }}
-                                </span>
-                            </div>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block text-[11px] font-medium text-gray-500 mb-1">Catatan</label>
-                                    <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ $existingNote['catatan'] ?: '(tidak ada catatan)' }}</p>
+                        <div class="border-t border-gray-100 dark:border-gray-700 pt-4 mt-4">
+                            <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Komentar</h4>
+
+                            @if(count($noteComments) > 0)
+                                <div class="space-y-2 mb-4 max-h-48 overflow-y-auto">
+                                    @foreach($noteComments as $comment)
+                                        <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                                    {{ $comment['user']['employee']['nama'] ?? 'User #'.$comment['user_id'] }}
+                                                </span>
+                                                <span class="flex items-center gap-2">
+                                                    @if($isSuperior && !$replyToId)
+                                                        <button wire:click="replyToComment({{ $comment['id'] }})"
+                                                                class="text-[10px] font-medium text-primary-600 hover:text-primary-700 transition-colors">
+                                                            Balas
+                                                        </button>
+                                                    @endif
+                                                    <span class="text-[10px] text-gray-400">
+                                                        {{ \Carbon\Carbon::parse($comment['created_at'])->format('d/m/Y H:i') }}
+                                                    </span>
+                                                </span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ $comment['komentar'] }}</p>
+
+                                            @if($replyToId === $comment['id'])
+                                                <div class="flex items-start gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                                                    <textarea wire:model="komentar" rows="1"
+                                                              class="flex-1 text-xs rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+                                                              placeholder="Tulis balasan..."></textarea>
+                                                    <button wire:click="saveComment"
+                                                            class="px-2.5 py-1 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors shrink-0">Kirim</button>
+                                                    <button wire:click="cancelReply"
+                                                            class="px-2.5 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors shrink-0">Batal</button>
+                                                </div>
+                                                @error('komentar') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                                            @endif
+
+                                            @if(!empty($comment['replies']))
+                                                <div class="mt-2 space-y-1.5 pl-3 border-l-2 border-gray-200 dark:border-gray-600">
+                                                    @foreach($comment['replies'] as $reply)
+                                                        <div class="p-2 rounded-lg bg-white/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50">
+                                                            <div class="flex items-center justify-between mb-0.5">
+                                                                <span class="text-[11px] font-medium text-gray-600 dark:text-gray-400">
+                                                                    {{ $reply['user']['employee']['nama'] ?? 'User #'.$reply['user_id'] }}
+                                                                </span>
+                                                                <span class="text-[10px] text-gray-400">{{ \Carbon\Carbon::parse($reply['created_at'])->format('d/m/Y H:i') }}</span>
+                                                            </div>
+                                                            <p class="text-[11px] text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ $reply['komentar'] }}</p>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
                                 </div>
-                                <div>
-                                    <label class="block text-[11px] font-medium text-gray-500 mb-1">Rekomendasi</label>
-                                    <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ $existingNote['rekomendasi'] ?: '(tidak ada rekomendasi)' }}</p>
+                            @else
+                                <p class="text-xs text-gray-400 italic mb-4">Belum ada komentar.</p>
+                            @endif
+
+                            @if($isSuperior && !$replyToId)
+                                <div class="flex items-start gap-2">
+                                    <textarea wire:model="komentar" rows="2"
+                                              class="flex-1 text-xs rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+                                              placeholder="Tulis komentar..."></textarea>
+                                    <button wire:click="saveComment"
+                                            class="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors shrink-0">Kirim</button>
                                 </div>
-                            </div>
-                            @if($isSuperior)
-                                <button wire:click="$set('showForm', {{ $showForm ? 'false' : 'true' }})"
-                                        class="mt-3 text-xs text-primary-600 hover:text-primary-700 font-medium">
-                                    {{ $showForm ? 'Batal edit' : 'Edit catatan' }}
-                                </button>
+                                @error('komentar') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                             @endif
                         </div>
-                    @elseif($isSuperior)
-                        <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30">
-                            <p class="text-xs text-amber-600 dark:text-amber-400 font-medium">Belum ada catatan untuk periode ini.</p>
-                            <button wire:click="$set('showForm', true)" class="mt-2 text-xs text-primary-600 hover:text-primary-700 font-medium">Tambah catatan sekarang</button>
+                    @endif
+                @endif
+
+                {{-- HISTORY VIEW --}}
+                @if($viewState === 'history')
+                    <div class="mb-4 flex items-center gap-3 text-xs text-gray-500">
+                        <span class="flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6A2.25 2.25 0 016 3.75h1.5m9 0h-9"/></svg>
+                            <span>{{ count($notesHistory) }} catatan tersimpan</span>
+                        </span>
+                    </div>
+
+                    @if(count($notesHistory) > 0)
+                        <div class="overflow-x-auto mb-5">
+                            <table class="w-full text-xs">
+                                <thead>
+                                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                                        <th class="text-left py-2 pr-4 font-semibold text-gray-500">Periode</th>
+                                        <th class="text-left py-2 pr-4 font-semibold text-gray-500">Pemberi</th>
+                                        <th class="text-left py-2 pr-4 font-semibold text-gray-500">Catatan</th>
+                                        <th class="text-right py-2 font-semibold text-gray-500">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($notesHistory as $note)
+                                        @php
+                                            $bulanNama = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][$note['bulan'] - 1] ?? $note['bulan'];
+                                            $creator = $note['creator']['employee']['nama'] ?? $note['from_position']['nama'] ?? '-';
+                                        @endphp
+                                        <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                            <td class="py-2.5 pr-4 text-gray-900 dark:text-gray-100 font-medium">{{ $bulanNama }} {{ $note['tahun'] }}</td>
+                                            <td class="py-2.5 pr-4 text-gray-500">{{ $creator }}</td>
+                                            <td class="py-2.5 pr-4 text-gray-600 dark:text-gray-400 max-w-[200px] truncate">{{ $note['catatan'] ?: '-' }}</td>
+                                            <td class="py-2.5 text-right">
+                                                <button wire:click="showDetail({{ $note['id'] }})"
+                                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                    Lihat Detail
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     @else
-                        <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
-                            <p class="text-xs text-gray-400 italic">Belum ada catatan untuk periode ini.</p>
+                        <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 mb-5">
+                            <p class="text-xs text-gray-400 italic py-4 text-center">Belum ada riwayat catatan.</p>
                         </div>
                     @endif
+                @endif
 
-                    {{-- Edit/Add form --}}
-                    @if($showForm && $isSuperior)
-                        <div class="mt-4 p-4 rounded-xl bg-white dark:bg-gray-800 border border-primary-100 dark:border-primary-800/30 shadow-sm">
-                            <h4 class="text-xs font-semibold text-primary-700 dark:text-primary-300 uppercase tracking-wider mb-3">
-                                {{ $existingNote ? 'Edit Catatan' : 'Tambah Catatan' }}
-                            </h4>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Catatan</label>
-                                    <textarea wire:model="catatan" rows="3"
-                                              class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
-                                              placeholder="Masukkan catatan untuk jabatan ini..."></textarea>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Rekomendasi</label>
-                                    <textarea wire:model="rekomendasi" rows="3"
-                                              class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
-                                              placeholder="Masukkan rekomendasi untuk jabatan ini..."></textarea>
-                                </div>
-                                <div class="flex items-center justify-end gap-2 pt-1">
-                                    <button wire:click="$set('showForm', false)"
-                                            class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Batal</button>
-                                    <button wire:click="saveNote"
-                                            class="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">Simpan</button>
-                                </div>
+                {{-- DETAIL VIEW --}}
+                @if($viewState === 'detail' && $noteDetail)
+                    {{-- Back button --}}
+                    <button wire:click="backToHistory"
+                            class="flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700 mb-4 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                        Kembali ke Riwayat
+                    </button>
+
+                    {{-- Detail content --}}
+                    <div class="space-y-3 mb-5">
+                        @php
+                            $bulanNama = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][$noteDetail['bulan'] - 1] ?? $noteDetail['bulan'];
+                            $creator = $noteDetail['creator']['employee']['nama'] ?? $noteDetail['from_position']['nama'] ?? '-';
+                        @endphp
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-gray-500">{{ $bulanNama }} {{ $noteDetail['tahun'] }} — oleh {{ $creator }}</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 space-y-3">
+                            <div>
+                                <label class="block text-[11px] font-medium text-gray-500 mb-1">Situasi</label>
+                                <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ $noteDetail['situasi'] ?: '(tidak ada)' }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-gray-500 mb-1">Catatan</label>
+                                <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ $noteDetail['catatan'] ?: '(tidak ada)' }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-gray-500 mb-1">Komitmen</label>
+                                <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ $noteDetail['komitmen'] ?: '(tidak ada)' }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-gray-500 mb-1">Rekomendasi Jenjang</label>
+                                <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ $noteDetail['rekomendasi_jenjang'] ?: '(tidak ada)' }}</p>
                             </div>
                         </div>
-                    @endif
-                </div>
+                    </div>
 
-                {{-- History --}}
-                <div>
-                    <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Riwayat Catatan</h4>
-                    @if(count($notesHistory) > 0)
-                        <div class="space-y-2 max-h-64 overflow-y-auto">
-                            @foreach($notesHistory as $note)
-                                @php
-                                    $bulanNama = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][$note['bulan'] - 1] ?? $note['bulan'];
-                                    $creator = $note['creator']['employee']['nama'] ?? $note['from_position']['nama'] ?? '-';
-                                @endphp
-                                <div class="p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                    <div class="flex items-center justify-between mb-1.5">
-                                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $bulanNama }} {{ $note['tahun'] }}</span>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-[10px] text-gray-400">oleh {{ $creator }}</span>
-                                            <span class="text-[10px] text-gray-400">{{ $note['created_at'] ? \Carbon\Carbon::parse($note['created_at'])->format('d/m/Y') : '' }}</span>
+                    {{-- Comments --}}
+                    <div class="border-t border-gray-100 dark:border-gray-700 pt-4">
+                        <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Komentar</h4>
+
+                        @if(count($noteComments) > 0)
+                            <div class="space-y-2 mb-4 max-h-60 overflow-y-auto">
+                                @foreach($noteComments as $comment)
+                                    <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                                {{ $comment['user']['employee']['nama'] ?? 'User #'.$comment['user_id'] }}
+                                            </span>
+                                            <span class="flex items-center gap-2">
+                                                @if($isSuperior && !$replyToId)
+                                                    <button wire:click="replyToComment({{ $comment['id'] }})"
+                                                            class="text-[10px] font-medium text-primary-600 hover:text-primary-700 transition-colors">
+                                                        Balas
+                                                    </button>
+                                                @endif
+                                                <span class="text-[10px] text-gray-400">
+                                                    {{ \Carbon\Carbon::parse($comment['created_at'])->format('d/m/Y H:i') }}
+                                                </span>
+                                            </span>
                                         </div>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ $comment['komentar'] }}</p>
+
+                                        {{-- Reply form inline --}}
+                                        @if($replyToId === $comment['id'])
+                                            <div class="flex items-start gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                                                <textarea wire:model="komentar" rows="1"
+                                                          class="flex-1 text-xs rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+                                                          placeholder="Tulis balasan..."></textarea>
+                                                <button wire:click="saveComment"
+                                                        class="px-2.5 py-1 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors shrink-0">
+                                                    Kirim
+                                                </button>
+                                                <button wire:click="cancelReply"
+                                                        class="px-2.5 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors shrink-0">
+                                                    Batal
+                                                </button>
+                                            </div>
+                                            @error('komentar') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                                        @endif
+
+                                        {{-- Replies --}}
+                                        @if(!empty($comment['replies']))
+                                            <div class="mt-2 space-y-1.5 pl-3 border-l-2 border-gray-200 dark:border-gray-600">
+                                                @foreach($comment['replies'] as $reply)
+                                                    <div class="p-2 rounded-lg bg-white/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50">
+                                                        <div class="flex items-center justify-between mb-0.5">
+                                                            <span class="text-[11px] font-medium text-gray-600 dark:text-gray-400">
+                                                                {{ $reply['user']['employee']['nama'] ?? 'User #'.$reply['user_id'] }}
+                                                            </span>
+                                                            <span class="text-[10px] text-gray-400">
+                                                                {{ \Carbon\Carbon::parse($reply['created_at'])->format('d/m/Y H:i') }}
+                                                            </span>
+                                                        </div>
+                                                        <p class="text-[11px] text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ $reply['komentar'] }}</p>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
-                                    <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                                        <p><span class="font-medium text-gray-500">Catatan:</span> {{ $note['catatan'] ?: '-' }}</p>
-                                        <p><span class="font-medium text-gray-500">Rekomendasi:</span> {{ $note['rekomendasi'] ?: '-' }}</p>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <p class="text-xs text-gray-400 italic py-4 text-center">Belum ada riwayat catatan.</p>
-                    @endif
-                </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-xs text-gray-400 italic mb-4">Belum ada komentar.</p>
+                        @endif
+
+                        {{-- Add comment --}}
+                        @if($isSuperior && !$replyToId)
+                            <div class="flex items-start gap-2">
+                                <textarea wire:model="komentar" rows="2"
+                                          class="flex-1 text-xs rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+                                          placeholder="Tulis komentar..."></textarea>
+                                <button wire:click="saveComment"
+                                        class="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors shrink-0">
+                                    Kirim
+                                </button>
+                            </div>
+                            @error('komentar') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                        @endif
+                    </div>
+                @endif
+
             @else
                 <div class="py-8 text-center text-xs text-gray-400">Pilih jabatan untuk melihat catatan.</div>
             @endif
@@ -312,6 +544,8 @@
         function strukturOrganisasi() {
             return {
                 focusedId: null,
+                canGiveNotes: @json($canGiveNotesByPosition),
+                myPositionId: @json($myPositionId),
                 positions: @json($flatPositions),
                 get focused() {
                     return this.focusedId ? this.positions[this.focusedId] : null;

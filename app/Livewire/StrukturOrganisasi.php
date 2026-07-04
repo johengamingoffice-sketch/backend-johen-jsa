@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Employee;
 use App\Models\Position;
 use App\Models\PositionNote;
+use App\Models\PositionNoteComment;
 use Livewire\Component;
 
 class StrukturOrganisasi extends Component
@@ -12,8 +13,14 @@ class StrukturOrganisasi extends Component
     public bool $showNoteModal = false;
     public ?int $selectedPositionId = null;
     public string $selectedPositionName = '';
+
+    public string $viewState = 'form';
+
+    public string $situasi = '';
     public string $catatan = '';
-    public string $rekomendasi = '';
+    public string $komitmen = '';
+    public string $rekomendasi_jenjang = '';
+
     public int $bulan;
     public int $tahun;
     public bool $showForm = false;
@@ -21,18 +28,30 @@ class StrukturOrganisasi extends Component
     public array $notesHistory = [];
     public bool $isSuperior = false;
 
+    public ?int $selectedNoteId = null;
+    public ?array $noteDetail = null;
+    public string $komentar = '';
+    public ?int $replyToId = null;
+    public array $noteComments = [];
+
     public function mount(): void
     {
         $this->bulan = now()->month;
         $this->tahun = now()->year;
     }
 
-    public function openNoteModal(int $positionId): void
+    public function openNoteModal(int $positionId, string $view = 'form'): void
     {
         $this->selectedPositionId = $positionId;
         $position = Position::findOrFail($positionId);
         $this->selectedPositionName = $position->nama;
-        $this->showForm = false;
+        $this->viewState = $view;
+        $this->showForm = ($view === 'form');
+        $this->selectedNoteId = null;
+        $this->noteDetail = null;
+        $this->noteComments = [];
+        $this->replyToId = null;
+        $this->komentar = '';
         $this->loadNoteData();
         $this->dispatch('open-modal', name: 'note-modal');
     }
@@ -50,8 +69,10 @@ class StrukturOrganisasi extends Component
             ->first();
 
         $this->existingNote = $note?->toArray();
+        $this->situasi = $note?->situasi ?? '';
         $this->catatan = $note?->catatan ?? '';
-        $this->rekomendasi = $note?->rekomendasi ?? '';
+        $this->komitmen = $note?->komitmen ?? '';
+        $this->rekomendasi_jenjang = $note?->rekomendasi_jenjang ?? '';
 
         $this->notesHistory = PositionNote::with('fromPosition', 'creator.employee')
             ->where('to_position_id', $this->selectedPositionId)
@@ -60,8 +81,87 @@ class StrukturOrganisasi extends Component
             ->get()
             ->toArray();
 
+        $this->selectedNoteId = $note?->id;
+
+        $this->noteComments = $note
+            ? PositionNoteComment::with('user.employee', 'replies.user.employee')
+                ->where('position_note_id', $note->id)
+                ->whereNull('parent_id')
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->toArray()
+            : [];
+
         $position = Position::find($this->selectedPositionId);
         $this->isSuperior = $this->checkIsSuperior($myPositionId, $position);
+    }
+
+    public function showDetail(int $noteId): void
+    {
+        $this->selectedNoteId = $noteId;
+        $this->viewState = 'detail';
+
+        $note = PositionNote::with('fromPosition', 'creator.employee')->find($noteId);
+        $this->noteDetail = $note?->toArray();
+
+        $this->noteComments = PositionNoteComment::with('user.employee', 'replies.user.employee')
+            ->where('position_note_id', $noteId)
+            ->whereNull('parent_id')
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->toArray();
+
+        $this->replyToId = null;
+        $this->komentar = '';
+    }
+
+    public function backToHistory(): void
+    {
+        $this->viewState = 'history';
+        $this->selectedNoteId = null;
+        $this->noteDetail = null;
+        $this->noteComments = [];
+        $this->replyToId = null;
+        $this->komentar = '';
+    }
+
+    public function replyToComment(int $commentId): void
+    {
+        $this->replyToId = $commentId;
+        $this->komentar = '';
+    }
+
+    public function cancelReply(): void
+    {
+        $this->replyToId = null;
+        $this->komentar = '';
+    }
+
+    public function saveComment(): void
+    {
+        $this->validate([
+            'selectedNoteId' => ['required', 'exists:position_notes,id'],
+            'komentar' => ['required', 'string', 'max:5000'],
+        ]);
+
+        PositionNoteComment::create([
+            'position_note_id' => $this->selectedNoteId,
+            'user_id' => auth()->id(),
+            'komentar' => $this->komentar,
+            'parent_id' => $this->replyToId,
+        ]);
+
+        $this->dispatch('notify', type: 'success', message: 'Komentar berhasil dikirim.');
+
+        $this->noteComments = PositionNoteComment::with('user.employee', 'replies.user.employee')
+            ->where('position_note_id', $this->selectedNoteId)
+            ->whereNull('parent_id')
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->toArray();
+
+        $this->replyToId = null;
+        $this->komentar = '';
     }
 
     private function checkIsSuperior(?int $myPositionId, ?Position $targetPosition): bool
@@ -116,8 +216,10 @@ class StrukturOrganisasi extends Component
     {
         $this->validate([
             'selectedPositionId' => ['required', 'exists:positions,id'],
+            'situasi' => ['nullable', 'string', 'max:5000'],
             'catatan' => ['nullable', 'string', 'max:5000'],
-            'rekomendasi' => ['nullable', 'string', 'max:5000'],
+            'komitmen' => ['nullable', 'string', 'max:5000'],
+            'rekomendasi_jenjang' => ['nullable', 'string', 'max:5000'],
             'bulan' => ['required', 'integer', 'min:1', 'max:12'],
             'tahun' => ['required', 'integer', 'min:2020', 'max:2099'],
         ]);
@@ -143,14 +245,15 @@ class StrukturOrganisasi extends Component
                 'tahun' => $this->tahun,
             ],
             [
+                'situasi' => $this->situasi,
                 'catatan' => $this->catatan,
-                'rekomendasi' => $this->rekomendasi,
+                'komitmen' => $this->komitmen,
+                'rekomendasi_jenjang' => $this->rekomendasi_jenjang,
                 'created_by' => auth()->id(),
             ]
         );
 
         $this->dispatch('notify', type: 'success', message: 'Catatan berhasil disimpan.');
-        $this->showForm = false;
         $this->loadNoteData();
     }
 
@@ -192,11 +295,16 @@ class StrukturOrganisasi extends Component
 
         $myPositionId = $this->getMyPositionId();
 
+        $canGiveNotesByPosition = $allPositions->mapWithKeys(function ($pos) use ($myPositionId) {
+            return [$pos->id => $this->checkIsSuperior($myPositionId, $pos)];
+        });
+
         return view('livewire.struktur-organisasi', [
             'roots' => $roots,
             'flatPositions' => $flatPositions,
             'notesByPosition' => $notesByPosition,
             'myPositionId' => $myPositionId,
+            'canGiveNotesByPosition' => $canGiveNotesByPosition,
         ]);
     }
 

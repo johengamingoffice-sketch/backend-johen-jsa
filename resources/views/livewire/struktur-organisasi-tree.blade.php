@@ -19,18 +19,37 @@
             @else
                 <p class="text-[10px] text-gray-300 dark:text-gray-600 mt-1 italic">Kosong</p>
             @endif
-        </div>
 
-        {{-- Note button --}}
-        @php
-            $noteInfo = $notesByPosition->get($node['id']);
-            $hasCurrentNote = $noteInfo && $noteInfo->has_current > 0;
-        @endphp
-        <button wire:click.stop="openNoteModal({{ $node['id'] }})"
-                class="absolute -top-1.5 -right-1.5 w-7 h-7 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-sm hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:border-primary-300 transition-all @if($hasCurrentNote) ring-2 ring-green-400 @endif"
-                title="Lihat catatan & rekomendasi">
-            <svg class="w-3.5 h-3.5 @if($hasCurrentNote) text-green-500 @else text-gray-400 @endif" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
-        </button>
+            {{-- Note buttons --}}
+            @php
+                $canGive = $canGiveNotesByPosition[$node['id']] ?? false;
+                $noteInfo = $notesByPosition->get($node['id']);
+                $hasCurrentNote = $noteInfo && $noteInfo->has_current > 0;
+            @endphp
+            <div class="flex items-center justify-center gap-2 mt-2.5">
+                @if($canGive)
+                    <button wire:click.stop="openNoteModal({{ $node['id'] }}, 'form')"
+                            class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-[10px] font-medium transition-colors"
+                            title="Tambah catatan">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        Catatan
+                    </button>
+                    <button wire:click.stop="openNoteModal({{ $node['id'] }}, 'history')"
+                            class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 text-[10px] font-medium transition-colors"
+                            title="Riwayat catatan">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Riwayat Catatan
+                    </button>
+                @endif
+                @if($node['id'] == $myPositionId && !$canGive)
+                    <button wire:click.stop="openNoteModal({{ $node['id'] }}, 'history')"
+                            class="flex items-center justify-center w-7 h-7 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-400 hover:text-primary-600 hover:border-primary-400 dark:hover:border-primary-500 transition-colors"
+                            title="Lihat catatan">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </button>
+                @endif
+            </div>
+        </div>
     </div>
 
     @if(count($node['children']) > 0)
@@ -51,7 +70,7 @@
                                 <div class="h-2"></div>
                             @endif
 
-                            @include('livewire.struktur-organisasi-tree', ['node' => $child, 'level' => $level + 1, 'notesByPosition' => $notesByPosition, 'myPositionId' => $myPositionId])
+                            @include('livewire.struktur-organisasi-tree', ['node' => $child, 'level' => $level + 1, 'notesByPosition' => $notesByPosition, 'myPositionId' => $myPositionId, 'canGiveNotesByPosition' => $canGiveNotesByPosition])
                         </div>
                     @endforeach
                 </div>

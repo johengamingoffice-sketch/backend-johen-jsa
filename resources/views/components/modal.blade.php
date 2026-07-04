@@ -37,8 +37,8 @@ $maxWidth = [
             document.body.classList.remove('overflow-y-hidden');
         }
     })"
-    x-on:open-modal.window="$event.detail == '{{ $name }}' ? show = true : null"
-    x-on:close-modal.window="$event.detail == '{{ $name }}' ? show = false : null"
+    x-on:open-modal.window="(typeof $event.detail === 'string' ? $event.detail : $event.detail?.name) == '{{ $name }}' ? show = true : null"
+    x-on:close-modal.window="(typeof $event.detail === 'string' ? $event.detail : $event.detail?.name) == '{{ $name }}' ? show = false : null"
     x-on:close.stop="show = false"
     x-on:keydown.escape.window="show = false"
     x-on:keydown.tab.prevent="$event.shiftKey || nextFocusable().focus()"
@@ -61,7 +61,7 @@ $maxWidth = [
 
     <div
         x-show="show"
-        class="mb-6 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden {{ $maxWidth }} mx-auto"
+        class="relative z-10 mb-6 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden {{ $maxWidth }} mx-auto"
         x-transition:enter="ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
