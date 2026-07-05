@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LeaveRequest;
 use App\Services\DashboardService;
 use Illuminate\Http\Request;
 
@@ -47,10 +48,19 @@ class DashboardController extends Controller
         $expiringContractCount = count($expiringContracts);
         $meetingStats = $this->dashboardService->getMonthlyMeetingStats();
 
+        $koordinatorStats = [];
+        if ($user->isKoordinator()) {
+            $employee = $user->employee;
+            if ($employee) {
+                $koordinatorStats = $this->dashboardService->getKaryawanDashboard($employee->id);
+            }
+        }
+
         return view('dashboard.index', compact(
             'stats', 'availableYears', 'selectedYear', 'payrolls', 'divisionStats',
             'latestPayroll', 'pendingLeaveRequests', 'pendingLeaveCount',
             'expiringContracts', 'expiringContractCount', 'meetingStats',
+            'koordinatorStats',
         ));
     }
 }

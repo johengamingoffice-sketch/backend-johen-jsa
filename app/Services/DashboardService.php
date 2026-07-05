@@ -102,7 +102,7 @@ class DashboardService
         $userEmployee = $user->employee;
         if (!$userEmployee) return $query;
 
-        $lihatSemua = $user->id === 4 || $user->canViewAll() || in_array($userEmployee->position, [
+        $lihatSemua = $user->id === 4 || ($user->canViewAll() && !$user->isKoordinator()) || in_array($userEmployee->position, [
             'Human Resource Generalist', 'Admin HR', 'Admin GA', 'OB'
         ]);
 

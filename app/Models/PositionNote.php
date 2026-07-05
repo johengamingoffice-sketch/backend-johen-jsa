@@ -12,7 +12,7 @@ class PositionNote extends Model
         'from_position_id',
         'to_position_id',
         'situasi',
-        'catatan',
+        'evaluasi',
         'komitmen',
         'rekomendasi_jenjang',
         'bulan',

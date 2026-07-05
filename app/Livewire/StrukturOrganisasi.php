@@ -16,7 +16,7 @@ class StrukturOrganisasi extends Component
     public string $viewState = 'form';
 
     public string $situasi = '';
-    public string $catatan = '';
+    public string $evaluasi = '';
     public string $komitmen = '';
     public string $rekomendasi_jenjang = '';
 
@@ -73,7 +73,7 @@ class StrukturOrganisasi extends Component
 
         $this->existingNote = $note?->toArray();
         $this->situasi = $note?->situasi ?? '';
-        $this->catatan = $note?->catatan ?? '';
+        $this->evaluasi = $note?->evaluasi ?? '';
         $this->komitmen = $note?->komitmen ?? '';
         $this->rekomendasi_jenjang = $note?->rekomendasi_jenjang ?? '';
 
@@ -129,19 +129,19 @@ class StrukturOrganisasi extends Component
         $note = PositionNote::withCount('comments')->find($noteId);
 
         if (!$note) {
-            $this->dispatch('notify', type: 'error', message: 'Catatan tidak ditemukan.');
+            $this->dispatch('notify', type: 'error', message: 'Evaluasi tidak ditemukan.');
             return;
         }
 
         if ($note->created_by !== auth()->id()) {
-            $this->dispatch('notify', type: 'error', message: 'Anda tidak berwenang menghapus catatan ini.');
+            $this->dispatch('notify', type: 'error', message: 'Anda tidak berwenang menghapus evaluasi ini.');
             return;
         }
 
         $note->comments()->delete();
         $note->delete();
 
-        $this->dispatch('notify', type: 'success', message: 'Catatan berhasil dihapus.');
+        $this->dispatch('notify', type: 'success', message: 'Evaluasi berhasil dihapus.');
         $this->backToHistory();
         $this->loadNoteData();
     }
@@ -254,7 +254,7 @@ class StrukturOrganisasi extends Component
         $this->validate([
             'selectedPositionId' => ['required', 'exists:positions,id'],
             'situasi' => ['nullable', 'string', 'max:5000'],
-            'catatan' => ['nullable', 'string', 'max:5000'],
+            'evaluasi' => ['nullable', 'string', 'max:5000'],
             'komitmen' => ['nullable', 'string', 'max:5000'],
             'rekomendasi_jenjang' => ['nullable', 'string', 'max:5000'],
             'bulan' => ['required', 'integer', 'min:1', 'max:12'],
@@ -270,7 +270,7 @@ class StrukturOrganisasi extends Component
         }
 
         if (!$this->checkIsSuperior($this->myPositionId, $position)) {
-            $this->dispatch('notify', type: 'error', message: 'Anda tidak berwenang memberi catatan untuk jabatan ini.');
+            $this->dispatch('notify', type: 'error', message: 'Anda tidak berwenang memberi evaluasi untuk jabatan ini.');
             return;
         }
 
@@ -283,14 +283,14 @@ class StrukturOrganisasi extends Component
             ],
             [
                 'situasi' => $this->situasi,
-                'catatan' => $this->catatan,
+                'evaluasi' => $this->evaluasi,
                 'komitmen' => $this->komitmen,
                 'rekomendasi_jenjang' => $this->rekomendasi_jenjang,
                 'created_by' => auth()->id(),
             ]
         );
 
-        $this->dispatch('notify', type: 'success', message: 'Catatan berhasil disimpan.');
+        $this->dispatch('notify', type: 'success', message: 'Evaluasi berhasil disimpan.');
         $this->loadNoteData();
     }
 

@@ -30,21 +30,21 @@
                 @if($canGive)
                     <button wire:click.stop="openNoteModal({{ $node['id'] }}, 'history')"
                             class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-[10px] font-medium transition-colors"
-                            title="Tambah catatan">
+                            title="Tambah evaluasi">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                        Catatan
+                        Evaluasi
                     </button>
                     <button wire:click.stop="openNoteModal({{ $node['id'] }}, 'history')"
                             class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 text-[10px] font-medium transition-colors"
-                            title="Riwayat catatan">
+                            title="Riwayat evaluasi">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Riwayat Catatan
+                        Riwayat Evaluasi
                     </button>
                 @endif
                 @if($node['id'] == $myPositionId && !$canGive)
                     <button wire:click.stop="openNoteModal({{ $node['id'] }}, 'history')"
                             class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:text-primary-600 hover:border-primary-400 dark:hover:border-primary-500 text-[10px] font-medium transition-colors">
-                        Lihat Catatan
+                        Lihat Evaluasi
                     </button>
                 @endif
             </div>

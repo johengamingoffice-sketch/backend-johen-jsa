@@ -396,24 +396,28 @@ class CutiIzinTable extends Component
         $isHr = $userEmployee && $userEmployee->positions()->whereIn('nama', [
             'Human Resource Generalist', 'Admin HR', 'Admin GA', 'Office Boy'
         ])->exists();
-        $lihatSemua = $user->id === 4 || $isHr || $user->canViewAll();
+        $lihatSemua = $user->id === 4 || $isHr || ($user->canViewAll() && !$user->isKoordinator());
 
-        $totalPengajuan = LeaveRequest::count();
-        $totalCuti = LeaveRequest::where('jenis', 'cuti_tahunan')->count();
-        $totalIzin = LeaveRequest::where('jenis', 'izin')->count();
-        $menunggu = LeaveRequest::where(function ($q) {
+        $baseQuery = LeaveRequest::query();
+
+        if ($userEmployee && !$lihatSemua) {
+            $baseQuery->where(function ($q) use ($userEmployee) {
+                $q->where('atasan_id', $userEmployee->id)
+                  ->orWhere('atasan2_id', $userEmployee->id);
+            });
+        }
+
+        $totalPengajuan = (clone $baseQuery)->count();
+        $totalCuti = (clone $baseQuery)->where('jenis', 'cuti_tahunan')->count();
+        $totalIzin = (clone $baseQuery)->where('jenis', 'izin')->count();
+        $menunggu = (clone $baseQuery)->where(function ($q) {
             $q->where('persetujuan_koor', 'menunggu')
               ->orWhere('persetujuan_atasan2', 'menunggu')
               ->orWhere('persetujuan_hr', 'menunggu');
         })->count();
 
-        $leaveRequests = LeaveRequest::with('employee', 'atasan', 'atasan2', 'selectedPosition')
-            ->when($userEmployee && !$lihatSemua, function ($query) use ($userEmployee) {
-                $query->where(function ($q) use ($userEmployee) {
-                    $q->where('atasan_id', $userEmployee->id)
-                      ->orWhere('atasan2_id', $userEmployee->id);
-                });
-            })
+        $leaveRequests = (clone $baseQuery)
+            ->with('employee', 'atasan', 'atasan2', 'selectedPosition')
             ->when($this->search, function ($query) {
                 $query->whereHas('employee', function ($q) {
                     $q->where('nama', 'like', "%{$this->search}%")

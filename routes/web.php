@@ -26,6 +26,10 @@ use App\Http\Controllers\PaymentSubmissionController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\AssetViewController;
 use App\Http\Controllers\JobdeskController;
+use App\Http\Controllers\WeeklyReportController;
+use App\Http\Controllers\DailyTrackingController;
+use App\Http\Controllers\ProjectItController;
+use App\Http\Controllers\JadwalMaintenanceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -61,6 +65,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kontrak-kerja', KontrakKerjaTable::class)->name('kontrak-kerja');
         Route::get('/manual-book', [ManualBookController::class, 'index'])->name('manual-book');
         Route::get('/jobdesk', [JobdeskController::class, 'index'])->name('jobdesk');
+        Route::get('/weekly-report', [WeeklyReportController::class, 'index'])->name('weekly-report');
+        Route::get('/daily-tracking', [DailyTrackingController::class, 'index'])->name('daily-tracking');
 
         Route::prefix('export')->name('export.')->group(function () {
             Route::get('/employees', [ExportController::class, 'employees'])->name('employees');
@@ -175,6 +181,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reimbursement', function () {
         return redirect()->route('payment-submissions.pengajuan');
     })->name('reimbursement');
+
+    Route::prefix('it')->name('it.')->group(function () {
+        Route::get('/project', [ProjectItController::class, 'index'])->name('project');
+        Route::get('/maintenance', [JadwalMaintenanceController::class, 'index'])->name('maintenance');
+    });
 
     Route::get('/kelola-akun', UserTable::class)->name('kelola-akun')->middleware('role:super_admin');
 });

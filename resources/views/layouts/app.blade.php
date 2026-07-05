@@ -52,11 +52,13 @@
 
                 @php
 $activeMenu = match (true) {
-    request()->routeIs('hris.absensi', 'hris.cuti-izin', 'hris.manual-book', 'hris.jobdesk') => 'operasional',
+    request()->routeIs('hris.absensi', 'hris.cuti-izin', 'hris.manual-book', 'hris.jobdesk', 'hris.weekly-report', 'hris.daily-tracking') => 'operasional',
     request()->routeIs('hris.*') => 'sdm',
     request()->routeIs('payroll.*', 'history.*', 'bonus.*', 'reimbursement') => 'keuangan',
     request()->routeIs('meeting.*') => 'meeting',
+    request()->routeIs('assets.*') && auth()->user()->isStaffIt() => 'it',
     request()->routeIs('assets.*') => 'asset',
+    request()->routeIs('it.*') => 'it',
     request()->routeIs('electricity.*', 'internet.*', 'ipl.*', 'payment-submissions.*', 'digital.*') => 'pembayaran',
     default => '',
 };
@@ -191,15 +193,56 @@ $activeMenu = match (true) {
                             <a href="{{ route('hris.jobdesk') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.jobdesk') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
                                 Jobdesk saya
                             </a>
-                            @if(auth()->user()->isStaff())
+                            @if(auth()->user()->isStaff() || auth()->user()->isStaffIt())
                             <a href="{{ route('hris.manual-book') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.manual-book') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
                                 Manual Book
+                            </a>
+                            @endif
+                            @if(auth()->user()->isKoordinator() || auth()->user()->isManager())
+                            <a href="{{ route('hris.weekly-report') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.weekly-report') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                                Weekly Plan Report
+                            </a>
+                            @endif
+                            @if(auth()->user()->isKoordinator())
+                            <a href="{{ route('hris.daily-tracking') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.daily-tracking') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                                Daily Tracking
                             </a>
                             @endif
                         </div>
                     </div>
 
+                    @if(auth()->user()->isStaffIt())
+                    <div class="mt-4">
+                        <button @click="openMenu = openMenu === 'it' ? null : 'it'" class="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200" :class="openMenu === 'it' ? 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'">
+                            <span class="flex items-center gap-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>
+                                IT
+                            </span>
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': openMenu === 'it' }" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                        <div x-show="openMenu === 'it'" x-cloak
+                             x-transition:enter="transition-all ease-out duration-200"
+                             x-transition:enter-start="opacity-0 -translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-transition:leave="transition-all ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 -translate-y-2"
+                             class="ml-2 mt-1 space-y-0.5">
+                            <a href="{{ route('it.project') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('it.project') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                                Project IT
+                            </a>
+                            <a href="{{ route('it.maintenance') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('it.maintenance') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                                Jadwal Maintenance
+                            </a>
+                            <a href="{{ route('assets.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('assets.*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                                Asset
+                            </a>
+                        </div>
+                    </div>
+                    @endif
+
                     @can('view-all')
+                    @unless(auth()->user()->isKoordinator())
                     <div class="mt-4">
                         <button @click="openMenu = openMenu === 'meeting' ? null : 'meeting'" class="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200" :class="openMenu === 'meeting' ? 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'">
                             <span class="flex items-center gap-3">
@@ -224,9 +267,11 @@ $activeMenu = match (true) {
                             </a>
                         </div>
                     </div>
+                    @endunless
                     @endcan
 
                     @can('view-all')
+                    @unless(auth()->user()->isKoordinator())
                     <div class="mt-4">
                         <button @click="openMenu = openMenu === 'asset' ? null : 'asset'" class="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200" :class="openMenu === 'asset' ? 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'">
                             <span class="flex items-center gap-3">
@@ -260,7 +305,9 @@ $activeMenu = match (true) {
                             </a>
                         </div>
                     </div>
+                    @endunless
 
+                    @unless(auth()->user()->isKoordinator())
                     <div class="mt-4">
                         <button @click="openMenu = openMenu === 'pembayaran' ? null : 'pembayaran'" class="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200" :class="openMenu === 'pembayaran' ? 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'">
                             <span class="flex items-center gap-3">
@@ -300,6 +347,7 @@ $activeMenu = match (true) {
                             </a>
                         </div>
                     </div>
+                    @endunless
                     @endcan
 
                     @if(auth()->user()->isSuperAdmin())

@@ -90,18 +90,18 @@
                           <button @click.stop="$wire.openNoteModal(focused.id, 'history')"
                                   class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-[10px] font-medium transition-colors">
                               <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                              Catatan
-                          </button>
-                          <button @click.stop="$wire.openNoteModal(focused.id, 'history')"
-                                  class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 text-[10px] font-medium transition-colors">
-                              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                              Riwayat Catatan
+                               Evaluasi
+                           </button>
+                           <button @click.stop="$wire.openNoteModal(focused.id, 'history')"
+                                   class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 text-[10px] font-medium transition-colors">
+                               <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                               Riwayat Evaluasi
                           </button>
                       </template>
                       <template x-if="!canGiveNotes[focused.id] && focused.id === myPositionId">
                           <button @click.stop="$wire.openNoteModal(focused.id, 'history')"
-                                  class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:text-primary-600 hover:border-primary-400 dark:hover:border-primary-500 text-[10px] font-medium transition-colors">
-                              Lihat Catatan
+                                   class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:text-primary-600 hover:border-primary-400 dark:hover:border-primary-500 text-[10px] font-medium transition-colors">
+                               Lihat Evaluasi
                           </button>
                       </template>
                   </div>
@@ -144,18 +144,18 @@
                                                <button @click.stop="$wire.openNoteModal(child.id, 'form')"
                                                        class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-[10px] font-medium transition-colors">
                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                                                   Catatan
-                                               </button>
-                                               <button @click.stop="$wire.openNoteModal(child.id, 'history')"
-                                                       class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 text-[10px] font-medium transition-colors">
-                                                   <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                   Riwayat Catatan
+                                                    Evaluasi
+                                                </button>
+                                                <button @click.stop="$wire.openNoteModal(child.id, 'history')"
+                                                        class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 text-[10px] font-medium transition-colors">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    Riwayat Evaluasi
                                                </button>
                                            </template>
                                             <template x-if="!canGiveNotes[child.id] && child.id === myPositionId">
                                                 <button @click.stop="$wire.openNoteModal(child.id, 'history')"
                                                         class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:text-primary-600 hover:border-primary-400 dark:hover:border-primary-500 text-[10px] font-medium transition-colors">
-                                                    Lihat Catatan
+                                                        Lihat Evaluasi
                                                 </button>
                                             </template>
                                        </div>
@@ -182,14 +182,14 @@
                 <div>
                     <h3 class="text-base font-bold text-gray-900 dark:text-gray-100">
                         @if($viewState === 'detail')
-                            Detail Catatan
+                            Detail Evaluasi
                         @elseif($viewState === 'history')
-                            Riwayat Catatan
+                            Riwayat Evaluasi
                         @else
-                            {{ $existingNote ? 'Edit Catatan' : 'Tambah Catatan' }}
+                            {{ $existingNote ? 'Edit Evaluasi' : 'Tambah Evaluasi' }}
                         @endif
                     </h3>
-                    <p class="text-xs text-gray-400 mt-0.5">{{ $selectedPositionName ?: 'Catatan & Rekomendasi Jabatan' }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ $selectedPositionName ?: 'Evaluasi & Rekomendasi Jabatan' }}</p>
                 </div>
                 <button @click="$dispatch('close-modal', { name: 'note-modal' })"
                         class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
@@ -203,10 +203,10 @@
                     <div class="mb-4 flex items-center gap-3 text-xs text-gray-500">
                         <span class="flex items-center gap-1">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6A2.25 2.25 0 016 3.75h1.5m9 0h-9"/></svg>
-                            <span>{{ count($notesHistory) }} catatan tersimpan</span>
+                                <span>{{ count($notesHistory) }} evaluasi tersimpan</span>
                         </span>
                         @if($isSuperior)
-                            <span class="px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 font-medium">Anda dapat memberi catatan</span>
+                            <span class="px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 font-medium">Anda dapat memberi evaluasi</span>
                         @endif
                     </div>
 
@@ -242,10 +242,10 @@
                                           placeholder="Situasi jabatan..."></textarea>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Catatan</label>
-                                <textarea wire:model="catatan" rows="2"
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Evaluasi</label>
+                                <textarea wire:model="evaluasi" rows="2"
                                           class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
-                                          placeholder="Catatan untuk jabatan ini..."></textarea>
+                                          placeholder="Evaluasi untuk jabatan ini..."></textarea>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Komitmen</label>
@@ -268,7 +268,7 @@
                         </div>
                     @else
                         <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 mb-5">
-                            <p class="text-xs text-gray-400 italic">Anda tidak berwenang memberi catatan untuk jabatan ini.</p>
+                            <p class="text-xs text-gray-400 italic">Anda tidak berwenang memberi evaluasi untuk jabatan ini.</p>
                         </div>
                     @endif
 
@@ -354,14 +354,14 @@
                         <div class="flex items-center gap-3 text-xs text-gray-500">
                             <span class="flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6A2.25 2.25 0 016 3.75h1.5m9 0h-9"/></svg>
-                                <span>{{ count($notesHistory) }} catatan tersimpan</span>
+                            <span>{{ count($notesHistory) }} evaluasi tersimpan</span>
                             </span>
                         </div>
                         @if($isSuperior)
                             <button wire:click="switchToForm"
                                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-xs font-medium transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                                Tambah Catatan Baru
+                                Tambah Evaluasi Baru
                             </button>
                         @endif
                     </div>
@@ -373,7 +373,7 @@
                                     <tr class="border-b border-gray-200 dark:border-gray-700">
                                         <th class="text-left py-2 pr-4 font-semibold text-gray-500">Periode</th>
                                         <th class="text-left py-2 pr-4 font-semibold text-gray-500">Pemberi</th>
-                                        <th class="text-left py-2 pr-4 font-semibold text-gray-500">Catatan</th>
+                                        <th class="text-left py-2 pr-4 font-semibold text-gray-500">Evaluasi</th>
                                         <th class="text-right py-2 font-semibold text-gray-500">Aksi</th>
                                     </tr>
                                 </thead>
@@ -386,7 +386,7 @@
                                         <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                                             <td class="py-2.5 pr-4 text-gray-900 dark:text-gray-100 font-medium">{{ $bulanNama }} {{ $note['tahun'] }}</td>
                                             <td class="py-2.5 pr-4 text-gray-500">{{ $creator }}</td>
-                                            <td class="py-2.5 pr-4 text-gray-600 dark:text-gray-400 max-w-[200px] truncate">{{ $note['catatan'] ?: '-' }}</td>
+                                            <td class="py-2.5 pr-4 text-gray-600 dark:text-gray-400 max-w-[200px] truncate">{{ $note['evaluasi'] ?: '-' }}</td>
                                             <td class="py-2.5 text-right">
                                                 <div class="flex items-center justify-end gap-1">
                                                     <button wire:click="showDetail({{ $note['id'] }})"
@@ -396,7 +396,7 @@
                                                     </button>
                                                     @if((auth()->id() ?? null) === ($note['created_by'] ?? null))
                                                         <button wire:click="deleteNote({{ $note['id'] }})"
-                                                                wire:confirm="Yakin ingin menghapus catatan ini?"
+                                                                 wire:confirm="Yakin ingin menghapus evaluasi ini?"
                                                                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-800 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 font-medium transition-colors">
                                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
                                                             Hapus
@@ -411,7 +411,7 @@
                         </div>
                     @else
                         <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 mb-5">
-                            <p class="text-xs text-gray-400 italic py-4 text-center">Belum ada riwayat catatan.</p>
+                            <p class="text-xs text-gray-400 italic py-4 text-center">Belum ada riwayat evaluasi.</p>
                         </div>
                     @endif
                 @endif
@@ -435,7 +435,7 @@
                             <span class="text-xs font-semibold text-gray-500">{{ $bulanNama }} {{ $noteDetail['tahun'] }} — oleh {{ $creator }}</span>
                             @if((auth()->id() ?? null) === ($noteDetail['created_by'] ?? null))
                                 <button wire:click="deleteNote({{ $noteDetail['id'] }})"
-                                        wire:confirm="Yakin ingin menghapus catatan ini?"
+                                        wire:confirm="Yakin ingin menghapus evaluasi ini?"
                                         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-800 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 font-medium transition-colors">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
                                     Hapus
@@ -449,7 +449,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-medium text-gray-500 mb-1">Catatan</label>
-                                <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ $noteDetail['catatan'] ?: '(tidak ada)' }}</p>
+                                <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ $noteDetail['evaluasi'] ?: '(tidak ada)' }}</p>
                             </div>
                             <div>
                                 <label class="block text-[11px] font-medium text-gray-500 mb-1">Komitmen</label>
@@ -548,7 +548,7 @@
                 @endif
 
             @else
-                <div class="py-8 text-center text-xs text-gray-400">Pilih jabatan untuk melihat catatan.</div>
+                <div class="py-8 text-center text-xs text-gray-400">Pilih jabatan untuk melihat evaluasi.</div>
             @endif
         </div>
     </x-modal>
