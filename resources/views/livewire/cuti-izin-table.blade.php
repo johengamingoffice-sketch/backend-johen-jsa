@@ -89,8 +89,10 @@
                             <th class="px-6 py-3">Tanggal</th>
                             <th class="px-6 py-3">Durasi</th>
                             <th class="px-6 py-3">Keterangan</th>
-                            <th class="px-6 py-3">Atasan</th>
-                            <th class="px-6 py-3">Persetujuan Atasan</th>
+                            <th class="px-6 py-3">Atasan 1</th>
+                            <th class="px-6 py-3">Atasan 2</th>
+                            <th class="px-6 py-3">Persetujuan Atasan 1</th>
+                            <th class="px-6 py-3">Persetujuan Atasan 2</th>
                             <th class="px-6 py-3">Persetujuan HR</th>
                             <th class="px-6 py-3">Aksi</th>
                         </tr>
@@ -108,10 +110,22 @@
                                 <td class="table-cell text-gray-600 dark:text-gray-400">{{ $lr->durasi }}</td>
                                 <td class="table-cell text-gray-600 dark:text-gray-400 max-w-[200px] truncate">{{ $lr->keterangan ?? '-' }}</td>
                                 <td class="table-cell text-gray-600 dark:text-gray-400">{{ $lr->atasan?->nama ?? '-' }}</td>
+                                <td class="table-cell text-gray-600 dark:text-gray-400">{{ $lr->atasan2?->nama ?? '-' }}</td>
                                 <td class="table-cell">
                                     @if($lr->persetujuan_koor === 'disetujui')
                                         <span class="badge-success">Disetujui</span>
                                     @elseif($lr->persetujuan_koor === 'ditolak')
+                                        <span class="badge-danger">Ditolak</span>
+                                    @else
+                                        <span class="badge-warning">Menunggu</span>
+                                    @endif
+                                </td>
+                                <td class="table-cell">
+                                    @if(!$lr->atasan2_id)
+                                        <span class="text-xs text-gray-400">-</span>
+                                    @elseif($lr->persetujuan_atasan2 === 'disetujui')
+                                        <span class="badge-success">Disetujui</span>
+                                    @elseif($lr->persetujuan_atasan2 === 'ditolak')
                                         <span class="badge-danger">Ditolak</span>
                                     @else
                                         <span class="badge-warning">Menunggu</span>
@@ -127,7 +141,7 @@
                                     @endif
                                 </td>
                                 <td class="table-cell">
-                                    @if($lr->persetujuan_koor === 'menunggu' || $lr->persetujuan_hr === 'menunggu')
+                                    @if($lr->persetujuan_koor === 'menunggu' || ($lr->atasan2_id && $lr->persetujuan_atasan2 === 'menunggu') || $lr->persetujuan_hr === 'menunggu')
                                     <button wire:click="confirmDelete({{ $lr->id }})"
                                             class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                                             title="Hapus">
@@ -138,7 +152,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-6 py-16 text-center">
+                                <td colspan="10" class="px-6 py-16 text-center">
                                     <div class="flex flex-col items-center justify-center">
                                         <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-900 mb-3">
                                             <svg class="w-8 h-8 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>
@@ -160,6 +174,7 @@
             @endif
         </div>
 
+        <template x-teleport="body">
         {{-- PENGAJUAN MODAL --}}
         <div x-data="{ open: $wire.entangle('showPengajuanModal') }"
              x-show="open" x-cloak
@@ -183,6 +198,25 @@
                 </div>
 
                 <form wire:submit.prevent="submitPengajuan" class="space-y-4">
+                    @if(isset($userPositions) && $userPositions->count() > 1)
+                    <div>
+                        <x-input-label value="Ajukan sebagai *" />
+                        <select wire:model.live="selectedPositionId" required
+                                class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
+                            <option value="">Pilih jabatan</option>
+                            @foreach($userPositions as $up)
+                                <option value="{{ $up->id }}">{{ $up->nama }}</option>
+                            @endforeach
+                        </select>
+                        @if($selectedPositionId)
+                            <div class="mt-2 text-[11px] text-gray-500 dark:text-gray-400 space-y-0.5">
+                                <span class="block">Atasan 1: <strong class="text-gray-700 dark:text-gray-300">{{ $this->getSelectedPositionAtasan() ?: '-' }}</strong></span>
+                                <span class="block">Atasan 2: <strong class="text-gray-700 dark:text-gray-300">{{ $this->getSelectedPositionAtasan2() ?: '-' }}</strong></span>
+                            </div>
+                        @endif
+                        @error('selectedPositionId') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    @endif
                     <div>
                         <x-input-label value="Jenis *" />
                         <div class="mt-2 grid grid-cols-2 gap-3">
@@ -237,8 +271,9 @@
                         </button>
                     </div>
                 </form>
-            </div>
         </div>
+    </div>
+    </template>
     @else
         {{-- Admin/Direksi Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
@@ -341,8 +376,10 @@
                             <th class="px-6 py-3">Jenis</th>
                             <th class="px-6 py-3">Tanggal</th>
                             <th class="px-6 py-3">Durasi</th>
-                            <th class="px-6 py-3">Atasan</th>
-                            <th class="px-6 py-3">Persetujuan Atasan</th>
+                            <th class="px-6 py-3">Atasan 1</th>
+                            <th class="px-6 py-3">Atasan 2</th>
+                            <th class="px-6 py-3">Persetujuan Atasan 1</th>
+                            <th class="px-6 py-3">Persetujuan Atasan 2</th>
                             <th class="px-6 py-3">Persetujuan HR</th>
                             <th class="px-6 py-3">Aksi</th>
                         </tr>
@@ -351,7 +388,9 @@
                         @forelse($leaveRequests as $lr)
                             @php
                                 $isAtasan = $userEmployee && $userEmployee->id === $lr->atasan_id;
+                                $isAtasan2 = $userEmployee && $userEmployee->id === $lr->atasan2_id;
                                 $canApproveKoor = $isAtasan;
+                                $canApproveAtasan2 = $isAtasan2;
                                 $canApproveHr = $user->id === 4 || $isHr;
                                 $requiresPin = $user->requiresPinApproval();
                             @endphp
@@ -369,7 +408,7 @@
                                         <span class="font-medium text-gray-900 dark:text-gray-100">{{ $lr->employee->nama ?? '-' }}</span>
                                     </div>
                                 </td>
-                                <td class="table-cell text-gray-600 dark:text-gray-400">{{ $lr->employee?->position ?? '-' }}</td>
+                                <td class="table-cell text-gray-600 dark:text-gray-400">{{ $lr->selectedPosition?->nama ?? $lr->employee?->position ?? '-' }}</td>
                                 <td class="table-cell">
                                     <span class="font-medium text-gray-900 dark:text-gray-100">{{ $lr->jenis === 'cuti_tahunan' ? 'Cuti Tahunan' : 'Izin' }}</span>
                                 </td>
@@ -378,6 +417,7 @@
                                 </td>
                                 <td class="table-cell text-gray-600 dark:text-gray-400">{{ $lr->durasi }}</td>
                                 <td class="table-cell text-gray-600 dark:text-gray-400">{{ $lr->atasan?->nama ?? '-' }}</td>
+                                <td class="table-cell text-gray-600 dark:text-gray-400">{{ $lr->atasan2?->nama ?? '-' }}</td>
                                 <td class="table-cell">
                                     @if($lr->persetujuan_koor === 'disetujui')
                                         <span class="badge-success">Disetujui</span>
@@ -399,6 +439,36 @@
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                 </button>
                                                 <button @click="confirmAction = true; confirmTitle = 'Tolak Pengajuan'; confirmMessage = 'Apakah Anda yakin ingin menolak pengajuan ini?'; confirmHandler = () => $wire.tolak({{ $lr->id }}, 'persetujuan_koor')" class="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors" title="Tolak">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                                @endif
+                                            @endif
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="table-cell">
+                                    @if(!$lr->atasan2_id)
+                                        <span class="text-xs text-gray-400">-</span>
+                                    @elseif($lr->persetujuan_atasan2 === 'disetujui')
+                                        <span class="badge-success">Disetujui</span>
+                                    @elseif($lr->persetujuan_atasan2 === 'ditolak')
+                                        <span class="badge-danger">Ditolak</span>
+                                    @else
+                                        <div class="flex items-center gap-1">
+                                            <span class="badge-warning">Menunggu</span>
+                                            @if($canApproveAtasan2)
+                                                @if($requiresPin)
+                                                <button wire:click="setujui({{ $lr->id }}, 'persetujuan_atasan2')" class="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-md transition-colors" title="Setujui">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                </button>
+                                                <button wire:click="tolak({{ $lr->id }}, 'persetujuan_atasan2')" class="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors" title="Tolak">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                                @else
+                                                <button @click="confirmAction = true; confirmTitle = 'Setujui Pengajuan'; confirmMessage = 'Apakah Anda yakin ingin menyetujui pengajuan ini?'; confirmHandler = () => $wire.setujui({{ $lr->id }}, 'persetujuan_atasan2')" class="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-md transition-colors" title="Setujui">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                </button>
+                                                <button @click="confirmAction = true; confirmTitle = 'Tolak Pengajuan'; confirmMessage = 'Apakah Anda yakin ingin menolak pengajuan ini?'; confirmHandler = () => $wire.tolak({{ $lr->id }}, 'persetujuan_atasan2')" class="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors" title="Tolak">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
                                                 @endif
@@ -446,7 +516,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="px-6 py-16 text-center">
+                                <td colspan="11" class="px-6 py-16 text-center">
                                     <div class="flex flex-col items-center justify-center">
                                         <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-900 mb-3">
                                             <svg class="w-8 h-8 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>
@@ -469,18 +539,7 @@
         </div>
     @endif
 
-    {{-- NOTIFICATION TOAST --}}
-    <div x-data="{ show: false, message: '', type: 'success' }"
-         x-on:notify.window="show = true; message = $event.detail.message; type = $event.detail.type; setTimeout(() => show = false, 4000)"
-         x-show="show" x-cloak
-         class="fixed bottom-6 right-6 z-[100] flex items-center gap-3 rounded-xl px-5 py-3.5 text-sm font-medium shadow-xl"
-         :class="type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'">
-        <template x-if="type === 'success'"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></template>
-        <template x-if="type === 'error'"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg></template>
-         <span x-text="message"></span>
-        <button @click="show = false" class="ml-2 hover:opacity-80"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-    </div>
-
+    <template x-teleport="body">
     {{-- Confirmation Modal --}}
     <div x-show="confirmAction" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm overflow-y-auto"
@@ -500,7 +559,9 @@
             </div>
         </div>
     </div>
+    </template>
 
+    <template x-teleport="body">
     {{-- PIN Persetujuan Modal --}}
     <div x-data="{ open: $wire.entangle('showPinModal') }"
          x-show="open" x-cloak
@@ -548,7 +609,9 @@
             </div>
         </div>
     </div>
+    </template>
 
+    <template x-teleport="body">
     {{-- No PIN Modal --}}
     <div x-data="{ open: $wire.entangle('showNoPinModal') }"
          x-show="open" x-cloak
@@ -575,9 +638,11 @@
             </div>
         </div>
     </div>
+    </template>
 
-    {{-- Approval Success Modal --}}
-    <div x-data="{ open: $wire.entangle('showApprovalSuccessModal') }"
+    <template x-teleport="body">
+    {{-- Atasan 2 Error Modal --}}
+    <div x-data="{ open: $wire.entangle('showAtasan2ErrorModal') }"
          x-show="open" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm overflow-y-auto"
          x-transition:enter="transition ease-out duration-200"
@@ -588,17 +653,19 @@
          x-transition:leave-end="opacity-0 scale-95"
          @click="open = false">
         <div @click.stop class="relative w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-2xl my-10">
-            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 mx-auto mb-4">
-                <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-900/30 mx-auto mb-4">
+                <svg class="w-7 h-7 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-2" x-text="$wire.approvalSuccessMessage"></h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Status pengajuan telah berhasil diperbarui.</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-2">Persetujuan Tertunda</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6" x-text="$wire.atasan2ErrorMessage"></p>
             <div class="flex items-center justify-center pt-4 border-t border-gray-100 dark:border-gray-700">
                 <button @click="open = false" class="btn-primary text-xs px-8">Tutup</button>
             </div>
         </div>
     </div>
+    </template>
 
+    <template x-teleport="body">
     {{-- Delete Confirm Modal --}}
     <div x-data="{ open: $wire.entangle('showDeleteConfirmModal') }"
          x-show="open" x-cloak
@@ -625,50 +692,7 @@
             </div>
         </div>
     </div>
+    </template>
 
-    {{-- Delete Success Modal --}}
-    <div x-data="{ open: $wire.entangle('showDeleteSuccessModal') }"
-         x-show="open" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm overflow-y-auto"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         @click="open = false">
-        <div @click.stop class="relative w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-2xl my-10">
-            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 mx-auto mb-4">
-                <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-2" x-text="$wire.deleteSuccessMessage"></h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Pengajuan telah berhasil dihapus dari sistem.</p>
-            <div class="flex items-center justify-center pt-4 border-t border-gray-100 dark:border-gray-700">
-                <button @click="open = false" class="btn-primary text-xs px-8">Tutup</button>
-            </div>
-        </div>
-    </div>
 
-    {{-- Submit Success Modal --}}
-    <div x-data="{ open: $wire.entangle('showSubmitSuccessModal') }"
-         x-show="open" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm overflow-y-auto"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         @click="open = false">
-        <div @click.stop class="relative w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-2xl my-10">
-            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 mx-auto mb-4">
-                <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-2">Pengajuan Berhasil Dikirim</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Pengajuan cuti/izin Anda telah berhasil dikirim dan menunggu persetujuan atasan.</p>
-            <div class="flex items-center justify-center pt-4 border-t border-gray-100 dark:border-gray-700">
-                <button @click="open = false" class="btn-primary text-xs px-8">Tutup</button>
-            </div>
-        </div>
-    </div>
 </div>

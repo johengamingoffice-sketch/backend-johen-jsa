@@ -69,6 +69,7 @@ class DashboardService
         return $this->applyAtasanFilter(LeaveRequest::query(), $user)
             ->where(function ($q) {
                 $q->where('persetujuan_koor', 'menunggu')
+                  ->orWhere('persetujuan_atasan2', 'menunggu')
                   ->orWhere('persetujuan_hr', 'menunggu');
             })->count();
     }
@@ -78,6 +79,7 @@ class DashboardService
         return $this->applyAtasanFilter(LeaveRequest::with('employee'), $user)
             ->where(function ($q) {
                 $q->where('persetujuan_koor', 'menunggu')
+                  ->orWhere('persetujuan_atasan2', 'menunggu')
                   ->orWhere('persetujuan_hr', 'menunggu');
             })
             ->latest()
@@ -105,7 +107,10 @@ class DashboardService
         ]);
 
         if (!$lihatSemua) {
-            $query->where('atasan_id', $userEmployee->id);
+            $query->where(function ($q) use ($userEmployee) {
+                $q->where('atasan_id', $userEmployee->id)
+                  ->orWhere('atasan2_id', $userEmployee->id);
+            });
         }
 
         return $query;
@@ -177,6 +182,7 @@ class DashboardService
             ->where('jenis', 'cuti_tahunan')
             ->whereYear('tanggal_mulai', $tahunIni)
             ->where('persetujuan_koor', 'disetujui')
+            ->where('persetujuan_atasan2', 'disetujui')
             ->where('persetujuan_hr', 'disetujui')
             ->get()
             ->sum(fn($lr) => (int) filter_var($lr->durasi, FILTER_SANITIZE_NUMBER_INT));
@@ -187,6 +193,7 @@ class DashboardService
         $pendingCount = LeaveRequest::where('employee_id', $employeeId)
             ->where(function ($q) {
                 $q->where('persetujuan_koor', 'menunggu')
+                  ->orWhere('persetujuan_atasan2', 'menunggu')
                   ->orWhere('persetujuan_hr', 'menunggu');
             })->count();
 
@@ -200,8 +207,9 @@ class DashboardService
                 'tanggal' => $lr->tanggal_mulai->isoFormat('D MMM') . ' - ' . $lr->tanggal_selesai->isoFormat('D MMM YYYY'),
                 'durasi' => $lr->durasi,
                 'status_koor' => $lr->persetujuan_koor,
+                'status_atasan2' => $lr->persetujuan_atasan2,
                 'status_hr' => $lr->persetujuan_hr,
-                'status_akhir' => $lr->persetujuan_koor === 'disetujui' && $lr->persetujuan_hr === 'disetujui' ? 'disetujui' : ($lr->persetujuan_koor === 'ditolak' || $lr->persetujuan_hr === 'ditolak' ? 'ditolak' : 'menunggu'),
+                'status_akhir' => $lr->persetujuan_koor === 'disetujui' && $lr->persetujuan_atasan2 === 'disetujui' && $lr->persetujuan_hr === 'disetujui' ? 'disetujui' : ($lr->persetujuan_koor === 'ditolak' || $lr->persetujuan_atasan2 === 'ditolak' || $lr->persetujuan_hr === 'ditolak' ? 'ditolak' : 'menunggu'),
             ]);
 
         $recentAttendance = Attendance::where('employee_id', $employeeId)

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Employee extends Model
@@ -21,6 +22,7 @@ class Employee extends Model
         'division_id',
         'position',
         'atasan',
+        'atasan2',
         'jenis_karyawan',
         'lokasi_kerja',
         'no_kontak_darurat1',
@@ -87,5 +89,27 @@ class Employee extends Model
     public function meetingRequests(): HasMany
     {
         return $this->hasMany(MeetingRequest::class);
+    }
+
+    public function positions(): BelongsToMany
+    {
+        return $this->belongsToMany(Position::class, 'employee_position')
+            ->withPivot('is_main')
+            ->withTimestamps();
+    }
+
+    public function mainPosition(): ?Position
+    {
+        return $this->positions()->wherePivot('is_main', true)->first();
+    }
+
+    public function hasMultiplePositions(): bool
+    {
+        return $this->positions()->count() > 1;
+    }
+
+    public function positionNames(): string
+    {
+        return $this->positions->pluck('nama')->implode(' & ');
     }
 }

@@ -176,7 +176,7 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('payment-submissions.pengajuan');
     })->name('reimbursement');
 
-    Route::get('/kelola-akun', UserTable::class)->name('kelola-akun');
+    Route::get('/kelola-akun', UserTable::class)->name('kelola-akun')->middleware('role:super_admin');
 });
 
 Route::middleware('auth')->group(function () {

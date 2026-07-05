@@ -129,6 +129,7 @@
             @endif
         </div>
 
+        <template x-teleport="body">
         {{-- ABSEN MODAL --}}
         <div x-data="{ open: $wire.entangle('showAbsenModal') }"
              x-show="open" x-cloak
@@ -179,8 +180,9 @@
                         </button>
                     </div>
                 </form>
-            </div>
         </div>
+    </div>
+    </template>
     @else
         {{-- Admin/Direksi Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
@@ -356,15 +358,4 @@
         </div>
     @endif
 
-    {{-- NOTIFICATION TOAST --}}
-    <div x-data="{ show: false, message: '', type: 'success' }"
-         x-on:notify.window="show = true; message = $event.detail.message; type = $event.detail.type; setTimeout(() => show = false, 4000)"
-         x-show="show" x-cloak
-         class="fixed bottom-6 right-6 z-[100] flex items-center gap-3 rounded-xl px-5 py-3.5 text-sm font-medium shadow-xl"
-         :class="type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'">
-        <template x-if="type === 'success'"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></template>
-        <template x-if="type === 'error'"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg></template>
-        <span x-text="message"></span>
-        <button @click="show = false" class="ml-2 hover:opacity-80"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-    </div>
 </div>

@@ -50,7 +50,6 @@ html.dark {
 @layer components {
     .card {
         @apply rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200;
-        will-change: transform;
     }
 
     .dark .card {

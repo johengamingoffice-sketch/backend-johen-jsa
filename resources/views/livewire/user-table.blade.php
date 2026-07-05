@@ -82,7 +82,7 @@
                                     </button>
                                     @endcan
                                     @can('delete-data')
-                                    <button wire:click="delete({{ $u->id }})" wire:confirm="Yakin ingin menghapus akun {{ $u->name }}?" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+                                    <button wire:click="confirmDelete({{ $u->id }})" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
                                         Hapus
                                     </button>
@@ -96,7 +96,9 @@
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-900 mb-3">
                                         <svg class="w-8 h-8 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
-                                    </div>
+
+    <x:confirm-delete-modal title="Hapus Akun" message="Apakah Anda yakin ingin menghapus akun ini?" />
+</div>
                                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Belum ada akun</h3>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tambah akun pengguna untuk memulai</p>
                                 </div>
@@ -114,6 +116,7 @@
         @endif
     </div>
 
+    <template x-teleport="body">
     {{-- CREATE MODAL --}}
     <div x-data="{ open: $wire.entangle('showCreateModal') }"
          x-show="open" x-cloak
@@ -186,7 +189,9 @@
             </form>
         </div>
     </div>
+    </template>
 
+    <template x-teleport="body">
     {{-- EDIT MODAL --}}
     <div x-data="{ open: $wire.entangle('showEditModal') }"
          x-show="open" x-cloak
@@ -259,16 +264,6 @@
             </form>
         </div>
     </div>
+    </template>
 
-    {{-- NOTIFICATION TOAST --}}
-    <div x-data="{ show: false, message: '', type: 'success' }"
-         x-on:notify.window="show = true; message = $event.detail.message; type = $event.detail.type; setTimeout(() => show = false, 4000)"
-         x-show="show" x-cloak
-         class="fixed bottom-6 right-6 z-[100] flex items-center gap-3 rounded-xl px-5 py-3.5 text-sm font-medium shadow-xl"
-         :class="type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'">
-        <template x-if="type === 'success'"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></template>
-        <template x-if="type === 'error'"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg></template>
-        <span x-text="message"></span>
-        <button @click="show = false" class="ml-2 hover:opacity-80"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-    </div>
 </div>

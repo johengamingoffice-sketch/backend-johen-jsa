@@ -10,6 +10,7 @@
         <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:500,600,700,800&display=swap" rel="stylesheet" />
 
         <script>
             if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -51,12 +52,12 @@
 
                 @php
 $activeMenu = match (true) {
-    request()->routeIs('hris.absensi', 'hris.cuti-izin', 'hris.manual-book') => 'operasional',
+    request()->routeIs('hris.absensi', 'hris.cuti-izin', 'hris.manual-book', 'hris.jobdesk') => 'operasional',
     request()->routeIs('hris.*') => 'sdm',
     request()->routeIs('payroll.*', 'history.*', 'bonus.*', 'reimbursement') => 'keuangan',
     request()->routeIs('meeting.*') => 'meeting',
-    request()->routeIs('assets.*', 'digital.*') => 'asset',
-    request()->routeIs('electricity.*', 'internet.*', 'ipl.*', 'payment-submissions.*') => 'pembayaran',
+    request()->routeIs('assets.*') => 'asset',
+    request()->routeIs('electricity.*', 'internet.*', 'ipl.*', 'payment-submissions.*', 'digital.*') => 'pembayaran',
     default => '',
 };
                 @endphp
@@ -127,7 +128,7 @@ $activeMenu = match (true) {
                             </a>
                             @endif
                             <a href="{{ route('assets.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('assets.*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
-                                asset saya
+                                Asset Saya
                             </a>
                         </div>
                     </div>
@@ -383,36 +384,86 @@ $activeMenu = match (true) {
 
                 <main class="flex-1 overflow-y-auto p-4 lg:p-8">
                     <div class="w-full space-y-6 animate-fade-in">
-                        @if (session('success'))
-                            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100">
-                                    <svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                </div>
-                                <span class="font-medium">{{ session('success') }}</span>
-                            </div>
-                        @endif
-
-                        @if (session('error'))
-                            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100">
-                                    <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
-                                </div>
-                                <span class="font-medium">{{ session('error') }}</span>
-                            </div>
-                        @endif
-
-                        @if (session('warning'))
-                            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100">
-                                    <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
-                                </div>
-                                <span class="font-medium">{{ session('warning') }}</span>
-                            </div>
-                        @endif
-
                         {{ $slot }}
                     </div>
                 </main>
+            </div>
+        </div>
+
+        {{-- Floating Toast Container (top-right) --}}
+        <div x-data class="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none" style="max-height: calc(100vh - 2rem); overflow-y: auto;">
+            <div class="pointer-events-auto space-y-3">
+                @include('components.toast')
+            </div>
+        </div>
+
+        {{-- Success Modal (centered) --}}
+        <div x-data
+             x-show="$store.successModal.open"
+             x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm overflow-y-auto"
+             @click="$store.successModal.hide()">
+            <div x-show="$store.successModal.open"
+                 x-cloak
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 @click.stop
+                 class="relative w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-2xl my-10">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 mx-auto mb-4">
+                    <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-2">Berhasil!</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6" x-text="$store.successModal.message"></p>
+                <div class="flex items-center justify-center pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <button @click="$store.successModal.hide()" class="btn-primary text-xs px-8">Tutup</button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Confirm Delete Modal (global, non-Livewire) --}}
+        <div x-data
+             x-show="$store.confirmModal.open"
+             x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm overflow-y-auto"
+             @click="$store.confirmModal.cancel()">
+            <div x-show="$store.confirmModal.open"
+                 x-cloak
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 @click.stop
+                 class="relative w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-2xl my-10">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 dark:bg-red-900/30 mx-auto mb-4">
+                    <svg class="w-7 h-7 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-2" x-text="$store.confirmModal.title"></h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6" x-text="$store.confirmModal.message"></p>
+                <div class="flex items-center justify-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <button @click="$store.confirmModal.cancel()" class="btn-secondary text-xs px-6">Batal</button>
+                    <button @click="$store.confirmModal.confirm()" class="btn-danger text-xs px-6 inline-flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                        Ya, Hapus
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -429,6 +480,26 @@ $activeMenu = match (true) {
                     }
                 }
             }
+
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('notify', ({ type, message }) => {
+                    if (type === 'success') {
+                        Alpine.store('successModal').show(message);
+                    } else {
+                        Alpine.store('toast').add(type, message);
+                    }
+                });
+            });
+
+            @if (session('success'))
+            (function(){function w(){if(typeof Alpine!=='undefined'&&Alpine.store('successModal')){Alpine.store('successModal').show('{{ addslashes(session('success')) }}');}else{setTimeout(w,50)}}w()})();
+            @endif
+            @if (session('error'))
+            (function(){function w(){if(typeof Alpine!=='undefined'&&Alpine.store('toast')){Alpine.store('toast').error('{{ addslashes(session('error')) }}');}else{setTimeout(w,50)}}w()})();
+            @endif
+            @if (session('warning'))
+            (function(){function w(){if(typeof Alpine!=='undefined'&&Alpine.store('toast')){Alpine.store('toast').warning('{{ addslashes(session('warning')) }}');}else{setTimeout(w,50)}}w()})();
+            @endif
         </script>
     </body>
 </html>

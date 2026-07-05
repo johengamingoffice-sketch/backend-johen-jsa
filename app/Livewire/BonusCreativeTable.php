@@ -22,6 +22,8 @@ class BonusCreativeTable extends Component
     public bool $showCreateModal = false;
     public bool $showEditModal = false;
     public ?int $editId = null;
+    public bool $showDeleteConfirm = false;
+    public ?int $deleteId = null;
 
     public string $tanggal = '';
     public string $nik = '';
@@ -170,15 +172,30 @@ class BonusCreativeTable extends Component
         $this->dispatch('notify', type: 'success', message: 'Data Creative berhasil diperbarui.');
     }
 
-    public function delete(int $id): void
+    public function confirmDelete(int $id): void
     {
         Gate::authorize('delete-data');
-        $item = BonusCreative::findOrFail($id);
+        $this->deleteId = $id;
+        $this->showDeleteConfirm = true;
+    }
+
+    public function executeDelete(): void
+    {
+        if (!$this->deleteId) return;
+        Gate::authorize('delete-data');
+        $item = BonusCreative::findOrFail($this->deleteId);
         if ($item->dokumentasi) {
             Storage::disk('public')->delete($item->dokumentasi);
         }
         $item->delete();
         $this->dispatch('notify', type: 'success', message: 'Data Creative berhasil dihapus.');
+        $this->cancelDelete();
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->showDeleteConfirm = false;
+        $this->deleteId = null;
     }
 
     public function render()

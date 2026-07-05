@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Division;
 use App\Models\Employee;
+use App\Models\Position;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -38,11 +39,16 @@ class EmployeeTable extends Component
     public string $status = 'aktif';
 
     public string $position = '';
+    public array $position_ids = [];
+    public string $main_position_id = '';
     public string $division_id = '';
     public string $atasan = '';
+    public string $atasan2 = '';
     public string $tanggal_masuk = '';
     public string $jenis_karyawan = '';
     public string $lokasi_kerja = '';
+    public bool $showDeleteConfirm = false;
+    public ?int $deleteId = null;
 
     public string $no_hp = '';
     public string $email = '';
@@ -68,8 +74,12 @@ class EmployeeTable extends Component
             'alamat' => 'nullable|string',
             'status' => 'required|in:aktif,nonaktif,resign',
             'position' => 'nullable|string|max:255',
+            'position_ids' => 'nullable|array',
+            'position_ids.*' => 'exists:positions,id',
+            'main_position_id' => 'nullable|string',
             'division_id' => 'nullable|exists:divisions,id',
             'atasan' => 'nullable|string|max:255',
+            'atasan2' => 'nullable|string|max:255',
             'tanggal_masuk' => 'nullable|date',
             'jenis_karyawan' => 'nullable|string|max:30',
             'lokasi_kerja' => 'nullable|string|max:255',
@@ -124,7 +134,7 @@ class EmployeeTable extends Component
     public function openEditModal(int $id): void
     {
         Gate::authorize('update-data');
-        $emp = Employee::findOrFail($id);
+        $emp = Employee::with('positions')->findOrFail($id);
         $this->editId = $emp->id;
         $this->nik = $emp->nik;
         $this->nama = $emp->nama;
@@ -134,8 +144,12 @@ class EmployeeTable extends Component
         $this->alamat = $emp->alamat ?? '';
         $this->status = $emp->status;
         $this->position = $emp->position ?? '';
+        $this->position_ids = $emp->positions->pluck('id')->toArray();
+        $mainPos = $emp->mainPosition();
+        $this->main_position_id = (string) ($mainPos?->id ?? '');
         $this->division_id = (string) ($emp->division_id ?? '');
         $this->atasan = $emp->atasan ?? '';
+        $this->atasan2 = $emp->atasan2 ?? '';
         $this->tanggal_masuk = $emp->tanggal_masuk?->format('Y-m-d') ?? '';
         $this->jenis_karyawan = $emp->jenis_karyawan ?? '';
         $this->lokasi_kerja = $emp->lokasi_kerja ?? '';
@@ -202,7 +216,15 @@ class EmployeeTable extends Component
         $rules['nik'] = ['required', 'string', 'max:30', 'unique:employees,nik'];
         $this->validate($rules);
 
-        Employee::create($this->buildData());
+        $employee = Employee::create($this->buildData());
+
+        if (!empty($this->position_ids)) {
+            $syncData = [];
+            foreach ($this->position_ids as $pid) {
+                $syncData[$pid] = ['is_main' => $pid == (int) $this->main_position_id];
+            }
+            $employee->positions()->sync($syncData);
+        }
 
         $this->closeModal();
         $this->dispatch('notify', type: 'success', message: 'Karyawan berhasil ditambahkan.');
@@ -219,15 +241,38 @@ class EmployeeTable extends Component
 
         $emp->update($this->buildData());
 
+        if (!empty($this->position_ids)) {
+            $syncData = [];
+            foreach ($this->position_ids as $pid) {
+                $syncData[$pid] = ['is_main' => $pid == (int) $this->main_position_id];
+            }
+            $emp->positions()->sync($syncData);
+        }
+
         $this->closeModal();
         $this->dispatch('notify', type: 'success', message: 'Data karyawan berhasil diperbarui.');
     }
 
-    public function delete(int $id): void
+    public function confirmDelete(int $id): void
     {
         Gate::authorize('delete-data');
-        Employee::findOrFail($id)->delete();
+        $this->deleteId = $id;
+        $this->showDeleteConfirm = true;
+    }
+
+    public function executeDelete(): void
+    {
+        if (!$this->deleteId) return;
+        Gate::authorize('delete-data');
+        Employee::findOrFail($this->deleteId)->delete();
         $this->dispatch('notify', type: 'success', message: 'Karyawan berhasil dihapus.');
+        $this->cancelDelete();
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->showDeleteConfirm = false;
+        $this->deleteId = null;
     }
 
     public function render()
@@ -255,14 +300,22 @@ class EmployeeTable extends Component
             ->paginate(10);
 
         $divisions = Division::where('is_active', true)->orderBy('nama')->get();
+        $allPositions = Position::where('is_active', true)->orderBy('nama')->get();
         return view('livewire.employee-table', [
             'employees' => $employees,
             'divisions' => $divisions,
+            'allPositions' => $allPositions,
         ]);
     }
 
     private function buildData(): array
     {
+        $positionNames = [];
+        if (!empty($this->position_ids)) {
+            $positionNames = Position::whereIn('id', $this->position_ids)->pluck('nama')->toArray();
+        }
+        $posStr = !empty($positionNames) ? implode(' & ', $positionNames) : ($this->position ?: null);
+
         return [
             'nik' => $this->nik,
             'nama' => $this->nama,
@@ -273,8 +326,9 @@ class EmployeeTable extends Component
             'tanggal_lahir' => $this->tanggal_lahir ?: null,
             'jenis_kelamin' => $this->jenis_kelamin ?: null,
             'division_id' => $this->division_id ?: null,
-            'position' => $this->position ?: null,
+            'position' => $posStr,
             'atasan' => $this->atasan ?: null,
+            'atasan2' => $this->atasan2 ?: null,
             'jenis_karyawan' => $this->jenis_karyawan ?: null,
             'lokasi_kerja' => $this->lokasi_kerja ?: null,
             'no_kontak_darurat1' => $this->no_kontak_darurat1 ?: null,
@@ -300,8 +354,11 @@ class EmployeeTable extends Component
         $this->alamat = '';
         $this->status = 'aktif';
         $this->position = '';
+        $this->position_ids = [];
+        $this->main_position_id = '';
         $this->division_id = '';
         $this->atasan = '';
+        $this->atasan2 = '';
         $this->tanggal_masuk = '';
         $this->jenis_karyawan = '';
         $this->lokasi_kerja = '';

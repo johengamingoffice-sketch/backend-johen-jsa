@@ -1,5 +1,4 @@
-<div x-data="{ showFotoModal: false, fotoModalUrl: '', fotoModalLabel: '', showSuccessModal: false, successMessage: '' }"
-     x-on:notify.window="successMessage = $event.detail.message; showSuccessModal = true; setTimeout(() => showSuccessModal = false, 4000)">
+<div x-data="{ showFotoModal: false, fotoModalUrl: '', fotoModalLabel: '' }">
     <div class="flex flex-col gap-4 px-6 py-4 border-b border-gray-50 dark:border-gray-800">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3 flex-1">
@@ -111,7 +110,7 @@
                                     Detail
                                 </button>
                                 @can('delete-data')
-                                <button wire:click="delete({{ $item->id }})" wire:confirm="Yakin ingin menghapus data {{ $item->nama }}?" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+                                <button wire:click="confirmDelete({{ $item->id }})" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
                                     Hapus
                                 </button>
@@ -145,6 +144,7 @@
         </div>
     @endif
 
+    <template x-teleport="body">
     {{-- CREATE MODAL --}}
     <div x-data="{ open: $wire.entangle('showCreateModal') }" x-show="open" x-cloak class="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 bg-gray-900/60 backdrop-blur-sm overflow-y-auto" @click="open = false">
         <div @click.stop class="relative w-full max-w-2xl rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-2xl my-10">
@@ -266,7 +266,9 @@
             </form>
         </div>
     </div>
+    </template>
 
+    <template x-teleport="body">
     {{-- EDIT MODAL --}}
     <div x-data="{ open: $wire.entangle('showEditModal') }" x-show="open" x-cloak class="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 bg-gray-900/60 backdrop-blur-sm overflow-y-auto" @click="open = false">
         <div @click.stop class="relative w-full max-w-2xl rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-2xl my-10">
@@ -398,7 +400,9 @@
             </form>
         </div>
     </div>
+    </template>
 
+    <template x-teleport="body">
     {{-- MODAL FOTO --}}
     <div x-show="showFotoModal" x-cloak
          x-transition:enter="transition-opacity ease-linear duration-200"
@@ -435,39 +439,7 @@
             </div>
         </div>
     </div>
+    </template>
 
-    {{-- MODAL SUKSES --}}
-    <div x-show="showSuccessModal" x-cloak
-         x-transition:enter="transition-opacity ease-linear duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-[300] flex items-center justify-center p-5 bg-gray-900/30 backdrop-blur-sm"
-         @click="showSuccessModal = false">
-        <div x-show="showSuccessModal" x-cloak
-             x-transition:enter="transition-all ease-out duration-200"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition-all ease-in duration-150"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-95"
-             @click.stop
-             class="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
-            <div class="p-7 pt-9 text-center">
-                <div class="w-[52px] h-[52px] rounded-2xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-[26px] h-[26px] text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
-                </div>
-                <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-1.5">Berhasil!</h4>
-                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed" x-text="successMessage"></p>
-            </div>
-            <div class="flex items-center justify-center px-6 pb-7">
-                <button @click="showSuccessModal = false"
-                        class="px-8 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm">
-                    Tutup
-                </button>
-            </div>
-        </div>
-    </div>
+    <x:confirm-delete-modal title="Hapus Data" message="Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan." />
 </div>

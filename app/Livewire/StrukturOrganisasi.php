@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\Employee;
 use App\Models\Position;
 use App\Models\PositionNote;
 use App\Models\PositionNoteComment;
@@ -33,15 +32,19 @@ class StrukturOrganisasi extends Component
     public string $komentar = '';
     public ?int $replyToId = null;
     public array $noteComments = [];
+    public bool $canComment = false;
+    public ?int $myPositionId = null;
 
     public function mount(): void
     {
         $this->bulan = now()->month;
         $this->tahun = now()->year;
+        $this->myPositionId = $this->getMyPositionId();
     }
 
     public function openNoteModal(int $positionId, string $view = 'form'): void
     {
+        $this->myPositionId = $this->getMyPositionId();
         $this->selectedPositionId = $positionId;
         $position = Position::findOrFail($positionId);
         $this->selectedPositionName = $position->nama;
@@ -60,7 +63,7 @@ class StrukturOrganisasi extends Component
     {
         if (!$this->selectedPositionId) return;
 
-        $myPositionId = $this->getMyPositionId();
+        $this->myPositionId = $this->getMyPositionId();
 
         $note = PositionNote::with('fromPosition', 'creator.employee')
             ->where('to_position_id', $this->selectedPositionId)
@@ -92,12 +95,14 @@ class StrukturOrganisasi extends Component
                 ->toArray()
             : [];
 
-        $position = Position::find($this->selectedPositionId);
-        $this->isSuperior = $this->checkIsSuperior($myPositionId, $position);
-    }
+    $position = Position::find($this->selectedPositionId);
+    $this->isSuperior = $this->checkIsSuperior($this->myPositionId, $position);
+    $this->canComment = $this->isSuperior || ($this->myPositionId && $this->myPositionId === $this->selectedPositionId);
+}
 
     public function showDetail(int $noteId): void
     {
+        $this->myPositionId = $this->getMyPositionId();
         $this->selectedNoteId = $noteId;
         $this->viewState = 'detail';
 
@@ -113,6 +118,32 @@ class StrukturOrganisasi extends Component
 
         $this->replyToId = null;
         $this->komentar = '';
+
+        $targetPosition = $note?->to_position_id;
+        $this->isSuperior = $this->checkIsSuperior($this->myPositionId, Position::find($targetPosition));
+        $this->canComment = $this->isSuperior || ($this->myPositionId && $this->myPositionId === $targetPosition);
+    }
+
+    public function deleteNote(int $noteId): void
+    {
+        $note = PositionNote::withCount('comments')->find($noteId);
+
+        if (!$note) {
+            $this->dispatch('notify', type: 'error', message: 'Catatan tidak ditemukan.');
+            return;
+        }
+
+        if ($note->created_by !== auth()->id()) {
+            $this->dispatch('notify', type: 'error', message: 'Anda tidak berwenang menghapus catatan ini.');
+            return;
+        }
+
+        $note->comments()->delete();
+        $note->delete();
+
+        $this->dispatch('notify', type: 'success', message: 'Catatan berhasil dihapus.');
+        $this->backToHistory();
+        $this->loadNoteData();
     }
 
     public function backToHistory(): void
@@ -123,6 +154,12 @@ class StrukturOrganisasi extends Component
         $this->noteComments = [];
         $this->replyToId = null;
         $this->komentar = '';
+    }
+
+    public function switchToForm(): void
+    {
+        $this->viewState = 'form';
+        $this->showForm = true;
     }
 
     public function replyToComment(int $commentId): void
@@ -224,7 +261,7 @@ class StrukturOrganisasi extends Component
             'tahun' => ['required', 'integer', 'min:2020', 'max:2099'],
         ]);
 
-        $myPositionId = $this->getMyPositionId();
+        $this->myPositionId = $this->getMyPositionId();
 
         $position = Position::find($this->selectedPositionId);
         if (!$position) {
@@ -232,14 +269,14 @@ class StrukturOrganisasi extends Component
             return;
         }
 
-        if (!$this->checkIsSuperior($myPositionId, $position)) {
+        if (!$this->checkIsSuperior($this->myPositionId, $position)) {
             $this->dispatch('notify', type: 'error', message: 'Anda tidak berwenang memberi catatan untuk jabatan ini.');
             return;
         }
 
         PositionNote::updateOrCreate(
             [
-                'from_position_id' => $myPositionId,
+                'from_position_id' => $this->myPositionId,
                 'to_position_id' => $this->selectedPositionId,
                 'bulan' => $this->bulan,
                 'tahun' => $this->tahun,
@@ -257,27 +294,14 @@ class StrukturOrganisasi extends Component
         $this->loadNoteData();
     }
 
-    private function getMyPositionId(): ?int
-    {
-        $user = auth()->user();
-        if (!$user || !$user->employee || !$user->employee->position) return null;
-
-        $pos = Position::where('nama', $user->employee->position)->first();
-        return $pos?->id;
-    }
-
     public function render()
     {
-        $allPositions = Position::where('is_active', true)->get();
+        $allPositions = Position::where('is_active', true)->with('employees')->get();
 
-        $employeesByPosition = Employee::whereNotNull('position')
-            ->get()
-            ->groupBy('position');
+        $roots = $this->buildTree($allPositions, null);
 
-        $roots = $this->buildTree($allPositions, null, $employeesByPosition);
-
-        $flatPositions = $allPositions->mapWithKeys(function ($pos) use ($employeesByPosition) {
-            $emp = $employeesByPosition->get($pos->nama)?->first();
+        $flatPositions = $allPositions->mapWithKeys(function ($pos) {
+            $emp = $pos->employees->first();
             return [$pos->id => [
                 'id' => $pos->id,
                 'nama' => $pos->nama,
@@ -293,32 +317,38 @@ class StrukturOrganisasi extends Component
             ->get()
             ->keyBy('to_position_id');
 
-        $myPositionId = $this->getMyPositionId();
-
-        $canGiveNotesByPosition = $allPositions->mapWithKeys(function ($pos) use ($myPositionId) {
-            return [$pos->id => $this->checkIsSuperior($myPositionId, $pos)];
+        $canGiveNotesByPosition = $allPositions->mapWithKeys(function ($pos) {
+            return [$pos->id => $this->checkIsSuperior($this->myPositionId, $pos)];
         });
 
         return view('livewire.struktur-organisasi', [
             'roots' => $roots,
             'flatPositions' => $flatPositions,
             'notesByPosition' => $notesByPosition,
-            'myPositionId' => $myPositionId,
             'canGiveNotesByPosition' => $canGiveNotesByPosition,
         ]);
     }
 
-    private function buildTree($positions, $parentId, $employeesByPosition)
+    private function buildTree($positions, $parentId)
     {
         return $positions
             ->where('parent_id', $parentId)
-            ->map(function ($pos) use ($positions, $employeesByPosition) {
+            ->map(function ($pos) use ($positions) {
                 return [
                     'id' => $pos->id,
                     'nama' => $pos->nama,
-                    'employee' => $employeesByPosition->get($pos->nama)?->first(),
-                    'children' => $this->buildTree($positions, $pos->id, $employeesByPosition),
+                    'employee' => $pos->employees->first(),
+                    'children' => $this->buildTree($positions, $pos->id),
                 ];
             })->values();
+    }
+
+    private function getMyPositionId(): ?int
+    {
+        $user = auth()->user();
+        if (!$user || !$user->employee) return null;
+
+        $mainPos = $user->employee->mainPosition();
+        return $mainPos?->id;
     }
 }

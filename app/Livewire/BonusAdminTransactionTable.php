@@ -22,6 +22,8 @@ class BonusAdminTransactionTable extends Component
     public bool $showCreateModal = false;
     public bool $showEditModal = false;
     public ?int $editId = null;
+    public bool $showDeleteConfirm = false;
+    public ?int $deleteId = null;
 
     public string $tanggal = '';
     public string $nik = '';
@@ -150,12 +152,27 @@ class BonusAdminTransactionTable extends Component
         $this->dispatch('notify', type: 'success', message: 'Data Admin Transaksi berhasil diperbarui.');
     }
 
-    public function delete(int $id): void
+    public function confirmDelete(int $id): void
     {
         Gate::authorize('delete-data');
-        $item = BonusAdminTransaction::findOrFail($id);
+        $this->deleteId = $id;
+        $this->showDeleteConfirm = true;
+    }
+
+    public function executeDelete(): void
+    {
+        if (!$this->deleteId) return;
+        Gate::authorize('delete-data');
+        $item = BonusAdminTransaction::findOrFail($this->deleteId);
         $item->delete();
         $this->dispatch('notify', type: 'success', message: 'Data Admin Transaksi berhasil dihapus.');
+        $this->cancelDelete();
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->showDeleteConfirm = false;
+        $this->deleteId = null;
     }
 
     public function render()

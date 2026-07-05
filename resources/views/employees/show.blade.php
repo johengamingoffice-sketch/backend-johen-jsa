@@ -69,7 +69,7 @@
         deleteDokumenId: null,
         cariDokumen: '',
         selectedFile: null,
-        showSuccessModal: false,
+        showSuccess: false,
         successMessage: '',
         documents: [],
         kontrakModal: false,
@@ -77,10 +77,6 @@
         editKontrakModal: false,
         deleteKontrakId: null,
         viewKontrak: null,
-        showContractSuccess: false,
-        contractSuccessMessage: '',
-        showPositionSuccess: false,
-        positionSuccessMessage: '',
         formKontrakJenis: '',
         formKontrakMulai: '',
         formKontrakBerakhir: '',
@@ -99,8 +95,6 @@
         formPromosiTanggal: '',
         formPromosiAlasan: '',
         formPromosiNomor: '',
-        showPromotionSuccess: false,
-        promotionSuccessMessage: '',
         hapusPromosiId: null,
         payrollList: [],
         viewPayrollDetail: null,
@@ -127,25 +121,10 @@
                 try {
                     this.payrollStats = JSON.parse(data.dataset.payrollStats || '{}');
                 } catch (e) { this.payrollStats = { gaji_pokok: 0, total_tunjangan: 0, total_potongan: 0, gaji_bersih: 0 }; }
-                if (data.dataset.docSuccess) {
-                    this.showSuccessModal = true;
-                    this.successMessage = data.dataset.docSuccess;
-                    setTimeout(() => this.showSuccessModal = false, 3000);
-                }
-                if (data.dataset.contractSuccess) {
-                    this.showContractSuccess = true;
-                    this.contractSuccessMessage = data.dataset.contractSuccess;
-                    setTimeout(() => this.showContractSuccess = false, 3000);
-                }
-                if (data.dataset.positionSuccess) {
-                    this.showPositionSuccess = true;
-                    this.positionSuccessMessage = data.dataset.positionSuccess;
-                    setTimeout(() => this.showPositionSuccess = false, 3000);
-                }
-                if (data.dataset.promotionSuccess) {
-                    this.showPromotionSuccess = true;
-                    this.promotionSuccessMessage = data.dataset.promotionSuccess;
-                    setTimeout(() => this.showPromotionSuccess = false, 3000);
+                if (data.dataset.docSuccess || data.dataset.contractSuccess || data.dataset.positionSuccess || data.dataset.promotionSuccess) {
+                    this.successMessage = data.dataset.docSuccess || data.dataset.contractSuccess || data.dataset.positionSuccess || data.dataset.promotionSuccess;
+                    this.showSuccess = true;
+                    setTimeout(() => this.showSuccess = false, 3000);
                 }
             }
             if (window.location.hash) {
@@ -241,7 +220,15 @@
             <div class="bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 px-7 py-3 pb-8 relative">
                 <div class="absolute inset-0 bg-[radial-gradient(circle_at_90%_0%,rgba(255,255,255,0.18),transparent_55%)] pointer-events-none"></div>
                 <div class="flex items-center justify-between relative z-10 pt-5">
-                    <div class="sm:ml-[148px] text-white text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">{{ $employee->position ?? '—' }}</div>
+                    <div class="sm:ml-[148px] text-white text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
+                        @php $mainPos = $employee->mainPosition(); @endphp
+                        {{ $mainPos?->nama ?? '—' }}
+                        @if($employee->positions->count() > 1)
+                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-lg bg-white/20 text-xs font-semibold">
+                                +{{ $employee->positions->count() - 1 }} lainnya
+                            </span>
+                        @endif
+                    </div>
                     <div class="flex items-center gap-2.5">
                         @if(auth()->user()->can('update-data') || $employee->user_id === auth()->id())
                                     <button @click="editModal = true" class="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 transition-all">
@@ -304,6 +291,9 @@
                         </label>
                         <input id="photo-input-{{ $employee->id }}" type="file" name="foto" accept="image/*" class="hidden" onchange="this.form.submit()">
                     </form>
+                    @error('foto')
+                        <p class="absolute -bottom-6 left-0 right-0 text-[11px] font-medium text-red-500 text-center">{{ $message }}</p>
+                    @enderror
                     @endif
                 </div>
                 <div class="text-center sm:text-left sm:pt-20 pt-2">
@@ -323,7 +313,7 @@
                     </div>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-2 sm:mb-2">
                         NIK <strong class="text-gray-700 dark:text-gray-200 font-semibold">{{ $employee->nik }}</strong>
-                        &nbsp;&mdash;&nbsp; {{ $employee->position ?? '—' }}
+                        &nbsp;&mdash;&nbsp; {{ $employee->positions->count() > 0 ? $employee->positions->pluck('nama')->implode(' & ') : '—' }}
                         &nbsp;&mdash;&nbsp; Divisi {{ $employee->division?->nama ?? '—' }}
                     </p>
                     <div class="flex items-center justify-center sm:justify-start gap-5 flex-wrap">
@@ -422,15 +412,33 @@
                         <div>
                             <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
                                 <span class="block text-xs font-medium text-gray-400 dark:text-gray-500">Jabatan</span>
-                                <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mt-0.5">{{ $employee->position?->nama ?? '-' }}</span>
+                                <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mt-0.5">
+                                    @if($employee->positions->count() > 0)
+                                        @foreach($employee->positions as $pos)
+                                            <span class="inline-flex items-center gap-1.5 {{ !$loop->last ? 'mb-1' : '' }}">
+                                                {{ $pos->nama }}
+                                                @if($pos->pivot?->is_main)
+                                                    <span class="text-[10px] font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-1.5 py-0.5 rounded">Utama</span>
+                                                @endif
+                                            </span>
+                                            @if(!$loop->last)<br>@endif
+                                        @endforeach
+                                    @else
+                                        -
+                                    @endif
+                                </span>
                             </div>
                             <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
                                 <span class="block text-xs font-medium text-gray-400 dark:text-gray-500">Divisi</span>
                                 <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mt-0.5">{{ $employee->division?->nama ?? '-' }}</span>
                             </div>
                             <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
-                                <span class="block text-xs font-medium text-gray-400 dark:text-gray-500">Atasan</span>
+                                <span class="block text-xs font-medium text-gray-400 dark:text-gray-500">Atasan 1</span>
                                 <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mt-0.5">{{ $employee->atasan ?? '-' }}</span>
+                            </div>
+                            <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+                                <span class="block text-xs font-medium text-gray-400 dark:text-gray-500">Atasan 2</span>
+                                <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mt-0.5">{{ $employee->atasan2 ?? '-' }}</span>
                             </div>
                             <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
                                 <span class="block text-xs font-medium text-gray-400 dark:text-gray-500">Tanggal Bergabung</span>
@@ -738,37 +746,25 @@
                     </div>
                 </div>
 
-                {{-- Modal Sukses Dokumen --}}
-                <div x-show="showSuccessModal" x-cloak
-                     x-transition:enter="transition-opacity ease-linear duration-200"
-                     x-transition:enter-start="opacity-0"
-                     x-transition:enter-end="opacity-100"
-                     x-transition:leave="transition-opacity ease-linear duration-200"
-                     x-transition:leave-start="opacity-100"
-                     x-transition:leave-end="opacity-0"
-                     class="fixed inset-0 z-[300] flex items-center justify-center p-5 bg-gray-900/30 backdrop-blur-sm"
-                     @click="showSuccessModal = false">
-                    <div x-show="showSuccessModal" x-cloak
-                         x-transition:enter="transition-all ease-out duration-200"
-                         x-transition:enter-start="opacity-0 scale-95"
-                         x-transition:enter-end="opacity-100 scale-100"
-                         x-transition:leave="transition-all ease-in duration-150"
-                         x-transition:leave-start="opacity-100 scale-100"
-                         x-transition:leave-end="opacity-0 scale-95"
-                         @click.stop
-                          class="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
-                        <div class="p-7 pt-9 text-center">
-                            <div class="w-[52px] h-[52px] rounded-2xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-[26px] h-[26px] text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
-                            </div>
-                            <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-1.5">Berhasil!</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed" x-text="successMessage"></p>
+                {{-- Modal Sukses --}}
+                <div x-show="showSuccess" x-cloak
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="fixed inset-0 z-[300] flex items-center justify-center p-5 bg-gray-900/60 backdrop-blur-sm"
+                     @click="showSuccess = false">
+                    <div @click.stop
+                         class="relative w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-2xl">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 mx-auto mb-4">
+                            <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <div class="flex items-center justify-center px-6 pb-7">
-                            <button @click="showSuccessModal = false"
-                                    class="px-8 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm">
-                                Tutup
-                            </button>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-2">Berhasil!</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6" x-text="successMessage"></p>
+                        <div class="flex items-center justify-center pt-4 border-t border-gray-100 dark:border-gray-700">
+                            <button @click="showSuccess = false" class="btn-primary text-xs px-8">Tutup</button>
                         </div>
                     </div>
                 </div>
@@ -1225,9 +1221,40 @@
                             @endforeach
                         </select>
                     </div>
-                    <div>
+                    <div x-data="{ open: false }" class="relative">
                         <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Jabatan</label>
-                        <input type="text" name="position" value="{{ old('position', $employee->position) }}"
+                        <input type="hidden" name="position" value="{{ old('position', $employee->position) }}">
+                        @php $selectedIds = old('position_ids', $employee->positions->pluck('id')->toArray()); @endphp
+                        <button type="button" @click="open = !open"
+                                class="flex items-center justify-between w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all">
+                            <span>{{ count($selectedIds) > 0 ? count($selectedIds) . ' jabatan dipilih' : 'Pilih jabatan' }}</span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                        <div x-show="open" @click.outside="open = false" x-cloak
+                             class="absolute z-20 mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 shadow-lg max-h-48 overflow-y-auto p-1.5 space-y-0.5">
+                            @foreach($allPositions as $pos)
+                                <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors {{ in_array($pos->id, $selectedIds) ? 'bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                                    <input type="checkbox" name="position_ids[]" value="{{ $pos->id }}"
+                                           {{ in_array($pos->id, $selectedIds) ? 'checked' : '' }}
+                                           class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300 flex-1">{{ $pos->nama }}</span>
+                                    <input type="radio" name="main_position_id" value="{{ $pos->id }}"
+                                           {{ $employee->mainPosition()?->id === $pos->id ? 'checked' : '' }}
+                                           onclick="event.stopPropagation()"
+                                           class="text-primary-600 focus:ring-primary-500">
+                                    <span class="text-[10px] text-gray-400 dark:text-gray-500">Utama</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Atasan 1</label>
+                        <input type="text" name="atasan" value="{{ old('atasan', $employee->atasan) }}"
+                               class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Atasan 2</label>
+                        <input type="text" name="atasan2" value="{{ old('atasan2', $employee->atasan2) }}"
                                class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all">
                     </div>
                 </div>
@@ -1793,110 +1820,9 @@
         </div>
     </div>
 
-    {{-- Modal Sukses Promosi --}}
-    <div x-show="showPromotionSuccess" x-cloak
-         x-transition:enter="transition-opacity ease-linear duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-[300] flex items-center justify-center p-5 bg-gray-900/30 backdrop-blur-sm"
-         @click="showPromotionSuccess = false">
-        <div x-show="showPromotionSuccess" x-cloak
-             x-transition:enter="transition-all ease-out duration-200"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition-all ease-in duration-150"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-95"
-             @click.stop
-             class="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
-            <div class="p-7 pt-9 text-center">
-                <div class="w-[52px] h-[52px] rounded-2xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-[26px] h-[26px] text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
-                </div>
-                <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-1.5">Berhasil!</h4>
-                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed" x-text="promotionSuccessMessage"></p>
-            </div>
-            <div class="flex items-center justify-center px-6 pb-7">
-                <button @click="showPromotionSuccess = false"
-                        class="px-8 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm">
-                    Tutup
-                </button>
-            </div>
-        </div>
-    </div>
 
-    {{-- Modal Sukses Jabatan --}}
-    <div x-show="showPositionSuccess" x-cloak
-         x-transition:enter="transition-opacity ease-linear duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-[300] flex items-center justify-center p-5 bg-gray-900/30 backdrop-blur-sm"
-         @click="showPositionSuccess = false">
-        <div x-show="showPositionSuccess" x-cloak
-             x-transition:enter="transition-all ease-out duration-200"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition-all ease-in duration-150"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-95"
-             @click.stop
-             class="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
-            <div class="p-7 pt-9 text-center">
-                <div class="w-[52px] h-[52px] rounded-2xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-[26px] h-[26px] text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
-                </div>
-                <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-1.5">Berhasil!</h4>
-                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed" x-text="positionSuccessMessage"></p>
-            </div>
-            <div class="flex items-center justify-center px-6 pb-7">
-                <button @click="showPositionSuccess = false"
-                        class="px-8 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm">
-                    Tutup
-                </button>
-            </div>
-        </div>
-    </div>
 
-    {{-- Modal Sukses Kontrak --}}
-    <div x-show="showContractSuccess" x-cloak
-         x-transition:enter="transition-opacity ease-linear duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-[300] flex items-center justify-center p-5 bg-gray-900/30 backdrop-blur-sm"
-         @click="showContractSuccess = false">
-        <div x-show="showContractSuccess" x-cloak
-             x-transition:enter="transition-all ease-out duration-200"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition-all ease-in duration-150"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-95"
-             @click.stop
-             class="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
-            <div class="p-7 pt-9 text-center">
-                <div class="w-[52px] h-[52px] rounded-2xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-[26px] h-[26px] text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
-                </div>
-                <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-1.5">Berhasil!</h4>
-                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed" x-text="contractSuccessMessage"></p>
-            </div>
-            <div class="flex items-center justify-center px-6 pb-7">
-                <button @click="showContractSuccess = false"
-                        class="px-8 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm">
-                    Tutup
-                </button>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 </x-app-layout>

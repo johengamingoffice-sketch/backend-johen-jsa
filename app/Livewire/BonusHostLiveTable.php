@@ -24,6 +24,8 @@ class BonusHostLiveTable extends Component
     public bool $showCreateModal = false;
     public bool $showEditModal = false;
     public ?int $editId = null;
+    public bool $showDeleteConfirm = false;
+    public ?int $deleteId = null;
 
     public string $tanggal = '';
     public string $jam_mulai = '';
@@ -210,10 +212,18 @@ class BonusHostLiveTable extends Component
         $this->dispatch('notify', type: 'success', message: 'Data Host Live berhasil diperbarui.');
     }
 
-    public function delete(int $id): void
+    public function confirmDelete(int $id): void
     {
         Gate::authorize('delete-data');
-        $item = BonusHostLive::findOrFail($id);
+        $this->deleteId = $id;
+        $this->showDeleteConfirm = true;
+    }
+
+    public function executeDelete(): void
+    {
+        if (!$this->deleteId) return;
+        Gate::authorize('delete-data');
+        $item = BonusHostLive::findOrFail($this->deleteId);
         if ($item->foto_statistik) {
             Storage::disk('public')->delete($item->foto_statistik);
         }
@@ -222,6 +232,13 @@ class BonusHostLiveTable extends Component
         }
         $item->delete();
         $this->dispatch('notify', type: 'success', message: 'Data Host Live berhasil dihapus.');
+        $this->cancelDelete();
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->showDeleteConfirm = false;
+        $this->deleteId = null;
     }
 
     public function render()
@@ -244,7 +261,7 @@ class BonusHostLiveTable extends Component
         ->paginate(10);
 
         $employees = Employee::with('division')
-            ->where('position', 'like', 'Host Live%')
+            ->where('position', 'like', 'Host%')
             ->orderBy('nama')
             ->get();
 

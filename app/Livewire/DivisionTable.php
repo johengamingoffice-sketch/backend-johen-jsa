@@ -23,6 +23,8 @@ class DivisionTable extends Component
     public string $koordinator = '';
     public string $deskripsi = '';
     public bool $is_active = true;
+    public bool $showDeleteConfirm = false;
+    public ?int $deleteId = null;
 
     protected $updatesQueryString = ['search'];
 
@@ -109,18 +111,34 @@ class DivisionTable extends Component
         $this->dispatch('notify', type: 'success', message: 'Divisi berhasil diperbarui.');
     }
 
-    public function delete(int $id): void
+    public function confirmDelete(int $id): void
     {
         Gate::authorize('delete-data');
-        $div = Division::withCount('employees')->findOrFail($id);
+        $this->deleteId = $id;
+        $this->showDeleteConfirm = true;
+    }
+
+    public function executeDelete(): void
+    {
+        if (!$this->deleteId) return;
+        Gate::authorize('delete-data');
+        $div = Division::withCount('employees')->findOrFail($this->deleteId);
 
         if ($div->employees_count > 0) {
             $this->dispatch('notify', type: 'error', message: 'Tidak dapat menghapus divisi yang masih memiliki karyawan.');
+            $this->cancelDelete();
             return;
         }
 
         $div->delete();
         $this->dispatch('notify', type: 'success', message: 'Divisi berhasil dihapus.');
+        $this->cancelDelete();
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->showDeleteConfirm = false;
+        $this->deleteId = null;
     }
 
     public function toggleActive(int $id): void

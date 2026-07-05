@@ -69,22 +69,31 @@ class StrukturOrganisasiSeeder extends Seeder
         Position::create(['nama' => 'Fullstack Developer', 'parent_id' => $koorIt->id, 'is_active' => true]);
         Position::create(['nama' => 'IT Support', 'parent_id' => $koorIt->id, 'is_active' => true]);
 
-        Position::create(['nama' => 'Graphic Designer', 'parent_id' => $koorCreative->id, 'is_active' => true]);
+        Position::create(['nama' => 'Desain Grafis', 'parent_id' => $koorCreative->id, 'is_active' => true]);
         Position::create(['nama' => 'Video Animator', 'parent_id' => $koorCreative->id, 'is_active' => true]);
         Position::create(['nama' => 'Video Editor', 'parent_id' => $koorCreative->id, 'is_active' => true]);
         Position::create(['nama' => 'Social Media Specialist', 'parent_id' => $koorCreative->id, 'is_active' => true]);
         Position::create(['nama' => 'Content Creator', 'parent_id' => $koorCreative->id, 'is_active' => true]);
 
-        Position::create(['nama' => 'Admin Transaksi per Game', 'parent_id' => $koorAdmin->id, 'is_active' => true]);
+        Position::create(['nama' => 'Admin Johen PUBG', 'parent_id' => $koorAdmin->id, 'is_active' => true]);
+        Position::create(['nama' => 'Admin Johen MLBB', 'parent_id' => $koorAdmin->id, 'is_active' => true]);
+        Position::create(['nama' => 'Admin Monkey & Dex', 'parent_id' => $koorAdmin->id, 'is_active' => true]);
+        Position::create(['nama' => 'Admin Record PUBG', 'parent_id' => $koorAdmin->id, 'is_active' => true]);
+        Position::create(['nama' => 'Admin Record MLBB', 'parent_id' => $koorAdmin->id, 'is_active' => true]);
+        Position::create(['nama' => 'Admin Malam MLBB', 'parent_id' => $koorAdmin->id, 'is_active' => true]);
+        Position::create(['nama' => 'Admin Transaksi Roblox', 'parent_id' => $koorAdmin->id, 'is_active' => true]);
 
-        foreach ([$koorPubg, $koorMlbb, $koorFf, $koorRoblox, $koorValo, $koorEfoot, $koorMonkeyPubg] as $koor) {
+        foreach ([$koorPubg, $koorFf, $koorRoblox, $koorEfoot, $koorMlbb, $koorValo, $koorMonkeyPubg] as $koor) {
+            $gameName = str_replace('Koordinator ', '', $koor->nama);
             foreach (['Pagi', 'Siang', 'Malam', 'Subuh'] as $shift) {
-                Position::create(['nama' => "Host Live ($shift)", 'parent_id' => $koor->id, 'is_active' => true]);
+                Position::create(['nama' => "Host {$gameName} ({$shift})", 'parent_id' => $koor->id, 'is_active' => true]);
             }
         }
 
         Position::create(['nama' => 'Admin HR', 'parent_id' => $hr->id, 'is_active' => true]);
         Position::create(['nama' => 'Admin GA', 'parent_id' => $hr->id, 'is_active' => true]);
-        Position::create(['nama' => 'OB', 'parent_id' => $hr->id, 'is_active' => true]);
+        Position::create(['nama' => 'Office Boy', 'parent_id' => $hr->id, 'is_active' => true]);
+        Position::create(['nama' => 'Resepsionis 1', 'parent_id' => $hr->id, 'is_active' => true]);
+        Position::create(['nama' => 'Resepsionis 2', 'parent_id' => $hr->id, 'is_active' => true]);
     }
 }

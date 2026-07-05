@@ -7,6 +7,7 @@ use App\Models\Division;
 use App\Models\Employee;
 use App\Models\EmployeeContract;
 use App\Models\EmployeeDocument;
+use App\Models\Position;
 use App\Models\PositionHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -41,7 +42,7 @@ class EmployeeController extends Controller
 
     public function show(Employee $employee)
     {
-        $employee->load(['division', 'documents', 'contracts', 'positionHistories', 'payrollDetails.payrollImport', 'promotions']);
+        $employee->load(['division', 'documents', 'contracts', 'positionHistories', 'payrollDetails.payrollImport', 'promotions', 'positions']);
         $employee->setRelation('contracts', $employee->contracts->sortByDesc('tanggal_mulai')->values());
 
         $payrollDetails = $employee->payrollDetails()
@@ -80,8 +81,9 @@ class EmployeeController extends Controller
 
         $divisions = Division::orderBy('nama')->get();
         $jenisDokumenList = ['KTP', 'KK', 'NPWP', 'Ijazah', 'Sertifikat', 'Kontrak', 'SK', 'Lainnya'];
+        $allPositions = Position::where('is_active', true)->orderBy('nama')->get();
 
-        return view('employees.show', compact('employee', 'divisions', 'jenisDokumenList', 'payrollDetails', 'stats', 'statusClasses'));
+        return view('employees.show', compact('employee', 'divisions', 'jenisDokumenList', 'payrollDetails', 'stats', 'statusClasses', 'allPositions'));
     }
 
     public function edit(Employee $employee)
@@ -95,6 +97,17 @@ class EmployeeController extends Controller
             Gate::authorize('update-data');
         }
         $employee->update($request->validated());
+
+        // Sync positions from pivot
+        if ($request->has('position_ids')) {
+            $positionIds = $request->input('position_ids', []);
+            $mainPositionId = $request->input('main_position_id');
+            $syncData = [];
+            foreach ($positionIds as $pid) {
+                $syncData[$pid] = ['is_main' => $pid == $mainPositionId];
+            }
+            $employee->positions()->sync($syncData);
+        }
 
         if ($request->input('_redirect') === 'show') {
             return redirect()->route('hris.employees.show', $employee)
@@ -111,11 +124,16 @@ class EmployeeController extends Controller
             Gate::authorize('update-data');
         }
         $request->validate([
-            'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'foto' => 'required|image|mimes:jpg,jpeg,png|max:5120',
         ]);
 
         $file = $request->file('foto');
-        $filename = $employee->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $filename = $employee->id . '_' . time() . '.' . $file->extension();
+
+        if ($employee->foto) {
+            Storage::disk('public')->delete('employees/' . $employee->foto);
+        }
+
         $file->storeAs('employees', $filename, 'public');
 
         $employee->update(['foto' => $filename]);

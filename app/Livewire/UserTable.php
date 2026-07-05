@@ -24,6 +24,8 @@ class UserTable extends Component
     public ?int $linkEmployeeId = null;
     public string $filterRole = '';
     public string $search = '';
+    public bool $showDeleteConfirm = false;
+    public ?int $deleteId = null;
 
     public function updatingSearch(): void
     {
@@ -140,23 +142,41 @@ class UserTable extends Component
         $this->dispatch('notify', type: 'success', message: 'Akun berhasil diperbarui.');
     }
 
-    public function delete(int $id): void
+    public function confirmDelete(int $id): void
     {
         Gate::authorize('delete-data');
-        $user = User::findOrFail($id);
+        $this->deleteId = $id;
+        $this->showDeleteConfirm = true;
+    }
+
+    public function executeDelete(): void
+    {
+        if (!$this->deleteId) return;
+        Gate::authorize('delete-data');
+        $user = User::findOrFail($this->deleteId);
 
         if ($user->id === auth()->id()) {
             $this->dispatch('notify', type: 'error', message: 'Tidak dapat menghapus akun sendiri.');
+            $this->cancelDelete();
             return;
         }
 
         Employee::where('user_id', $user->id)->update(['user_id' => null]);
         $user->delete();
         $this->dispatch('notify', type: 'success', message: 'Akun berhasil dihapus.');
+        $this->cancelDelete();
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->showDeleteConfirm = false;
+        $this->deleteId = null;
     }
 
     public function render()
     {
+        abort_unless(auth()->user()->isSuperAdmin(), 403);
+
         $users = User::with('employee')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {

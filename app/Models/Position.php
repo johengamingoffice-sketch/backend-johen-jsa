@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Position extends Model
@@ -33,9 +34,11 @@ class Position extends Model
         return $this->hasMany(Position::class, 'parent_id');
     }
 
-    public function employees(): HasMany
+    public function employees(): BelongsToMany
     {
-        return $this->hasMany(Employee::class);
+        return $this->belongsToMany(Employee::class, 'employee_position')
+            ->withPivot('is_main')
+            ->withTimestamps();
     }
 
     public function notesGiven(): HasMany

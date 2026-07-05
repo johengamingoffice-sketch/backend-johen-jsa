@@ -44,14 +44,11 @@ class User extends Authenticatable
 
     public function requiresPinApproval(): bool
     {
-        if ($this->id === 4) return true;
-
-        $emp = $this->employee;
-        if (!$emp) return false;
-
-        return in_array($emp->position, [
-            'Head of Store 1',
-            'Head of Store 2',
+        return in_array($this->role, [
+            self::ROLE_KOORDINATOR,
+            self::ROLE_MANAGER,
+            self::ROLE_SUPER_ADMIN,
+            self::ROLE_GM_CEO,
         ]);
     }
 
