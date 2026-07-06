@@ -27,7 +27,9 @@
                     <option value="manager">Manager</option>
                     <option value="koordinator">Koordinator</option>
                     <option value="staff">Staff</option>
+                    <option value="koordinator_it">Koordinator IT</option>
                     <option value="staff_it">Staff IT</option>
+                    <option value="koordinator_creative">Koordinator Creative</option>
                     <option value="staff_creative">Staff Creative</option>
                     <option value="staff_host">Staff Host</option>
                     <option value="staff_admin">Staff Admin</option>
@@ -70,8 +72,12 @@
                                     <span class="badge-primary">Manager</span>
                                 @elseif($u->role === 'koordinator')
                                     <span class="badge-info">Koordinator</span>
+                                @elseif($u->role === 'koordinator_it')
+                                    <span class="badge-secondary">Koordinator IT</span>
                                 @elseif($u->role === 'staff_it')
                                     <span class="badge-secondary">Staff IT</span>
+                                @elseif($u->role === 'koordinator_creative')
+                                    <span class="badge-secondary">Koordinator Creative</span>
                                 @elseif($u->role === 'staff_creative')
                                     <span class="badge-secondary">Staff Creative</span>
                                 @elseif($u->role === 'staff_host')
@@ -173,7 +179,9 @@
                     <x-input-label for="create-role" value="Role *" />
                     <select id="create-role" wire:model="role" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
                         <option value="staff">Staff</option>
-                        <option value="staff_it">Staff IT</option>
+                        <option value="koordinator_it">Koordinator IT</option>
+                    <option value="staff_it">Staff IT</option>
+                        <option value="koordinator_creative">Koordinator Creative</option>
                         <option value="staff_creative">Staff Creative</option>
                         <option value="staff_host">Staff Host</option>
                         <option value="staff_admin">Staff Admin</option>
@@ -252,7 +260,9 @@
                     <x-input-label for="edit-role" value="Role *" />
                     <select id="edit-role" wire:model="role" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
                         <option value="staff">Staff</option>
-                        <option value="staff_it">Staff IT</option>
+                        <option value="koordinator_it">Koordinator IT</option>
+                    <option value="staff_it">Staff IT</option>
+                        <option value="koordinator_creative">Koordinator Creative</option>
                         <option value="staff_creative">Staff Creative</option>
                         <option value="staff_host">Staff Host</option>
                         <option value="staff_admin">Staff Admin</option>
@@ -261,7 +271,6 @@
                         <option value="gm_ceo">GM / CEO</option>
                         <option value="super_admin">Super Admin</option>
                     </select>
-                    @error('role') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div>

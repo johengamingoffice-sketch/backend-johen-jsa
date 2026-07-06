@@ -216,6 +216,9 @@ class WeeklyPlanReportTable extends Component
                 $subordinateIds = $this->getSubordinateIds($employee);
                 $visibleIds = array_merge($visibleIds, $subordinateIds);
                 $hideCreateButton = true;
+            } elseif ($user->isKoordinatorCreative() || $user->isKoordinatorIt()) {
+                $subordinateIds = $this->getSubordinateIds($employee);
+                $visibleIds = array_merge($visibleIds, $subordinateIds);
             }
 
             $query->whereIn('employee_id', $visibleIds);

@@ -216,7 +216,7 @@ class ActivityCompetitorTable extends Component
             $currentEmployeeId = $employee->id;
             $visibleIds = [$currentEmployeeId];
 
-            if ($user->isManager()) {
+            if ($user->isManager() || $user->isKoordinatorCreative() || $user->isKoordinatorIt()) {
                 $subordinateIds = $this->getSubordinateIds($employee);
                 $visibleIds = array_merge($visibleIds, $subordinateIds);
             }

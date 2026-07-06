@@ -230,7 +230,7 @@ class CutiIzinTable extends Component
                 abort(403, 'Hanya atasan 2 yang dapat menyetujui pengajuan ini.');
             }
         } elseif ($level === 'persetujuan_hr') {
-            if ($user->id !== 4 && !$this->isHr($user)) {
+            if (!$user->isSuperAdmin() && !$user->isGmCeo() && $user->id !== 4 && !$this->isHr($user)) {
                 abort(403, 'Hanya HR yang dapat menyetujui persetujuan HR.');
             }
         } else {
@@ -242,13 +242,21 @@ class CutiIzinTable extends Component
     {
         $user = auth()->user();
 
-        if ($user->isStaff()) {
+        if ($user->isStaff() || $user->isStaffCreative() || $user->isKoordinatorCreative() || $user->isKoordinatorIt() || $user->isStaffIt() || $user->isStaffHost() || $user->isStaffAdmin()) {
             $employee = $user->employee;
             if (!$employee) {
                 $this->dispatch('notify', type: 'error', message: 'Akun Anda tidak terhubung ke data karyawan.');
                 return;
             }
-            $lr = LeaveRequest::where('id', $id)->where('employee_id', $employee->id)->first();
+
+            if ($user->isKoordinatorIt()) {
+                $subordinateIds = $this->getSubordinateEmployeeIds();
+                $allowedIds = array_merge([$employee->id], $subordinateIds);
+                $lr = LeaveRequest::where('id', $id)->whereIn('employee_id', $allowedIds)->first();
+            } else {
+                $lr = LeaveRequest::where('id', $id)->where('employee_id', $employee->id)->first();
+            }
+
             if (!$lr) {
                 $this->dispatch('notify', type: 'error', message: 'Data tidak ditemukan.');
                 return;
@@ -272,11 +280,22 @@ class CutiIzinTable extends Component
         $user = auth()->user();
         $lr = LeaveRequest::findOrFail($this->deleteId);
 
-        if ($user->isStaff()) {
+        if ($user->isStaff() || $user->isStaffCreative() || $user->isKoordinatorCreative() || $user->isKoordinatorIt() || $user->isStaffIt() || $user->isStaffHost() || $user->isStaffAdmin()) {
             $employee = $user->employee;
-            if (!$employee || $lr->employee_id !== $employee->id) {
+            if (!$employee) {
                 abort(403);
             }
+
+            if ($user->isKoordinatorIt()) {
+                $subordinateIds = $this->getSubordinateEmployeeIds();
+                $allowedIds = array_merge([$employee->id], $subordinateIds);
+                if (!in_array($lr->employee_id, $allowedIds)) {
+                    abort(403);
+                }
+            } elseif ($lr->employee_id !== $employee->id) {
+                abort(403);
+            }
+
             if ($lr->persetujuan_koor !== 'menunggu' && $lr->persetujuan_atasan2 !== 'menunggu' && $lr->persetujuan_hr !== 'menunggu') {
                 abort(403);
             }
@@ -322,89 +341,27 @@ class CutiIzinTable extends Component
         $user = auth()->user();
         $userEmployee = $user->employee;
 
-        if ($user->isStaff()) {
-            $employee = $userEmployee;
-
-            if (!$employee) {
-                $leaveRequests = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
-
-                return view('livewire.cuti-izin-table', [
-                    'karyawanView' => true,
-                    'employee' => null,
-                    'totalPengajuanSaya' => 0,
-                    'totalCutiSaya' => 0,
-                    'totalIzinSaya' => 0,
-                    'menungguCuti' => 0,
-                    'menungguIzin' => 0,
-                    'sisaCuti' => 0,
-                    'jatahCuti' => 12,
-                    'leaveRequests' => $leaveRequests,
-                ]);
-            }
-
-            $totalPengajuanSaya = LeaveRequest::where('employee_id', $employee->id)->count();
-            $totalCutiSaya = LeaveRequest::where('employee_id', $employee->id)->where('jenis', 'cuti_tahunan')->count();
-            $totalIzinSaya = LeaveRequest::where('employee_id', $employee->id)->where('jenis', 'izin')->count();
-            $menungguCuti = LeaveRequest::where('employee_id', $employee->id)
-                ->where('jenis', 'cuti_tahunan')
-                ->where(function ($q) {
-                    $q->where('persetujuan_koor', 'menunggu')
-                      ->orWhere('persetujuan_atasan2', 'menunggu')
-                      ->orWhere('persetujuan_hr', 'menunggu');
-                })->count();
-            $menungguIzin = LeaveRequest::where('employee_id', $employee->id)
-                ->where('jenis', 'izin')
-                ->where(function ($q) {
-                    $q->where('persetujuan_koor', 'menunggu')
-                      ->orWhere('persetujuan_atasan2', 'menunggu')
-                      ->orWhere('persetujuan_hr', 'menunggu');
-                })->count();
-
-            $jatahCuti = 12;
-            $usedCuti = LeaveRequest::where('employee_id', $employee->id)
-                ->where('jenis', 'cuti_tahunan')
-                ->whereYear('tanggal_mulai', now()->year)
-                ->where('persetujuan_koor', 'disetujui')
-                ->where('persetujuan_atasan2', 'disetujui')
-                ->where('persetujuan_hr', 'disetujui')
-                ->get()
-                ->sum(fn($lr) => (int) filter_var($lr->durasi, FILTER_SANITIZE_NUMBER_INT));
-            $sisaCuti = max(0, $jatahCuti - $usedCuti);
-
-            $leaveRequests = LeaveRequest::with('employee', 'atasan', 'atasan2', 'selectedPosition')
-                ->where('employee_id', $employee->id)
-                ->when($this->filterJenis, function ($query) {
-                    $query->where('jenis', $this->filterJenis);
-                })
-                ->when($this->filterStatus, function ($query) {
-                    $query->where(function ($q) {
-                        $q->where('persetujuan_koor', $this->filterStatus)
-                          ->orWhere('persetujuan_atasan2', $this->filterStatus)
-                          ->orWhere('persetujuan_hr', $this->filterStatus);
-                    });
-                })
-                ->latest()
-                ->paginate(10);
-
-            $userPositions = $employee->positions;
-
-            return view('livewire.cuti-izin-table', compact(
-                'employee', 'userPositions', 'totalPengajuanSaya', 'totalCutiSaya', 'totalIzinSaya', 'menungguCuti', 'menungguIzin', 'leaveRequests', 'sisaCuti', 'jatahCuti'
-            ))->with('karyawanView', true);
-        }
-
         $isHr = $userEmployee && $userEmployee->positions()->whereIn('nama', [
             'Human Resource Generalist', 'Admin HR', 'Admin GA', 'Office Boy'
         ])->exists();
-        $lihatSemua = $user->id === 4 || $isHr || ($user->canViewAll() && !$user->isKoordinator());
+        $lihatSemua = $user->isSuperAdmin() || $user->isGmCeo() || $user->id === 4 || $isHr;
 
         $baseQuery = LeaveRequest::query();
 
         if ($userEmployee && !$lihatSemua) {
-            $baseQuery->where(function ($q) use ($userEmployee) {
-                $q->where('atasan_id', $userEmployee->id)
-                  ->orWhere('atasan2_id', $userEmployee->id);
+            $baseQuery->where(function ($q) use ($userEmployee, $user) {
+                if ($user->isKoordinatorIt()) {
+                    $subordinateIds = $this->getSubordinateEmployeeIds();
+                    $allowedIds = array_merge([$userEmployee->id], $subordinateIds);
+                    $q->whereIn('employee_id', $allowedIds);
+                } else {
+                    $q->where('atasan_id', $userEmployee->id)
+                      ->orWhere('atasan2_id', $userEmployee->id)
+                      ->orWhere('employee_id', $userEmployee->id);
+                }
             });
+        } elseif (!$lihatSemua) {
+            $baseQuery->whereRaw('1 = 0');
         }
 
         $totalPengajuan = (clone $baseQuery)->count();
@@ -437,8 +394,21 @@ class CutiIzinTable extends Component
             ->latest()
             ->paginate(10);
 
+        $jatahCuti = 12;
+        $usedCuti = $userEmployee
+            ? LeaveRequest::where('employee_id', $userEmployee->id)
+                ->where('jenis', 'cuti_tahunan')
+                ->whereYear('tanggal_mulai', now()->year)
+                ->where('persetujuan_koor', 'disetujui')
+                ->where('persetujuan_atasan2', 'disetujui')
+                ->where('persetujuan_hr', 'disetujui')
+                ->get()
+                ->sum(fn($lr) => (int) filter_var($lr->durasi, FILTER_SANITIZE_NUMBER_INT))
+            : 0;
+        $sisaCuti = max(0, $jatahCuti - $usedCuti);
+
         return view('livewire.cuti-izin-table', compact(
-            'leaveRequests', 'totalPengajuan', 'totalCuti', 'totalIzin', 'menunggu', 'userEmployee', 'isHr', 'user'
+            'leaveRequests', 'totalPengajuan', 'totalCuti', 'totalIzin', 'menunggu', 'userEmployee', 'isHr', 'user', 'sisaCuti', 'jatahCuti', 'lihatSemua'
         ))->with('karyawanView', false);
     }
 
@@ -459,28 +429,53 @@ class CutiIzinTable extends Component
 
     private function getAtasan2(Employee $employee, ?Employee $atasan1 = null): ?Employee
     {
-        $atasan2Field = trim($employee->atasan2 ?? '');
-        if ($atasan2Field === '' || $atasan2Field === '-') {
-            return null;
+        $atasan1 = $atasan1 ?? $this->getAtasan($employee);
+        if ($atasan1) {
+            $position = $atasan1->mainPosition();
+            if ($position && $position->parent_id) {
+                $current = $position->parent;
+                while ($current) {
+                    $atasan2 = $current->employees()->first();
+                    if ($atasan2) return $atasan2;
+                    $current = $current->parent;
+                }
+            }
         }
 
-        $atasan2 = Employee::where('nama', $atasan2Field)->first();
-        if ($atasan2) return $atasan2;
-
-        $atasan1 = $atasan1 ?? $this->getAtasan($employee);
-        if (!$atasan1) return null;
-
-        $position = $atasan1->mainPosition();
-        if (!$position || !$position->parent_id) return null;
-
-        $current = $position->parent;
-        while ($current) {
-            $atasan2 = $current->employees()->first();
+        $atasan2Field = trim($employee->atasan2 ?? '');
+        if ($atasan2Field !== '' && $atasan2Field !== '-') {
+            $atasan2 = Employee::where('nama', $atasan2Field)->first();
             if ($atasan2) return $atasan2;
-            $current = $current->parent;
         }
 
         return null;
+    }
+
+    private function getSubordinateEmployeeIds(): array
+    {
+        $employee = auth()->user()->employee;
+        if (!$employee) return [];
+
+        $mainPosition = $employee->mainPosition();
+        if (!$mainPosition) return [];
+
+        $descendantIds = $this->getAllDescendantIds($mainPosition);
+        if (empty($descendantIds)) return [];
+
+        return Employee::whereHas('positions', function ($q) use ($descendantIds) {
+            $q->whereIn('position_id', $descendantIds);
+        })->pluck('id')->toArray();
+    }
+
+    private function getAllDescendantIds(Position $position): array
+    {
+        $ids = [];
+        $children = Position::where('parent_id', $position->id)->get();
+        foreach ($children as $child) {
+            $ids[] = $child->id;
+            $ids = array_merge($ids, $this->getAllDescendantIds($child));
+        }
+        return $ids;
     }
 
     private function isHr($user): bool

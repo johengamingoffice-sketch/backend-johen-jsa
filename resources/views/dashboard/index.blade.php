@@ -96,7 +96,7 @@
         </div>
     </div>
 
-    @unless(auth()->user()->isStaff() || auth()->user()->isStaffIt() || auth()->user()->isStaffCreative() || auth()->user()->isStaffHost() || auth()->user()->isStaffAdmin())
+    @unless(auth()->user()->isStaff() || auth()->user()->isStaffCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isStaffIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isStaffHost() || auth()->user()->isStaffAdmin())
     {{-- Quick Actions --}}
     <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 mb-6 shadow-sm">
         <h3 class="text-base font-display font-bold text-gray-900 dark:text-gray-100 mb-4">Aksi Cepat</h3>
@@ -141,7 +141,7 @@
     </div>
     @endunless
 
-    @unless(auth()->user()->isStaff() || auth()->user()->isStaffIt() || auth()->user()->isStaffCreative() || auth()->user()->isStaffHost() || auth()->user()->isStaffAdmin())
+    @unless(auth()->user()->isStaff() || auth()->user()->isStaffCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isStaffIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isStaffHost() || auth()->user()->isStaffAdmin())
     {{-- Attendance Today --}}
     <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 mb-6 shadow-sm">
         <div class="flex items-center justify-between mb-4">
@@ -421,7 +421,7 @@
     {{-- Ringkasan Menu --}}
     <div x-data="{ openDivisiModal: false, openMeetingModal: false }">
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-6">
-        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isStaffIt())
         <div @click="openDivisiModal = true" class="group cursor-pointer rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-lg hover:border-primary-200 dark:hover:border-primary-800 transition-all duration-300">
             <div class="flex items-center gap-3 mb-4">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300">
@@ -449,7 +449,7 @@
         </div>
         @endunless
 
-        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isStaffIt())
         <a href="{{ route('history.index') }}" class="group rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all duration-300">
             <div class="flex items-center gap-3 mb-4">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300">
@@ -471,7 +471,7 @@
         </a>
         @endunless
 
-        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isStaffIt())
         <div @click="openMeetingModal = true" class="group cursor-pointer rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-lg hover:border-teal-200 dark:hover:border-teal-800 transition-all duration-300">
             <div class="flex items-center gap-3 mb-4">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300">
@@ -493,7 +493,7 @@
         </div>
         @endunless
 
-        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isStaffIt())
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
             <div class="flex items-center gap-3 mb-4">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-violet-500 text-white shadow-md">
@@ -612,7 +612,7 @@
 
     {{-- 2x2 Grid: Kontrak, Reimbursement, Cuti, Pembayaran --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isStaffIt())
         {{-- Kontrak Akan Berakhir --}}
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col">
             <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-800">
@@ -696,7 +696,7 @@
             </div>
         </div>
 
-        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isStaffIt())
         {{-- Pembayaran Mendatang --}}
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col">
             <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-800">
@@ -735,7 +735,7 @@
         </div>
         @endunless
 
-        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isStaffIt())
         {{-- Pengajuan Reimbursement --}}
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col">
             <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-800">

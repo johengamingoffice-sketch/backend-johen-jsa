@@ -67,7 +67,9 @@ class User extends Authenticatable
     public const ROLE_MANAGER = 'manager';
     public const ROLE_KOORDINATOR = 'koordinator';
     public const ROLE_STAFF = 'staff';
+    public const ROLE_KOORDINATOR_IT = 'koordinator_it';
     public const ROLE_STAFF_IT = 'staff_it';
+    public const ROLE_KOORDINATOR_CREATIVE = 'koordinator_creative';
     public const ROLE_STAFF_CREATIVE = 'staff_creative';
     public const ROLE_STAFF_HOST = 'staff_host';
     public const ROLE_STAFF_ADMIN = 'staff_admin';
@@ -97,9 +99,19 @@ class User extends Authenticatable
         return $this->role === self::ROLE_STAFF;
     }
 
+    public function isKoordinatorIt(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_IT;
+    }
+
     public function isStaffIt(): bool
     {
         return $this->role === self::ROLE_STAFF_IT;
+    }
+
+    public function isKoordinatorCreative(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_CREATIVE;
     }
 
     public function isStaffCreative(): bool
@@ -125,7 +137,9 @@ class User extends Authenticatable
             self::ROLE_MANAGER => 3,
             self::ROLE_KOORDINATOR => 2,
             self::ROLE_STAFF => 1,
+            self::ROLE_KOORDINATOR_IT => 1,
             self::ROLE_STAFF_IT => 1,
+            self::ROLE_KOORDINATOR_CREATIVE => 1,
             self::ROLE_STAFF_CREATIVE => 1,
             self::ROLE_STAFF_HOST => 1,
             self::ROLE_STAFF_ADMIN => 1,
