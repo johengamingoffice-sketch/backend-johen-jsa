@@ -111,6 +111,23 @@ class WeeklyPlanReportTable extends Component
         session()->flash('message', 'WPR berhasil disimpan.');
     }
 
+    public function delete(int $id): void
+    {
+        $report = WeeklyPlanReport::findOrFail($id);
+        $user = auth()->user();
+        $employee = $user->employee;
+
+        if (!$employee) return;
+
+        $isOwn = $report->employee_id === $employee->id;
+        $isKoordinator = $user->isKoordinator();
+
+        if ($isOwn || $isKoordinator) {
+            $report->delete();
+            session()->flash('message', 'WPR berhasil dihapus.');
+        }
+    }
+
     public function close(): void
     {
         $this->showModal = false;

@@ -321,7 +321,27 @@
                         </div>
                         <div>
                             <x-input-label for="create-lokasi_kerja" value="Lokasi Kerja" />
-                            <x-text-input id="create-lokasi_kerja" wire:model="lokasi_kerja" type="text" class="mt-1 block w-full" placeholder="Kantor Pusat / Cabang" />
+                            <select id="create-lokasi_kerja" wire:model="lokasi_kerja" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
+                                <option value="">Pilih lokasi kerja</option>
+                                <option value="Summarecon">Summarecon</option>
+                                <option value="Baleendah">Baleendah</option>
+                            </select>
+                        </div>
+                        <div>
+                            <x-input-label for="create-jenis_kerja" value="Jenis Kerja" />
+                            <select id="create-jenis_kerja" wire:model="jenis_kerja" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
+                                <option value="">Pilih jenis kerja</option>
+                                <option value="Office">Office</option>
+                                <option value="Operasional">Operasional</option>
+                            </select>
+                        </div>
+                        <div>
+                            <x-input-label for="create-jam_kerja" value="Jam Kerja" />
+                            <x-text-input id="create-jam_kerja" wire:model="jam_kerja" type="text" class="mt-1 block w-full" placeholder="Contoh: 08:00 - 17:00" />
+                        </div>
+                        <div class="sm:col-span-2">
+                            <x-input-label for="create-jobdesk" value="Jobdesk" />
+                            <textarea id="create-jobdesk" wire:model="jobdesk" rows="3" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200" placeholder="Deskripsi jobdesk..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -574,7 +594,27 @@
                         </div>
                         <div>
                             <x-input-label for="edit-lokasi_kerja" value="Lokasi Kerja" />
-                            <x-text-input id="edit-lokasi_kerja" wire:model="lokasi_kerja" type="text" class="mt-1 block w-full" />
+                            <select id="edit-lokasi_kerja" wire:model="lokasi_kerja" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
+                                <option value="">Pilih lokasi kerja</option>
+                                <option value="Summarecon">Summarecon</option>
+                                <option value="Baleendah">Baleendah</option>
+                            </select>
+                        </div>
+                        <div>
+                            <x-input-label for="edit-jenis_kerja" value="Jenis Kerja" />
+                            <select id="edit-jenis_kerja" wire:model="jenis_kerja" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
+                                <option value="">Pilih jenis kerja</option>
+                                <option value="Office">Office</option>
+                                <option value="Operasional">Operasional</option>
+                            </select>
+                        </div>
+                        <div>
+                            <x-input-label for="edit-jam_kerja" value="Jam Kerja" />
+                            <x-text-input id="edit-jam_kerja" wire:model="jam_kerja" type="text" class="mt-1 block w-full" />
+                        </div>
+                        <div class="sm:col-span-2">
+                            <x-input-label for="edit-jobdesk" value="Jobdesk" />
+                            <textarea id="edit-jobdesk" wire:model="jobdesk" rows="3" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200"></textarea>
                         </div>
                     </div>
                 </div>
@@ -733,6 +773,9 @@
                         <div class="preview-field"><span class="preview-label">Tanggal Bergabung</span><span class="preview-value">{{ $tanggal_masuk ?: '-' }}</span></div>
                         <div class="preview-field"><span class="preview-label">Jenis Karyawan</span><span class="preview-value">{{ $jenis_karyawan ? ucfirst($jenis_karyawan) : '-' }}</span></div>
                         <div class="preview-field"><span class="preview-label">Lokasi Kerja</span><span class="preview-value">{{ $lokasi_kerja ?: '-' }}</span></div>
+                        <div class="preview-field"><span class="preview-label">Jenis Kerja</span><span class="preview-value">{{ $jenis_kerja ?: '-' }}</span></div>
+                        <div class="preview-field"><span class="preview-label">Jam Kerja</span><span class="preview-value">{{ $jam_kerja ?: '-' }}</span></div>
+                        <div class="preview-field sm:col-span-2 lg:col-span-3"><span class="preview-label">Jobdesk</span><span class="preview-value">{{ $jobdesk ?: '-' }}</span></div>
                     </div>
                 </div>
 

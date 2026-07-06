@@ -16,6 +16,8 @@ $maxWidth = [
     '5xl' => 'sm:max-w-5xl',
     '6xl' => 'sm:max-w-6xl',
     '7xl' => 'sm:max-w-7xl',
+    '8xl' => 'sm:max-w-[88rem]',
+    '9xl' => 'sm:max-w-[96rem]',
     'full' => 'sm:max-w-full',
 ][$maxWidth];
 @endphp
@@ -67,7 +69,7 @@ $maxWidth = [
 
     <div
         x-show="show"
-        class="relative z-10 mb-6 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden {{ $maxWidth }} mx-auto"
+        class="relative z-10 mb-6 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden w-full {{ $maxWidth }} mx-auto"
         x-transition:enter="ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"

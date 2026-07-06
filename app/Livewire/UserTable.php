@@ -43,7 +43,7 @@ class UserTable extends Component
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'regex:/^\S*$/', 'unique:users,username' . ($this->editId ? ',' . $this->editId : '')],
             'password' => [$this->editId ? 'nullable' : 'required', 'string', 'min:4', 'confirmed'],
-            'role' => ['required', 'in:super_admin,gm_ceo,manager,koordinator,staff,staff_it'],
+            'role' => ['required', 'in:super_admin,gm_ceo,manager,koordinator,staff,staff_it,staff_creative,staff_host,staff_admin'],
         ];
     }
 

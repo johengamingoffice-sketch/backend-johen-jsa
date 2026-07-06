@@ -47,6 +47,9 @@ class EmployeeTable extends Component
     public string $tanggal_masuk = '';
     public string $jenis_karyawan = '';
     public string $lokasi_kerja = '';
+    public string $jenis_kerja = '';
+    public string $jam_kerja = '';
+    public string $jobdesk = '';
     public bool $showDeleteConfirm = false;
     public ?int $deleteId = null;
 
@@ -60,6 +63,13 @@ class EmployeeTable extends Component
 
     public string $tanggal_resign = '';
     public string $catatan = '';
+
+    public function updatedJenisKerja($value): void
+    {
+        if ($value === 'Office') {
+            $this->jam_kerja = 'Senin - Jumat 08.00-17.00, Sabtu 08.00-12.00';
+        }
+    }
 
     protected $updatesQueryString = ['search'];
 
@@ -82,7 +92,10 @@ class EmployeeTable extends Component
             'atasan2' => 'nullable|string|max:255',
             'tanggal_masuk' => 'nullable|date',
             'jenis_karyawan' => 'nullable|string|max:30',
-            'lokasi_kerja' => 'nullable|string|max:255',
+            'lokasi_kerja' => 'nullable|in:Summarecon,Baleendah',
+            'jenis_kerja' => 'nullable|in:Office,Operasional',
+            'jam_kerja' => 'nullable|string|max:255',
+            'jobdesk' => 'nullable|string',
             'no_hp' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
             'no_kontak_darurat1' => 'nullable|string|max:30',
@@ -153,6 +166,9 @@ class EmployeeTable extends Component
         $this->tanggal_masuk = $emp->tanggal_masuk?->format('Y-m-d') ?? '';
         $this->jenis_karyawan = $emp->jenis_karyawan ?? '';
         $this->lokasi_kerja = $emp->lokasi_kerja ?? '';
+        $this->jenis_kerja = $emp->jenis_kerja ?? '';
+        $this->jam_kerja = $emp->jam_kerja ?? '';
+        $this->jobdesk = $emp->jobdesk ?? '';
         $this->no_hp = $emp->no_hp ?? '';
         $this->email = $emp->email ?? '';
         $this->no_kontak_darurat1 = $emp->no_kontak_darurat1 ?? '';
@@ -331,6 +347,9 @@ class EmployeeTable extends Component
             'atasan2' => $this->atasan2 ?: null,
             'jenis_karyawan' => $this->jenis_karyawan ?: null,
             'lokasi_kerja' => $this->lokasi_kerja ?: null,
+            'jenis_kerja' => $this->jenis_kerja ?: null,
+            'jam_kerja' => $this->jam_kerja ?: null,
+            'jobdesk' => $this->jobdesk ?: null,
             'no_kontak_darurat1' => $this->no_kontak_darurat1 ?: null,
             'hubungan_darurat1' => $this->hubungan_darurat1 ?: null,
             'no_kontak_darurat2' => $this->no_kontak_darurat2 ?: null,
@@ -362,6 +381,9 @@ class EmployeeTable extends Component
         $this->tanggal_masuk = '';
         $this->jenis_karyawan = '';
         $this->lokasi_kerja = '';
+        $this->jenis_kerja = '';
+        $this->jam_kerja = '';
+        $this->jobdesk = '';
         $this->no_hp = '';
         $this->email = '';
         $this->no_kontak_darurat1 = '';

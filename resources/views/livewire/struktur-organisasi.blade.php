@@ -175,7 +175,7 @@
     </div>
 
     {{-- Note Modal --}}
-    <x-modal name="note-modal" maxWidth="7xl">
+    <x-modal name="note-modal" maxWidth="2xl">
         <div class="p-6">
             {{-- Header --}}
             <div class="flex items-center justify-between mb-5 pb-4 border-b border-gray-100 dark:border-gray-700">

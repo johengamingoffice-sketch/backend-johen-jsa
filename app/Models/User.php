@@ -68,6 +68,9 @@ class User extends Authenticatable
     public const ROLE_KOORDINATOR = 'koordinator';
     public const ROLE_STAFF = 'staff';
     public const ROLE_STAFF_IT = 'staff_it';
+    public const ROLE_STAFF_CREATIVE = 'staff_creative';
+    public const ROLE_STAFF_HOST = 'staff_host';
+    public const ROLE_STAFF_ADMIN = 'staff_admin';
 
     public function isSuperAdmin(): bool
     {
@@ -99,6 +102,21 @@ class User extends Authenticatable
         return $this->role === self::ROLE_STAFF_IT;
     }
 
+    public function isStaffCreative(): bool
+    {
+        return $this->role === self::ROLE_STAFF_CREATIVE;
+    }
+
+    public function isStaffHost(): bool
+    {
+        return $this->role === self::ROLE_STAFF_HOST;
+    }
+
+    public function isStaffAdmin(): bool
+    {
+        return $this->role === self::ROLE_STAFF_ADMIN;
+    }
+
     public function roleLevel(): int
     {
         return match ($this->role) {
@@ -108,6 +126,9 @@ class User extends Authenticatable
             self::ROLE_KOORDINATOR => 2,
             self::ROLE_STAFF => 1,
             self::ROLE_STAFF_IT => 1,
+            self::ROLE_STAFF_CREATIVE => 1,
+            self::ROLE_STAFF_HOST => 1,
+            self::ROLE_STAFF_ADMIN => 1,
             default => 0,
         };
     }

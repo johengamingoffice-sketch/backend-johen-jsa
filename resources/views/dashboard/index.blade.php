@@ -96,6 +96,7 @@
         </div>
     </div>
 
+    @unless(auth()->user()->isStaff() || auth()->user()->isStaffIt() || auth()->user()->isStaffCreative() || auth()->user()->isStaffHost() || auth()->user()->isStaffAdmin())
     {{-- Quick Actions --}}
     <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 mb-6 shadow-sm">
         <h3 class="text-base font-display font-bold text-gray-900 dark:text-gray-100 mb-4">Aksi Cepat</h3>
@@ -138,61 +139,64 @@
             </a>
         </div>
     </div>
+    @endunless
 
-    {{-- Attendance Today + Work Schedule --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-        {{-- Attendance Today --}}
-        <div class="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-display font-bold text-gray-900 dark:text-gray-100">Jam Kedatangan & Status Kehadiran</h3>
-                <span class="text-xs text-gray-400">{{ now()->isoFormat('dddd, D MMMM YYYY') }}</span>
-            </div>
-            @if($karyawanData['attendance_today'])
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/50 p-5 flex items-center gap-4 border border-gray-100 dark:border-gray-700">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 shrink-0">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Jam Kedatangan</p>
-                            <p class="text-xl font-bold font-display text-gray-900 dark:text-gray-100">{{ $karyawanData['attendance_today']['time_in'] }}</p>
-                        </div>
-                    </div>
-                    <div class="rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/10 p-5 flex items-center gap-4 border border-emerald-100 dark:border-emerald-800/30">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 shrink-0">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Status Kehadiran</p>
-                            @if(in_array($karyawanData['attendance_today']['status'], ['tepat waktu', 'hadir']))
-                                <span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 mt-1">Hadir</span>
-                            @elseif($karyawanData['attendance_today']['status'] === 'terlambat')
-                                <span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 mt-1">Terlambat</span>
-                            @else
-                                <span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-semibold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 mt-1">{{ ucfirst($karyawanData['attendance_today']['status']) }}</span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @else
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Belum Ada Absensi Hari Ini</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Silakan lakukan absensi masuk</p>
-                        </div>
-                    </div>
-                    <a href="{{ route('hris.absensi') }}" class="btn-primary text-xs py-2 px-4 shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
-                        Absen Sekarang
-                    </a>
-                </div>
-            @endif
+    @unless(auth()->user()->isStaff() || auth()->user()->isStaffIt() || auth()->user()->isStaffCreative() || auth()->user()->isStaffHost() || auth()->user()->isStaffAdmin())
+    {{-- Attendance Today --}}
+    <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 mb-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-display font-bold text-gray-900 dark:text-gray-100">Jam Kedatangan & Status Kehadiran</h3>
+            <span class="text-xs text-gray-400">{{ now()->isoFormat('dddd, D MMMM YYYY') }}</span>
         </div>
+        @if($karyawanData['attendance_today'])
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/50 p-5 flex items-center gap-4 border border-gray-100 dark:border-gray-700">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Jam Kedatangan</p>
+                        <p class="text-xl font-bold font-display text-gray-900 dark:text-gray-100">{{ $karyawanData['attendance_today']['time_in'] }}</p>
+                    </div>
+                </div>
+                <div class="rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/10 p-5 flex items-center gap-4 border border-emerald-100 dark:border-emerald-800/30">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Status Kehadiran</p>
+                        @if(in_array($karyawanData['attendance_today']['status'], ['tepat waktu', 'hadir']))
+                            <span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 mt-1">Hadir</span>
+                        @elseif($karyawanData['attendance_today']['status'] === 'terlambat')
+                            <span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 mt-1">Terlambat</span>
+                        @else
+                            <span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-semibold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 mt-1">{{ ucfirst($karyawanData['attendance_today']['status']) }}</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Belum Ada Absensi Hari Ini</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Silakan lakukan absensi masuk</p>
+                    </div>
+                </div>
+                <a href="{{ route('hris.absensi') }}" class="btn-primary text-xs py-2 px-4 shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
+                    Absen Sekarang
+                </a>
+            </div>
+        @endif
+    </div>
+    @endunless
 
+    {{-- Pengumuman + Jadwal Kerja --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
         {{-- Work Schedule --}}
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 shadow-sm">
             <div class="flex items-center justify-between mb-4">
@@ -200,11 +204,7 @@
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
             </div>
             <div class="space-y-4">
-                <div>
-                    <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Shift</p>
-                    <p class="text-sm font-bold text-gray-900 dark:text-gray-100">Pagi</p>
-                </div>
-                <div class="flex items-center gap-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex items-center gap-3">
                     <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
@@ -233,10 +233,7 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- Announcements + Latest Payroll --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
         {{-- Announcements --}}
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 shadow-sm">
             <div class="flex items-center justify-between mb-4">
@@ -274,9 +271,10 @@
                 </div>
             @endif
         </div>
+    </div>
 
-        {{-- Latest Payroll --}}
-        @if($karyawanData['latest_payroll'])
+    {{-- Latest Payroll --}}
+    @if($karyawanData['latest_payroll'])
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 shadow-sm">
             <div class="flex items-center justify-between mb-4">
                 <div>
@@ -302,53 +300,6 @@
             </div>
         </div>
         @endif
-    </div>
-
-    {{-- Recent Attendance History --}}
-    @if(count($karyawanData['recent_attendance'] ?? []) > 0)
-    <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-6">
-        <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-            <h3 class="text-base font-display font-bold text-gray-900 dark:text-gray-100">Riwayat Absensi Terbaru</h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        <th class="px-5 sm:px-6 py-3">Tanggal</th>
-                        <th class="px-5 sm:px-6 py-3">Jam Masuk</th>
-                        <th class="px-5 sm:px-6 py-3">Jam Keluar</th>
-                        <th class="px-5 sm:px-6 py-3">Durasi</th>
-                        <th class="px-5 sm:px-6 py-3">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                    @foreach($karyawanData['recent_attendance'] as $att)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 dark:bg-gray-900 transition-colors">
-                        <td class="px-5 sm:px-6 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{{ $att['date'] }}</td>
-                        <td class="px-5 sm:px-6 py-3 text-sm text-gray-600 dark:text-gray-400 font-mono">{{ $att['time_in'] }}</td>
-                        <td class="px-5 sm:px-6 py-3 text-sm text-gray-600 dark:text-gray-400 font-mono">{{ $att['time_out'] }}</td>
-                        <td class="px-5 sm:px-6 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $att['work_duration'] }}</td>
-                        <td class="px-5 sm:px-6 py-3">
-                            @php $s = $att['status']; @endphp
-                            @if($s === 'tepat waktu' || $s === 'hadir')
-                                <span class="badge-success">Tepat Waktu</span>
-                            @elseif($s === 'terlambat')
-                                <span class="badge-warning">Terlambat</span>
-                            @elseif($s === 'izin')
-                                <span class="badge-info">Izin</span>
-                            @elseif($s === 'sakit')
-                                <span class="badge-warning">Sakit</span>
-                            @else
-                                <span class="badge-secondary">{{ $s }}</span>
-                            @endif
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-    @endif
 
     @else
     {{-- No employee linked --}}
@@ -470,7 +421,7 @@
     {{-- Ringkasan Menu --}}
     <div x-data="{ openDivisiModal: false, openMeetingModal: false }">
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-6">
-        @unless(auth()->user()->isKoordinator())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
         <div @click="openDivisiModal = true" class="group cursor-pointer rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-lg hover:border-primary-200 dark:hover:border-primary-800 transition-all duration-300">
             <div class="flex items-center gap-3 mb-4">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300">
@@ -498,7 +449,7 @@
         </div>
         @endunless
 
-        @unless(auth()->user()->isKoordinator())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
         <a href="{{ route('history.index') }}" class="group rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all duration-300">
             <div class="flex items-center gap-3 mb-4">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300">
@@ -520,7 +471,7 @@
         </a>
         @endunless
 
-        @unless(auth()->user()->isKoordinator())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
         <div @click="openMeetingModal = true" class="group cursor-pointer rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-lg hover:border-teal-200 dark:hover:border-teal-800 transition-all duration-300">
             <div class="flex items-center gap-3 mb-4">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300">
@@ -542,7 +493,7 @@
         </div>
         @endunless
 
-        @unless(auth()->user()->isKoordinator())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
             <div class="flex items-center gap-3 mb-4">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-violet-500 text-white shadow-md">
@@ -661,7 +612,7 @@
 
     {{-- 2x2 Grid: Kontrak, Reimbursement, Cuti, Pembayaran --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        @unless(auth()->user()->isKoordinator())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
         {{-- Kontrak Akan Berakhir --}}
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col">
             <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-800">
@@ -745,7 +696,7 @@
             </div>
         </div>
 
-        @unless(auth()->user()->isKoordinator())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
         {{-- Pembayaran Mendatang --}}
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col">
             <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-800">
@@ -784,7 +735,7 @@
         </div>
         @endunless
 
-        @unless(auth()->user()->isKoordinator())
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isStaffIt())
         {{-- Pengajuan Reimbursement --}}
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col">
             <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-800">

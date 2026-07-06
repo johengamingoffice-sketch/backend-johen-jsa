@@ -23,11 +23,13 @@
                 <thead>
                     <tr class="bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
                         <th rowspan="2" class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider border-r border-gray-100 dark:border-gray-700">Nama</th>
+                        <th class="px-4 py-3 border-r border-gray-100 dark:border-gray-700"></th>
                         <th colspan="4" class="px-4 py-3 text-center text-xs font-semibold text-primary-700 dark:text-primary-400 uppercase tracking-wider border-r border-gray-100 dark:border-gray-700">W-1</th>
                         <th colspan="3" class="px-4 py-3 text-center text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider border-r border-gray-100 dark:border-gray-700">W+1</th>
                         <th rowspan="2" class="px-4 py-3 text-center text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Feedback Atasan</th>
                     </tr>
                     <tr class="bg-gray-50/50 dark:bg-gray-800/50 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-4 py-2.5 border-r border-gray-100 dark:border-gray-700">Week</th>
                         <th class="px-4 py-2.5">Tanggal</th>
                         <th class="px-4 py-2.5">Kategori</th>
                         <th class="px-4 py-2.5">Plan Activity</th>
@@ -38,13 +40,46 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                    @forelse($reports as $r)
+                    @php
+                        $weekGroupCounts = [];
+                        $weekGroupKey = null;
+                        $nameGroupCounts = [];
+                        $nameGroupKey = null;
+                        foreach ($reports as $i => $r) {
+                            $empId = $r->employee_id;
+                            $week = $r->tanggal->isoWeek;
+                            $wkKey = $empId . '-' . $week;
+                            if ($wkKey !== $weekGroupKey) {
+                                $weekGroupKey = $wkKey;
+                                $weekGroupCounts[$i] = 1;
+                            } else {
+                                end($weekGroupCounts);
+                                $weekGroupCounts[key($weekGroupCounts)]++;
+                            }
+                            $nKey = (string) $empId;
+                            if ($nKey !== $nameGroupKey) {
+                                $nameGroupKey = $nKey;
+                                $nameGroupCounts[$i] = 1;
+                            } else {
+                                end($nameGroupCounts);
+                                $nameGroupCounts[key($nameGroupCounts)]++;
+                            }
+                        }
+                    @endphp
+                    @forelse($reports as $i => $r)
                     @php
                         $reportEmployee = $r->employee;
                         $canGiveFeedback = isset($canGiveFeedbackMap[$reportEmployee?->id]);
+                        $isFirstInWeekGroup = isset($weekGroupCounts[$i]);
+                        $isFirstInNameGroup = isset($nameGroupCounts[$i]);
                     @endphp
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 dark:bg-gray-900 transition-colors">
-                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap border-r border-gray-100 dark:border-gray-700">{{ $reportEmployee?->nama ?? '-' }}</td>
+                        @if($isFirstInNameGroup)
+                        <td rowspan="{{ $nameGroupCounts[$i] }}" class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap align-middle border-r border-gray-100 dark:border-gray-700">{{ $reportEmployee?->nama ?? '-' }}</td>
+                        @endif
+                        @if($isFirstInWeekGroup)
+                        <td rowspan="{{ $weekGroupCounts[$i] }}" class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 text-center whitespace-nowrap align-middle border-r border-gray-100 dark:border-gray-700">{{ $r->tanggal->isoWeek }}</td>
+                        @endif
                         <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ $r->tanggal->isoFormat('D MMM YYYY') }}</td>
                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 capitalize">{{ $r->kategori }}</td>
                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">{{ $r->plan_activity }}</td>
@@ -64,17 +99,27 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-center border-r border-gray-100 dark:border-gray-700">
-                            @if($reportEmployee && auth()->user()->employee && $reportEmployee->id === auth()->user()->employee->id)
-                                @if(!$r->keterangan || !$r->action_plan)
-                                <button wire:click="openW1({{ $r->id }})" class="text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 hover:underline whitespace-nowrap">
-                                    Isi W+1
-                                </button>
+                            <div class="flex items-center justify-center gap-2">
+                                @if($reportEmployee && auth()->user()->employee && $reportEmployee->id === auth()->user()->employee->id)
+                                    @if(!$r->keterangan || !$r->action_plan)
+                                    <button wire:click="openW1({{ $r->id }})" class="text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 hover:underline whitespace-nowrap">
+                                        Isi W+1
+                                    </button>
+                                    @else
+                                    <span class="text-xs text-gray-400">Selesai</span>
+                                    @endif
+                                    <button wire:click="delete({{ $r->id }})" wire:confirm="Hapus WPR ini?" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 whitespace-nowrap" title="Hapus">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                @elseif(auth()->user()->isKoordinator())
+                                    <span class="text-xs text-gray-300 dark:text-gray-600">-</span>
+                                    <button wire:click="delete({{ $r->id }})" wire:confirm="Hapus WPR ini?" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 whitespace-nowrap" title="Hapus">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
                                 @else
-                                <span class="text-xs text-gray-400">Selesai</span>
+                                    <span class="text-xs text-gray-300 dark:text-gray-600">-</span>
                                 @endif
-                            @else
-                                <span class="text-xs text-gray-300 dark:text-gray-600">-</span>
-                            @endif
+                            </div>
                         </td>
                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">
                             @if($canGiveFeedback)
@@ -96,7 +141,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="px-4 py-12 text-center">
+                        <td colspan="10" class="px-4 py-12 text-center">
                             <div class="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-gray-800">
                                 <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
                             </div>

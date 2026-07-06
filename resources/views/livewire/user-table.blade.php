@@ -28,6 +28,9 @@
                     <option value="koordinator">Koordinator</option>
                     <option value="staff">Staff</option>
                     <option value="staff_it">Staff IT</option>
+                    <option value="staff_creative">Staff Creative</option>
+                    <option value="staff_host">Staff Host</option>
+                    <option value="staff_admin">Staff Admin</option>
                 </select>
             </div>
 
@@ -69,6 +72,12 @@
                                     <span class="badge-info">Koordinator</span>
                                 @elseif($u->role === 'staff_it')
                                     <span class="badge-secondary">Staff IT</span>
+                                @elseif($u->role === 'staff_creative')
+                                    <span class="badge-secondary">Staff Creative</span>
+                                @elseif($u->role === 'staff_host')
+                                    <span class="badge-secondary">Staff Host</span>
+                                @elseif($u->role === 'staff_admin')
+                                    <span class="badge-secondary">Staff Admin</span>
                                 @else
                                     <span class="badge-secondary">Staff</span>
                                 @endif
@@ -99,8 +108,6 @@
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-900 mb-3">
                                         <svg class="w-8 h-8 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
-
-    <x:confirm-delete-modal title="Hapus Akun" message="Apakah Anda yakin ingin menghapus akun ini?" />
 </div>
                                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Belum ada akun</h3>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tambah akun pengguna untuk memulai</p>
@@ -108,6 +115,8 @@
                             </td>
                         </tr>
                     @endforelse
+
+<x:confirm-delete-modal title="Hapus Akun" message="Apakah Anda yakin ingin menghapus akun ini?" />
                 </tbody>
             </table>
         </div>
@@ -165,6 +174,9 @@
                     <select id="create-role" wire:model="role" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
                         <option value="staff">Staff</option>
                         <option value="staff_it">Staff IT</option>
+                        <option value="staff_creative">Staff Creative</option>
+                        <option value="staff_host">Staff Host</option>
+                        <option value="staff_admin">Staff Admin</option>
                         <option value="koordinator">Koordinator</option>
                         <option value="manager">Manager</option>
                         <option value="gm_ceo">GM / CEO</option>
@@ -241,6 +253,9 @@
                     <select id="edit-role" wire:model="role" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
                         <option value="staff">Staff</option>
                         <option value="staff_it">Staff IT</option>
+                        <option value="staff_creative">Staff Creative</option>
+                        <option value="staff_host">Staff Host</option>
+                        <option value="staff_admin">Staff Admin</option>
                         <option value="koordinator">Koordinator</option>
                         <option value="manager">Manager</option>
                         <option value="gm_ceo">GM / CEO</option>

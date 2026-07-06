@@ -26,6 +26,12 @@ class EmployeeController extends Controller
         return view('employees.index', compact('stats'));
     }
 
+    public function creative()
+    {
+        $division = Division::firstOrCreate(['nama' => 'Creative']);
+        return redirect()->route('hris.employees.index', ['division' => $division->id]);
+    }
+
     public function create()
     {
         return redirect()->route('hris.employees.index');

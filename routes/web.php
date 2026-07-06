@@ -41,6 +41,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('hris')->name('hris.')->group(function () {
         Route::resource('employees', EmployeeController::class);
+        Route::get('/employees/creative', [EmployeeController::class, 'creative'])->name('employees.creative');
+        Route::get('/influencer', function () { return view('influencer.index'); })->name('influencer');
+        Route::get('/kalender-event', function () { return view('kalender-event.index'); })->name('kalender-event');
         Route::post('/employees/{employee}/photo', [EmployeeController::class, 'uploadPhoto'])->name('employees.upload-photo');
         Route::post('/employees/{employee}/documents', [EmployeeController::class, 'storeDocument'])->name('employees.store-document');
         Route::get('/employees/{employee}/documents/{document}/download', [EmployeeController::class, 'downloadDocument'])->name('employees.download-document');
@@ -63,10 +66,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/absensi', AbsensiTable::class)->name('absensi');
         Route::get('/cuti-izin', CutiIzinTable::class)->name('cuti-izin');
         Route::get('/kontrak-kerja', KontrakKerjaTable::class)->name('kontrak-kerja');
-        Route::get('/manual-book', [ManualBookController::class, 'index'])->name('manual-book');
+        Route::get('/manual-book', App\Livewire\ManualBookTable::class)->name('manual-book');
+        Route::get('/buku-panduan', function () { return view('buku-panduan.index'); })->name('buku-panduan');
+        Route::get('/laporan-penjualan', function () { return view('laporan-penjualan.index'); })->name('laporan-penjualan');
         Route::get('/jobdesk', [JobdeskController::class, 'index'])->name('jobdesk');
         Route::get('/weekly-report', [WeeklyReportController::class, 'index'])->name('weekly-report');
         Route::get('/daily-tracking', [DailyTrackingController::class, 'index'])->name('daily-tracking');
+        Route::get('/activity-competitor', [App\Http\Controllers\ActivityCompetitorController::class, 'index'])->name('activity-competitor');
 
         Route::prefix('export')->name('export.')->group(function () {
             Route::get('/employees', [ExportController::class, 'employees'])->name('employees');
@@ -178,9 +184,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{category}', [AssetViewController::class, 'index'])->name('category');
     });
 
-    Route::get('/reimbursement', function () {
-        return redirect()->route('payment-submissions.pengajuan');
-    })->name('reimbursement');
+    Route::get('/reimbursement', [App\Http\Controllers\ReimbursementController::class, 'index'])->name('reimbursement');
 
     Route::prefix('it')->name('it.')->group(function () {
         Route::get('/project', [ProjectItController::class, 'index'])->name('project');
