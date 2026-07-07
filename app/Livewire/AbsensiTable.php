@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
+use App\Models\Position;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -79,7 +80,18 @@ class AbsensiTable extends Component
         $user = auth()->user();
         $today = $this->date;
 
-        if ($user->isStaff()) {
+        $ownView = $user->isStaff()
+            || $user->isStaffIt()
+            || $user->isStaffCreative()
+            || $user->isStaffHostPubg()
+            || $user->isStaffHostFf()
+            || $user->isStaffHostMlbb()
+            || $user->isStaffHostEfootball()
+            || $user->isStaffAdmin()
+            || ($user->isKoordinator() && $this->tab === 'saya')
+            || (($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball()) && $this->tab === 'saya');
+
+        if ($ownView) {
             $employee = $user->employee;
 
             if (!$employee) {
@@ -121,49 +133,6 @@ class AbsensiTable extends Component
             ))->with('karyawanView', true);
         }
 
-        if ($user->isKoordinator() && $this->tab === 'saya') {
-            $employee = $user->employee;
-
-            if (!$employee) {
-                $riwayat = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
-
-                return view('livewire.absensi-table', [
-                    'karyawanView' => false,
-                    'koordinatorView' => true,
-                    'employee' => null,
-                    'totalAbsensi' => 0,
-                    'tepatWaktu' => 0,
-                    'terlambat' => 0,
-                    'totalHadir' => 0,
-                    'attendances' => collect(),
-                    'riwayat' => $riwayat,
-                    'attendanceHariIni' => null,
-                    'today' => $today,
-                ]);
-            }
-
-            $riwayat = Attendance::where('employee_id', $employee->id)
-                ->orderBy('date', 'desc')
-                ->paginate(10);
-
-            $semuaAbsensi = Attendance::where('employee_id', $employee->id)->get();
-            $totalAbsensi = $semuaAbsensi->count();
-            $tepatWaktu = $semuaAbsensi->filter(fn($a) =>
-                $a->status === 'hadir' && (!$a->time_in || $a->time_in <= '09:00:00')
-            )->count();
-            $terlambat = $semuaAbsensi->filter(fn($a) =>
-                $a->status === 'hadir' && $a->time_in && $a->time_in > '09:00:00'
-            )->count();
-            $totalHadir = $tepatWaktu + $terlambat;
-            $attendanceHariIni = Attendance::where('employee_id', $employee->id)
-                ->whereDate('date', today())->first();
-
-            return view('livewire.absensi-table', compact(
-                'employee', 'totalAbsensi', 'tepatWaktu', 'terlambat', 'totalHadir',
-                'riwayat', 'attendanceHariIni', 'today'
-            ))->with('karyawanView', false)->with('koordinatorView', true);
-        }
-
         $attendances = Attendance::with('employee.division')
             ->whereDate('date', $today)
             ->get()
@@ -176,6 +145,15 @@ class AbsensiTable extends Component
             if ($koordinatorEmployee && $koordinatorEmployee->division_id) {
                 $employeeQuery->where('division_id', $koordinatorEmployee->division_id)
                     ->where('id', '!=', $koordinatorEmployee->id);
+            }
+        }
+
+        if (($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball()) && $this->tab === 'tim') {
+            $subordinateIds = $this->getSubordinateEmployeeIds();
+            if (!empty($subordinateIds)) {
+                $employeeQuery->whereIn('id', $subordinateIds);
+            } else {
+                $employeeQuery->whereRaw('1 = 0');
             }
         }
 
@@ -207,5 +185,32 @@ class AbsensiTable extends Component
         return view('livewire.absensi-table', compact(
             'attendances', 'totalKaryawan', 'hadir', 'terlambat', 'totalHadir', 'employees', 'today'
         ))->with('karyawanView', false);
+    }
+
+    private function getSubordinateEmployeeIds(): array
+    {
+        $employee = auth()->user()->employee;
+        if (!$employee) return [];
+
+        $mainPosition = $employee->mainPosition();
+        if (!$mainPosition) return [];
+
+        $descendantIds = $this->getAllDescendantIds($mainPosition);
+        if (empty($descendantIds)) return [];
+
+        return Employee::whereHas('positions', function ($q) use ($descendantIds) {
+            $q->whereIn('position_id', $descendantIds);
+        })->pluck('id')->toArray();
+    }
+
+    private function getAllDescendantIds(Position $position): array
+    {
+        $ids = [];
+        $children = Position::where('parent_id', $position->id)->get();
+        foreach ($children as $child) {
+            $ids[] = $child->id;
+            $ids = array_merge($ids, $this->getAllDescendantIds($child));
+        }
+        return $ids;
     }
 }

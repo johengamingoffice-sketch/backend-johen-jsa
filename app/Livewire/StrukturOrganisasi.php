@@ -160,6 +160,15 @@ class StrukturOrganisasi extends Component
     {
         $this->viewState = 'form';
         $this->showForm = true;
+        $this->situasi = '';
+        $this->evaluasi = '';
+        $this->komitmen = '';
+        $this->rekomendasi_jenjang = '';
+        $this->existingNote = null;
+        $this->noteComments = [];
+        $this->selectedNoteId = null;
+        $this->komentar = '';
+        $this->replyToId = null;
     }
 
     public function replyToComment(int $commentId): void

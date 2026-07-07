@@ -30,8 +30,16 @@
                     <option value="koordinator_it">Koordinator IT</option>
                     <option value="staff_it">Staff IT</option>
                     <option value="koordinator_creative">Koordinator Creative</option>
+                    <option value="koordinator_admin">Koordinator Admin</option>
+                    <option value="koordinator_pubg">Koordinator Johen PUBG</option>
+                    <option value="koordinator_ff">Koordinator FF</option>
+                    <option value="koordinator_mlbb">Koordinator MLBB</option>
+                    <option value="koordinator_efootball">Koordinator E-football</option>
                     <option value="staff_creative">Staff Creative</option>
-                    <option value="staff_host">Staff Host</option>
+                    <option value="staff_host_pubg">Staff Host PUBG</option>
+                    <option value="staff_host_ff">Staff Host FF</option>
+                    <option value="staff_host_mlbb">Staff Host MLBB</option>
+                    <option value="staff_host_efootball">Staff Host E-football</option>
                     <option value="staff_admin">Staff Admin</option>
                 </select>
             </div>
@@ -78,10 +86,26 @@
                                     <span class="badge-secondary">Staff IT</span>
                                 @elseif($u->role === 'koordinator_creative')
                                     <span class="badge-secondary">Koordinator Creative</span>
+                                @elseif($u->role === 'koordinator_admin')
+                                    <span class="badge-secondary">Koordinator Admin</span>
+                                @elseif($u->role === 'koordinator_pubg')
+                                    <span class="badge-secondary">Koordinator Johen PUBG</span>
+                                @elseif($u->role === 'koordinator_ff')
+                                    <span class="badge-secondary">Koordinator FF</span>
+                                @elseif($u->role === 'koordinator_mlbb')
+                                    <span class="badge-secondary">Koordinator MLBB</span>
+                                @elseif($u->role === 'koordinator_efootball')
+                                    <span class="badge-secondary">Koordinator E-football</span>
                                 @elseif($u->role === 'staff_creative')
                                     <span class="badge-secondary">Staff Creative</span>
-                                @elseif($u->role === 'staff_host')
-                                    <span class="badge-secondary">Staff Host</span>
+                                @elseif($u->role === 'staff_host_pubg')
+                                    <span class="badge-secondary">Staff Host PUBG</span>
+                                @elseif($u->role === 'staff_host_ff')
+                                    <span class="badge-secondary">Staff Host FF</span>
+                                @elseif($u->role === 'staff_host_mlbb')
+                                    <span class="badge-secondary">Staff Host MLBB</span>
+                                @elseif($u->role === 'staff_host_efootball')
+                                    <span class="badge-secondary">Staff Host E-football</span>
                                 @elseif($u->role === 'staff_admin')
                                     <span class="badge-secondary">Staff Admin</span>
                                 @else
@@ -182,8 +206,16 @@
                         <option value="koordinator_it">Koordinator IT</option>
                     <option value="staff_it">Staff IT</option>
                         <option value="koordinator_creative">Koordinator Creative</option>
+                        <option value="koordinator_admin">Koordinator Admin</option>
+                        <option value="koordinator_pubg">Koordinator Johen PUBG</option>
+                        <option value="koordinator_ff">Koordinator FF</option>
+                        <option value="koordinator_mlbb">Koordinator MLBB</option>
+                        <option value="koordinator_efootball">Koordinator E-football</option>
                         <option value="staff_creative">Staff Creative</option>
-                        <option value="staff_host">Staff Host</option>
+                        <option value="staff_host_pubg">Staff Host PUBG</option>
+                        <option value="staff_host_ff">Staff Host FF</option>
+                        <option value="staff_host_mlbb">Staff Host MLBB</option>
+                        <option value="staff_host_efootball">Staff Host E-football</option>
                         <option value="staff_admin">Staff Admin</option>
                         <option value="koordinator">Koordinator</option>
                         <option value="manager">Manager</option>
@@ -263,8 +295,16 @@
                         <option value="koordinator_it">Koordinator IT</option>
                     <option value="staff_it">Staff IT</option>
                         <option value="koordinator_creative">Koordinator Creative</option>
+                        <option value="koordinator_admin">Koordinator Admin</option>
+                        <option value="koordinator_pubg">Koordinator Johen PUBG</option>
+                        <option value="koordinator_ff">Koordinator FF</option>
+                        <option value="koordinator_mlbb">Koordinator MLBB</option>
+                        <option value="koordinator_efootball">Koordinator E-football</option>
                         <option value="staff_creative">Staff Creative</option>
-                        <option value="staff_host">Staff Host</option>
+                        <option value="staff_host_pubg">Staff Host PUBG</option>
+                        <option value="staff_host_ff">Staff Host FF</option>
+                        <option value="staff_host_mlbb">Staff Host MLBB</option>
+                        <option value="staff_host_efootball">Staff Host E-football</option>
                         <option value="staff_admin">Staff Admin</option>
                         <option value="koordinator">Koordinator</option>
                         <option value="manager">Manager</option>

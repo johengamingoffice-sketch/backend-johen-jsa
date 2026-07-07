@@ -102,6 +102,15 @@ class DashboardService
         $userEmployee = $user->employee;
         if (!$userEmployee) return $query;
 
+        if ($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf()) {
+            $query->where(function ($q) use ($userEmployee) {
+                $q->where('atasan_id', $userEmployee->id)
+                  ->orWhere('atasan2_id', $userEmployee->id);
+            });
+
+            return $query;
+        }
+
         $lihatSemua = $user->id === 4 || ($user->canViewAll() && !$user->isKoordinator()) || in_array($userEmployee->position, [
             'Human Resource Generalist', 'Admin HR', 'Admin GA', 'OB'
         ]);
@@ -178,13 +187,18 @@ class DashboardService
             return [];
         }
 
-        $usedCuti = LeaveRequest::where('employee_id', $employeeId)
+        $usedCutiQuery = LeaveRequest::where('employee_id', $employeeId)
             ->where('jenis', 'cuti_tahunan')
             ->whereYear('tanggal_mulai', $tahunIni)
             ->where('persetujuan_koor', 'disetujui')
-            ->where('persetujuan_atasan2', 'disetujui')
-            ->where('persetujuan_hr', 'disetujui')
-            ->get()
+            ->where('persetujuan_atasan2', 'disetujui');
+
+        $skipHrApproval = $employee->user && ($employee->user->isStaffHostPubg() || $employee->user->isStaffHostFf() || $employee->user->isStaffIt());
+        if (!$skipHrApproval) {
+            $usedCutiQuery->where('persetujuan_hr', 'disetujui');
+        }
+
+        $usedCuti = $usedCutiQuery->get()
             ->sum(fn($lr) => (int) filter_var($lr->durasi, FILTER_SANITIZE_NUMBER_INT));
 
         $jatahCuti = 12;

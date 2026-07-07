@@ -43,7 +43,7 @@ class UserTable extends Component
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'regex:/^\S*$/', 'unique:users,username' . ($this->editId ? ',' . $this->editId : '')],
             'password' => [$this->editId ? 'nullable' : 'required', 'string', 'min:4', 'confirmed'],
-            'role' => ['required', 'in:super_admin,gm_ceo,manager,koordinator,staff,koordinator_it,staff_it,koordinator_creative,staff_creative,staff_host,staff_admin'],
+            'role' => ['required', 'in:super_admin,gm_ceo,manager,koordinator,staff,koordinator_it,staff_it,koordinator_creative,koordinator_admin,koordinator_pubg,koordinator_ff,koordinator_mlbb,koordinator_efootball,staff_creative,staff_host_pubg,staff_host_ff,staff_host_mlbb,staff_host_efootball,staff_admin'],
         ];
     }
 
@@ -185,7 +185,20 @@ class UserTable extends Component
                 });
             })
             ->when($this->filterRole, fn($q) => $q->where('role', $this->filterRole))
-            ->orderBy('name')->paginate(20);
+            ->orderByRaw("CASE role
+                WHEN 'super_admin' THEN 1
+                WHEN 'gm_ceo' THEN 2
+                WHEN 'manager' THEN 3
+                WHEN 'koordinator' THEN 4
+                WHEN 'koordinator_it' THEN 4
+                WHEN 'koordinator_creative' THEN 4
+                WHEN 'koordinator_admin' THEN 4
+                WHEN 'koordinator_pubg' THEN 4
+                WHEN 'koordinator_ff' THEN 4
+                WHEN 'koordinator_mlbb' THEN 4
+                WHEN 'koordinator_efootball' THEN 4
+                ELSE 5
+            END, name")->paginate(20);
         $unlinkedEmployees = Employee::whereNull('user_id')->where('status', 'aktif')->orderBy('nama')->get();
         $allEmployees = Employee::where('status', 'aktif')->orderBy('nama')->get();
         return view('livewire.user-table', compact('users', 'unlinkedEmployees', 'allEmployees'));

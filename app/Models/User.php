@@ -71,8 +71,16 @@ class User extends Authenticatable
     public const ROLE_STAFF_IT = 'staff_it';
     public const ROLE_KOORDINATOR_CREATIVE = 'koordinator_creative';
     public const ROLE_STAFF_CREATIVE = 'staff_creative';
-    public const ROLE_STAFF_HOST = 'staff_host';
+    public const ROLE_STAFF_HOST_PUBG = 'staff_host_pubg';
     public const ROLE_STAFF_ADMIN = 'staff_admin';
+    public const ROLE_KOORDINATOR_ADMIN = 'koordinator_admin';
+    public const ROLE_KOORDINATOR_PUBG = 'koordinator_pubg';
+    public const ROLE_KOORDINATOR_FF = 'koordinator_ff';
+    public const ROLE_STAFF_HOST_FF = 'staff_host_ff';
+    public const ROLE_STAFF_HOST_MLBB = 'staff_host_mlbb';
+    public const ROLE_KOORDINATOR_MLBB = 'koordinator_mlbb';
+    public const ROLE_KOORDINATOR_EFOOTBALL = 'koordinator_efootball';
+    public const ROLE_STAFF_HOST_EFOOTBALL = 'staff_host_efootball';
 
     public function isSuperAdmin(): bool
     {
@@ -119,14 +127,142 @@ class User extends Authenticatable
         return $this->role === self::ROLE_STAFF_CREATIVE;
     }
 
-    public function isStaffHost(): bool
+    public function isKoordinatorPubg(): bool
     {
-        return $this->role === self::ROLE_STAFF_HOST;
+        return $this->role === self::ROLE_KOORDINATOR_PUBG;
+    }
+
+    public function isKoordinatorFf(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_FF;
+    }
+
+    public function isKoordinatorMlbb(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_MLBB;
+    }
+
+    public function isKoordinatorEfootball(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_EFOOTBALL;
+    }
+
+    public function isKoordinatorGame(): bool
+    {
+        return in_array($this->role, [
+            self::ROLE_KOORDINATOR_PUBG,
+            self::ROLE_KOORDINATOR_FF,
+            self::ROLE_KOORDINATOR_MLBB,
+            self::ROLE_KOORDINATOR_EFOOTBALL,
+        ]);
+    }
+
+    public function isStaffHostFf(): bool
+    {
+        if ($this->role === self::ROLE_STAFF_HOST_FF) {
+            return true;
+        }
+
+        if (!in_array($this->role, [self::ROLE_KOORDINATOR, self::ROLE_KOORDINATOR_PUBG])) {
+            return false;
+        }
+
+        $employee = $this->employee;
+        if (!$employee) return false;
+
+        $root = Position::where('nama', 'Koordinator Free Fire')->first();
+        if (!$root) return false;
+
+        $descendantIds = $this->getAllDescendantIdsForPosition($root);
+        $descendantIds[] = $root->id;
+
+        return $employee->positions()->whereIn('position_id', $descendantIds)->exists();
+    }
+
+    public function isStaffHostPubg(): bool
+    {
+        if ($this->role === self::ROLE_STAFF_HOST_PUBG) {
+            return true;
+        }
+
+        if (!in_array($this->role, [self::ROLE_KOORDINATOR, self::ROLE_KOORDINATOR_FF])) {
+            return false;
+        }
+
+        $employee = $this->employee;
+        if (!$employee) return false;
+
+        $root = Position::where('nama', 'Koordinator Johen PUBG')->first();
+        if (!$root) return false;
+
+        $descendantIds = $this->getAllDescendantIdsForPosition($root);
+        $descendantIds[] = $root->id;
+
+        return $employee->positions()->whereIn('position_id', $descendantIds)->exists();
+    }
+
+    public function isStaffHostMlbb(): bool
+    {
+        if ($this->role === self::ROLE_STAFF_HOST_MLBB) {
+            return true;
+        }
+
+        if ($this->role !== self::ROLE_KOORDINATOR) {
+            return false;
+        }
+
+        $employee = $this->employee;
+        if (!$employee) return false;
+
+        $root = Position::where('nama', 'Koordinator MLBB')->first();
+        if (!$root) return false;
+
+        $descendantIds = $this->getAllDescendantIdsForPosition($root);
+        $descendantIds[] = $root->id;
+
+        return $employee->positions()->whereIn('position_id', $descendantIds)->exists();
+    }
+
+    public function isStaffHostEfootball(): bool
+    {
+        if ($this->role === self::ROLE_STAFF_HOST_EFOOTBALL) {
+            return true;
+        }
+
+        if ($this->role !== self::ROLE_KOORDINATOR) {
+            return false;
+        }
+
+        $employee = $this->employee;
+        if (!$employee) return false;
+
+        $root = Position::where('nama', 'Koordinator E-football')->first();
+        if (!$root) return false;
+
+        $descendantIds = $this->getAllDescendantIdsForPosition($root);
+        $descendantIds[] = $root->id;
+
+        return $employee->positions()->whereIn('position_id', $descendantIds)->exists();
+    }
+
+    public function getAllDescendantIdsForPosition(Position $position): array
+    {
+        $ids = [];
+        foreach ($position->children as $child) {
+            $ids[] = $child->id;
+            $ids = array_merge($ids, $this->getAllDescendantIdsForPosition($child));
+        }
+        return $ids;
     }
 
     public function isStaffAdmin(): bool
     {
         return $this->role === self::ROLE_STAFF_ADMIN;
+    }
+
+    public function isKoordinatorAdmin(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_ADMIN;
     }
 
     public function roleLevel(): int
@@ -140,9 +276,17 @@ class User extends Authenticatable
             self::ROLE_KOORDINATOR_IT => 1,
             self::ROLE_STAFF_IT => 1,
             self::ROLE_KOORDINATOR_CREATIVE => 1,
+            self::ROLE_KOORDINATOR_ADMIN => 1,
+            self::ROLE_KOORDINATOR_PUBG => 1,
             self::ROLE_STAFF_CREATIVE => 1,
-            self::ROLE_STAFF_HOST => 1,
+            self::ROLE_STAFF_HOST_PUBG => 1,
             self::ROLE_STAFF_ADMIN => 1,
+            self::ROLE_KOORDINATOR_FF => 1,
+            self::ROLE_KOORDINATOR_MLBB => 1,
+            self::ROLE_KOORDINATOR_EFOOTBALL => 1,
+            self::ROLE_STAFF_HOST_FF => 1,
+            self::ROLE_STAFF_HOST_MLBB => 1,
+            self::ROLE_STAFF_HOST_EFOOTBALL => 1,
             default => 0,
         };
     }

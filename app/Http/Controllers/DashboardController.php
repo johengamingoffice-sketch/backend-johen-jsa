@@ -16,7 +16,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->isStaff() || $user->isStaffCreative() || $user->isKoordinatorIt() || $user->isStaffIt() || $user->isKoordinatorCreative() || $user->isStaffHost() || $user->isStaffAdmin()) {
+        if ($user->isStaff() || $user->isStaffCreative() || $user->isKoordinatorIt() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isStaffIt() || $user->isKoordinatorCreative() || $user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball() || $user->isStaffAdmin()) {
             $employee = $user->employee;
 
             if (!$employee) {

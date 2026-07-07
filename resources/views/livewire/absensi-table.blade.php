@@ -1,5 +1,5 @@
 <div>
-    @if(auth()->user()->isKoordinator())
+    @if(auth()->user()->isKoordinator() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isKoordinatorMlbb() || auth()->user()->isKoordinatorEfootball())
     {{-- Tab Navigation --}}
     <div class="mb-6">
         <div class="inline-flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">

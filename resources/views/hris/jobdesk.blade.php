@@ -114,9 +114,7 @@
                     <div class="flex-1">
                         @if($employee->jobdesk)
                             <div class="p-5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 h-full">
-                                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                                    {{ trim($employee->jobdesk) }}
-                                </p>
+                                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{!! nl2br(e(trim($employee->jobdesk))) !!}</p>
                             </div>
                         @else
                             <div class="flex flex-col items-center justify-center h-full py-12">

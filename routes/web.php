@@ -66,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/absensi', AbsensiTable::class)->name('absensi');
         Route::get('/cuti-izin', CutiIzinTable::class)->name('cuti-izin');
         Route::get('/kontrak-kerja', KontrakKerjaTable::class)->name('kontrak-kerja');
+        Route::get('/freelance', App\Livewire\FreelanceTable::class)->name('freelance');
         Route::get('/manual-book', App\Livewire\ManualBookTable::class)->name('manual-book');
         Route::get('/buku-panduan', function () { return view('buku-panduan.index'); })->name('buku-panduan');
         Route::get('/laporan-penjualan', function () { return view('laporan-penjualan.index'); })->name('laporan-penjualan');
@@ -189,6 +190,10 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('it')->name('it.')->group(function () {
         Route::get('/project', [ProjectItController::class, 'index'])->name('project');
         Route::get('/maintenance', [JadwalMaintenanceController::class, 'index'])->name('maintenance');
+    });
+
+    Route::prefix('pubg')->name('pubg.')->group(function () {
+        Route::get('/bonus', App\Livewire\BonusPubgTable::class)->name('bonus');
     });
 
     Route::get('/kelola-akun', UserTable::class)->name('kelola-akun')->middleware('role:super_admin');

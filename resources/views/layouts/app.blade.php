@@ -56,7 +56,7 @@ $activeMenu = match (true) {
     request()->routeIs('hris.*') => 'sdm',
     request()->routeIs('payroll.*', 'history.*', 'bonus.*', 'reimbursement') => 'keuangan',
     request()->routeIs('meeting.*') => 'meeting',
-    request()->routeIs('assets.*') => 'asset',
+    request()->routeIs('assets.*') => auth()->user()->canViewAll() && !auth()->user()->isKoordinator() ? 'asset' : 'sdm',
     request()->routeIs('electricity.*', 'internet.*', 'ipl.*', 'payment-submissions.*', 'digital.*') => 'pembayaran',
     default => '',
 };
@@ -97,8 +97,14 @@ $activeMenu = match (true) {
                             <a href="{{ route('hris.kontrak-kerja') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.kontrak-kerja') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
                                 Kontrak Kerja
                             </a>
+                            <a href="{{ route('hris.freelance') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.freelance') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                                Freelance
+                            </a>
                             <a href="{{ route('hris.struktur-organisasi') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.struktur-organisasi') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
                                 Struktur Organisasi
+                            </a>
+                            <a href="{{ route('assets.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('assets.*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                                Asset Saya
                             </a>
                         </div>
                     </div>
@@ -183,7 +189,7 @@ $activeMenu = match (true) {
                              x-transition:leave-end="opacity-0 -translate-y-2"
                              class="ml-2 mt-1 space-y-0.5">
                             <a href="{{ route('hris.absensi') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.absensi') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
-                                Presensi Saya
+                                {{ auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() ? 'Presensi' : 'Presensi Saya' }}
                             </a>
                             <a href="{{ route('hris.cuti-izin') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.cuti-izin') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
                                 Cuti dan Izin
@@ -191,12 +197,12 @@ $activeMenu = match (true) {
                             <a href="{{ route('hris.jobdesk') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.jobdesk') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
                                 Jobdesk saya
                             </a>
-                            @if(auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isStaffIt() || auth()->user()->isSuperAdmin())
+                            @if(auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt() || auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isSuperAdmin())
                             <a href="{{ route('hris.manual-book') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.manual-book') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
                                 Manual Book
                             </a>
                             @endif
-                            @if(auth()->user()->isKoordinator() || auth()->user()->isManager() || auth()->user()->isKoordinatorCreative() || auth()->user()->isKoordinatorIt())
+                            @if(auth()->user()->isKoordinator() || auth()->user()->isManager() || auth()->user()->isKoordinatorCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf())
                             <a href="{{ route('hris.weekly-report') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.weekly-report') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
                                 Weekly Plan Report
                             </a>
@@ -204,7 +210,7 @@ $activeMenu = match (true) {
                                 Activity Competitor
                             </a>
                             @endif
-                            @if(auth()->user()->isKoordinator() || auth()->user()->isKoordinatorCreative() || auth()->user()->isKoordinatorIt())
+                            @if(auth()->user()->isKoordinator() || auth()->user()->isKoordinatorCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf())
                             <a href="{{ route('hris.daily-tracking') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.daily-tracking') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
                                 Daily Tracking
                             </a>
@@ -227,21 +233,7 @@ $activeMenu = match (true) {
                     </div>
                     @endif
 
-                    @if(auth()->user()->isStaffHost())
-                    <div class="mt-4">
-                        <p class="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Divisi Host</p>
-                        <a href="{{ route('hris.buku-panduan') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.buku-panduan') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
-                            Buku Panduan
-                        </a>
-                        <a href="{{ route('hris.laporan-penjualan') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.laporan-penjualan') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
-                            Laporan Penjualan
-                        </a>
-                    </div>
-                    @endif
-
-                    @if(auth()->user()->isStaffAdmin())
+                    @if(auth()->user()->isKoordinatorAdmin() || auth()->user()->isStaffAdmin())
                     <div class="mt-4">
                         <p class="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Divisi Admin</p>
                         <a href="{{ route('hris.laporan-penjualan') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('hris.laporan-penjualan') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
@@ -263,6 +255,46 @@ $activeMenu = match (true) {
                             Jadwal Maintenance
                         </a>
 
+                    </div>
+                    @endif
+
+                    @if(!auth()->user()->isKoordinatorFf() && !auth()->user()->isStaffHostFf() && (auth()->user()->isKoordinatorPubg() || auth()->user()->isStaffHostPubg()))
+                    <div class="mt-4">
+                        <p class="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Divisi PUBG</p>
+                        <a href="{{ route('pubg.bonus') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('pubg.bonus') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Bonus & Insentif
+                        </a>
+                    </div>
+                    @endif
+
+                    @if(auth()->user()->isKoordinatorFf() || auth()->user()->isStaffHostFf())
+                    <div class="mt-4">
+                        <p class="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Divisi FF</p>
+                        <a href="{{ route('pubg.bonus') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('pubg.bonus') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Bonus & Insentif
+                        </a>
+                    </div>
+                    @endif
+
+                    @if(auth()->user()->isKoordinatorMlbb() || auth()->user()->isStaffHostMlbb())
+                    <div class="mt-4">
+                        <p class="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Divisi MLBB</p>
+                        <a href="{{ route('pubg.bonus') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('pubg.bonus') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Bonus & Insentif
+                        </a>
+                    </div>
+                    @endif
+
+                    @if(auth()->user()->isKoordinatorEfootball() || auth()->user()->isStaffHostEfootball())
+                    <div class="mt-4">
+                        <p class="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Divisi E-football</p>
+                        <a href="{{ route('pubg.bonus') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 {{ request()->routeIs('pubg.bonus') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Bonus & Insentif
+                        </a>
                     </div>
                     @endif
 

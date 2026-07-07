@@ -141,7 +141,7 @@
                                         {{-- Note buttons for child --}}
                                        <div class="flex items-center justify-center gap-2 mt-2.5">
                                            <template x-if="canGiveNotes[child.id]">
-                                               <button @click.stop="$wire.openNoteModal(child.id, 'form')"
+                                               <button @click.stop="$wire.openNoteModal(child.id, 'history')"
                                                        class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-[10px] font-medium transition-colors">
                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                                                     Evaluasi
