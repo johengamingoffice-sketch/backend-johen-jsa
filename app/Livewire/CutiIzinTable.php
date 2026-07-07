@@ -455,7 +455,7 @@ class CutiIzinTable extends Component
                 ->where('persetujuan_koor', 'disetujui')
                 ->where('persetujuan_atasan2', 'disetujui');
 
-            if (!$user->isStaffHostPubg() && !$user->isStaffHostFf() && !$user->isStaffIt()) {
+            if (!$user->isStaffHostPubg() && !$user->isStaffHostFf() && !$user->isStaffIt() && !$user->isStaffHostMlbb()) {
                 $usedCutiQuery->where('persetujuan_hr', 'disetujui');
             }
 

@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Employee;
 use App\Models\PayrollDetail;
 use App\Models\PayrollImport;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -28,25 +28,23 @@ class PayrollImportService
             $rowData = [
                 'nik' => trim($row[0] ?? ''),
                 'nama' => trim($row[1] ?? ''),
-                'email' => trim($row[2] ?? ''),
-                'divisi' => trim($row[3] ?? ''),
-                'jabatan' => trim($row[4] ?? ''),
-                'gaji_pokok' => (float) ($row[5] ?? 0),
-                'tambahan_upah' => (float) ($row[6] ?? 0),
-                'bonus' => (float) ($row[7] ?? 0),
-                'thr' => (float) ($row[8] ?? 0),
-                'apresiasi' => (float) ($row[9] ?? 0),
-                'tunjangan_jabatan' => (float) ($row[10] ?? 0),
-                'thr_dibayarkan' => (float) ($row[11] ?? 0),
-                'potongan_pinjaman' => (float) ($row[12] ?? 0),
-                'potongan_absensi' => (float) ($row[13] ?? 0),
-                'pdf_password' => trim($row[14] ?? ''),
+                'divisi' => trim($row[2] ?? ''),
+                'jabatan' => trim($row[3] ?? ''),
+                'gaji_pokok' => (float) ($row[4] ?? 0),
+                'tambahan_upah' => (float) ($row[5] ?? 0),
+                'bonus' => (float) ($row[6] ?? 0),
+                'thr' => (float) ($row[7] ?? 0),
+                'apresiasi' => (float) ($row[8] ?? 0),
+                'tunjangan_jabatan' => (float) ($row[9] ?? 0),
+                'thr_dibayarkan' => (float) ($row[10] ?? 0),
+                'potongan_pinjaman' => (float) ($row[11] ?? 0),
+                'potongan_absensi' => (float) ($row[12] ?? 0),
+                'pdf_password' => trim($row[13] ?? ''),
             ];
 
             $validator = Validator::make($rowData, [
                 'nik' => 'required|string',
                 'nama' => 'required|string|max:255',
-                'email' => 'required|email|max:255',
                 'divisi' => 'nullable|string|max:255',
                 'jabatan' => 'required|string|max:255',
                 'gaji_pokok' => 'required|numeric|min:0',
@@ -67,10 +65,23 @@ class PayrollImportService
                     'data' => $rowData,
                     'errors' => $validator->errors()->toArray(),
                 ];
-            } else {
-                $rowData['take_home_pay'] = $rowData['gaji_pokok'] + $rowData['tambahan_upah'] + $rowData['bonus'] + $rowData['thr'] + $rowData['apresiasi'] + $rowData['tunjangan_jabatan'] - $rowData['thr_dibayarkan'] - $rowData['potongan_pinjaman'] - $rowData['potongan_absensi'];
-                $validData[] = $rowData;
+                continue;
             }
+
+            $employee = Employee::where('nik', $rowData['nik'])->first();
+            if (!$employee) {
+                $errors[] = [
+                    'row' => $rowNumber,
+                    'data' => $rowData,
+                    'errors' => ['nik' => ['NIK ' . $rowData['nik'] . ' tidak ditemukan di data karyawan.']],
+                ];
+                continue;
+            }
+
+            $rowData['employee_id'] = $employee->id;
+            $rowData['email'] = $employee->email ?? $employee->user?->email ?? '';
+            $rowData['take_home_pay'] = $rowData['gaji_pokok'] + $rowData['tambahan_upah'] + $rowData['bonus'] + $rowData['thr'] + $rowData['apresiasi'] + $rowData['tunjangan_jabatan'] - $rowData['thr_dibayarkan'] - $rowData['potongan_pinjaman'] - $rowData['potongan_absensi'];
+            $validData[] = $rowData;
         }
 
         $payrollImport = DB::transaction(function () use ($validData, $periode, $filePath, $uploadedBy, $errors) {
@@ -83,8 +94,9 @@ class PayrollImportService
             ]);
 
             foreach ($validData as $data) {
-                $detail = PayrollDetail::create([
+                PayrollDetail::create([
                     'payroll_import_id' => $import->id,
+                    'employee_id' => $data['employee_id'],
                     'nik' => $data['nik'],
                     'nama' => $data['nama'],
                     'email' => $data['email'],
@@ -123,7 +135,6 @@ class PayrollImportService
             $validator = Validator::make($row, [
                 'nik' => 'required|string',
                 'nama' => 'required|string|max:255',
-                'email' => 'required|email|max:255',
                 'divisi' => 'nullable|string|max:255',
                 'jabatan' => 'required|string|max:255',
                 'gaji_pokok' => 'required|numeric|min:0',
@@ -145,7 +156,18 @@ class PayrollImportService
                     'errors' => $validator->errors()->toArray(),
                 ];
             } else {
-                $validData[] = $row;
+                $employee = Employee::where('nik', $row['nik'])->first();
+                if (!$employee) {
+                    $errors[] = [
+                        'row' => $rowNumber,
+                        'data' => $row,
+                        'errors' => ['nik' => ['NIK ' . $row['nik'] . ' tidak ditemukan di data karyawan.']],
+                    ];
+                } else {
+                    $row['employee_id'] = $employee->id;
+                    $row['email'] = $employee->email ?? $employee->user?->email ?? '';
+                    $validData[] = $row;
+                }
             }
         }
 

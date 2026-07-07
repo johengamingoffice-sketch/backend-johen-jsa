@@ -1,3 +1,10 @@
+@push('topbar-left')
+    <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Presensi</h1>
+        <p class="text-xs text-gray-400 mt-0.5">Rekap kehadiran karyawan harian</p>
+    </div>
+@endpush
+
 <div>
     @if(auth()->user()->isKoordinator() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isKoordinatorMlbb() || auth()->user()->isKoordinatorEfootball())
     {{-- Tab Navigation --}}

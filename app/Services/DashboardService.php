@@ -193,7 +193,7 @@ class DashboardService
             ->where('persetujuan_koor', 'disetujui')
             ->where('persetujuan_atasan2', 'disetujui');
 
-        $skipHrApproval = $employee->user && ($employee->user->isStaffHostPubg() || $employee->user->isStaffHostFf() || $employee->user->isStaffIt());
+        $skipHrApproval = $employee->user && ($employee->user->isStaffHostPubg() || $employee->user->isStaffHostFf() || $employee->user->isStaffIt() || $employee->user->isStaffHostMlbb());
         if (!$skipHrApproval) {
             $usedCutiQuery->where('persetujuan_hr', 'disetujui');
         }
@@ -258,7 +258,7 @@ class DashboardService
             ->whereDate('date', today())
             ->first();
 
-        $latestPayroll = PayrollDetail::where('nik', $employee->nik)
+        $latestPayroll = PayrollDetail::where('employee_id', $employeeId)
             ->latest()
             ->first();
 

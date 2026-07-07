@@ -69,7 +69,7 @@
                     <tr class="table-header">
                         <th class="px-6 py-3">NIK</th>
                         <th class="px-6 py-3">Nama</th>
-                        <th class="px-6 py-3">Email</th>
+                        <th class="px-6 py-3">Divisi</th>
                         <th class="px-6 py-3">Jabatan</th>
                         <th class="px-6 py-3 text-right">THP</th>
                         <th class="px-6 py-3 text-center">Status</th>
@@ -81,7 +81,7 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-900 transition-colors">
                             <td class="table-cell font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ $detail->nik }}</td>
                             <td class="table-cell text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ $detail->nama }}</td>
-                            <td class="table-cell text-gray-600 dark:text-gray-400">{{ $detail->email }}</td>
+                            <td class="table-cell text-gray-600 dark:text-gray-400">{{ $detail->divisi }}</td>
                             <td class="table-cell text-gray-600 dark:text-gray-400">{{ $detail->jabatan }}</td>
                             <td class="table-cell text-right font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">Rp {{ number_format($detail->take_home_pay, 0, ',', '.') }}</td>
                             <td class="table-cell text-center whitespace-nowrap">

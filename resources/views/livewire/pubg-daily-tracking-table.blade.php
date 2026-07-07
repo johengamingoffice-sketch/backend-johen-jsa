@@ -1,25 +1,14 @@
-<div>
-    @if(auth()->user()->isKoordinatorGame())
-    {{-- Tab Navigation --}}
-    <div class="mb-6">
-        <div class="inline-flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
-            <button wire:click="$set('tab', 'saya')"
-                class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'saya' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
-                Bonus Insentif Saya
-            </button>
-            <button wire:click="$set('tab', 'tim')"
-                class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 {{ $tab === 'tim' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
-                Bonus Insentif Tim
-            </button>
-        </div>
+@push('topbar-left')
+    <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Daily Tracking PUBG</h1>
+        <p class="text-xs text-gray-400 mt-0.5">Tracking harian pemain</p>
     </div>
-    @endif
+@endpush
 
+<div>
     @if(auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffHostMlbb() || auth()->user()->isStaffHostEfootball() || auth()->user()->isKoordinatorGame())
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-        <div class="stat-card group">
+    <div x-data="{ modal: null }" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        <div @click="modal = 'sold'" class="stat-card group cursor-pointer">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
@@ -28,9 +17,13 @@
             </div>
             <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($totalSold, 0, ',', '.') }}</p>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total Sold</p>
+            <div class="mt-2 flex items-center gap-1 text-[11px] font-medium text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span>Lihat Detail</span>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            </div>
         </div>
 
-        <div class="stat-card group">
+        <div @click="modal = 'view'" class="stat-card group cursor-pointer">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-lg shadow-teal-200 group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"/></svg>
@@ -39,9 +32,13 @@
             </div>
             <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($totalView, 0, ',', '.') }}</p>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total View</p>
+            <div class="mt-2 flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span>Lihat Detail</span>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            </div>
         </div>
 
-        <div class="stat-card group">
+        <div @click="modal = 'peak'" class="stat-card group cursor-pointer">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-red-500 text-white shadow-lg shadow-amber-200 group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"/></svg>
@@ -50,17 +47,105 @@
             </div>
             <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($totalPeak, 0, ',', '.') }}</p>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total Peak</p>
+            <div class="mt-2 flex items-center gap-1 text-[11px] font-medium text-amber-600 dark:text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span>Lihat Detail</span>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            </div>
         </div>
 
-        <div class="stat-card group">
+        <div @click="modal = 'durasi'" class="stat-card group cursor-pointer">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-200 group-hover:scale-110 transition-transform duration-300">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <span class="badge-success">Total</span>
             </div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">Rp {{ number_format($totalBonus, 0, ',', '.') }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total Bonus</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($totalDurasi, 0, ',', '.') }} Jam</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total Durasi</p>
+            <div class="mt-2 flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span>Lihat Detail</span>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            </div>
+        </div>
+
+        {{-- Detail Modal Sold --}}
+        <div x-show="modal === 'sold'" x-cloak x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 bg-gray-900/60 backdrop-blur-sm overflow-y-auto" @click="modal = null">
+            <div x-show="modal === 'sold'" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" @click.stop class="relative w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl my-10">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Total Sold per Host</h3>
+                    <button @click="modal = null" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+                </div>
+                <div class="space-y-2 max-h-80 overflow-y-auto">
+                    @forelse($soldBreakdown as $d)
+                    <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900">
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $d->nama }}</span>
+                        <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">{{ number_format($d->total, 0, ',', '.') }}</span>
+                    </div>
+                    @empty
+                    <p class="text-sm text-gray-400 text-center py-4">Belum ada data</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        {{-- Detail Modal View --}}
+        <div x-show="modal === 'view'" x-cloak x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 bg-gray-900/60 backdrop-blur-sm overflow-y-auto" @click="modal = null">
+            <div x-show="modal === 'view'" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" @click.stop class="relative w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl my-10">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Total View per Host</h3>
+                    <button @click="modal = null" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+                </div>
+                <div class="space-y-2 max-h-80 overflow-y-auto">
+                    @forelse($viewBreakdown as $d)
+                    <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900">
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $d->nama }}</span>
+                        <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{{ number_format($d->total, 0, ',', '.') }}</span>
+                    </div>
+                    @empty
+                    <p class="text-sm text-gray-400 text-center py-4">Belum ada data</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        {{-- Detail Modal Peak --}}
+        <div x-show="modal === 'peak'" x-cloak x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 bg-gray-900/60 backdrop-blur-sm overflow-y-auto" @click="modal = null">
+            <div x-show="modal === 'peak'" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" @click.stop class="relative w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl my-10">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Total Peak per Host</h3>
+                    <button @click="modal = null" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+                </div>
+                <div class="space-y-2 max-h-80 overflow-y-auto">
+                    @forelse($peakBreakdown as $d)
+                    <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900">
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $d->nama }}</span>
+                        <span class="text-sm font-semibold text-amber-600 dark:text-amber-400">{{ number_format($d->total, 0, ',', '.') }}</span>
+                    </div>
+                    @empty
+                    <p class="text-sm text-gray-400 text-center py-4">Belum ada data</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        {{-- Detail Modal Durasi --}}
+        <div x-show="modal === 'durasi'" x-cloak x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 bg-gray-900/60 backdrop-blur-sm overflow-y-auto" @click="modal = null">
+            <div x-show="modal === 'durasi'" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" @click.stop class="relative w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl my-10">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Total Durasi per Host</h3>
+                    <button @click="modal = null" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+                </div>
+                <div class="space-y-2 max-h-80 overflow-y-auto">
+                    @forelse($durasiBreakdown as $d)
+                    <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900">
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $d->nama }}</span>
+                        <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{{ number_format($d->total, 0, ',', '.') }} Jam</span>
+                    </div>
+                    @empty
+                    <p class="text-sm text-gray-400 text-center py-4">Belum ada data</p>
+                    @endforelse
+                </div>
+            </div>
         </div>
     </div>
     @endif
@@ -69,8 +154,8 @@
         {{-- Header --}}
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-4 border-b border-gray-50 dark:border-gray-800">
             <div>
-                <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Bonus & Insentif {{ $divisi }}</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Data bonus dan insentif divisi {{ $divisi }}</p>
+                <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Daily Tracking {{ $divisi }}</h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Data daily tracking divisi {{ $divisi }}</p>
             </div>
             <button wire:click="openCreateModal" class="btn-primary text-xs py-2 shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/></svg>
@@ -98,35 +183,33 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="table-header">
-                        <th class="px-6 py-3 text-center w-12">No</th>
-                        <th class="px-6 py-3">Tanggal</th>
+                        <th class="px-6 py-3 text-center border-r border-gray-200 dark:border-gray-600">Tanggal</th>
                         <th class="px-6 py-3">NIK</th>
                         <th class="px-6 py-3">Nama</th>
                         <th class="px-6 py-3">Sesi</th>
                         <th class="px-6 py-3 text-right">Sold</th>
                         <th class="px-6 py-3 text-right">View</th>
                         <th class="px-6 py-3 text-right">Peak View</th>
-                        <th class="px-6 py-3 text-right">Estimasi Bonus</th>
+                        <th class="px-6 py-3 text-center">Durasi Live</th>
                         <th class="px-6 py-3">Catatan</th>
-                        @if($tab !== 'tim')
                         <th class="px-6 py-3 text-center w-24">Aksi</th>
-                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                    @forelse($items as $item)
+                    @forelse($groupedItems as $date => $dateItems)
+                        @foreach($dateItems as $i => $item)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                            <td class="table-cell text-center text-gray-500">{{ $items->firstItem() + $loop->index }}</td>
-                            <td class="table-cell text-gray-700 dark:text-gray-300">{{ $item->tanggal->format('d/m/Y') }}</td>
+                            @if($loop->first)
+                            <td class="table-cell text-gray-700 dark:text-gray-300 font-medium text-center border-r border-gray-200 dark:border-gray-600" rowspan="{{ $dateItems->count() }}">{{ $item->tanggal->format('d/m/Y') }}</td>
+                            @endif
                             <td class="table-cell font-mono text-xs text-gray-600 dark:text-gray-400">{{ $item->nik }}</td>
                             <td class="table-cell font-medium text-gray-900 dark:text-gray-100">{{ $item->nama }}</td>
                             <td class="table-cell text-gray-600 dark:text-gray-400">{{ $item->sesi ?? '-' }}</td>
                             <td class="table-cell text-right font-mono text-sm text-gray-700 dark:text-gray-300">{{ number_format($item->ach_sold, 0) }}</td>
                             <td class="table-cell text-right font-mono text-sm text-gray-700 dark:text-gray-300">{{ number_format($item->ach_view, 0) }}</td>
                             <td class="table-cell text-right font-mono text-sm text-gray-700 dark:text-gray-300">{{ number_format($item->peak_view, 0) }}</td>
-                            <td class="table-cell text-right font-mono text-sm font-semibold text-emerald-600 dark:text-emerald-400">Rp {{ number_format($item->insentif, 0, ',', '.') }}</td>
+                            <td class="table-cell text-center text-gray-600 dark:text-gray-400">{{ $item->durasi ? number_format($item->durasi, 0) . ' Jam' : '-' }}</td>
                             <td class="table-cell text-gray-500 dark:text-gray-400 max-w-[150px] truncate">{{ $item->catatan ?? '-' }}</td>
-                            @if($tab !== 'tim')
                             <td class="table-cell text-center">
                                 <div class="flex items-center justify-center gap-1">
                                     <button wire:click="openEditModal({{ $item->id }})" class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors">
@@ -139,14 +222,14 @@
                                     </button>
                                 </div>
                             </td>
-                            @endif
                         </tr>
+                        @endforeach
                     @empty
                         <tr>
-                            <td colspan="{{ $tab === 'tim' ? 10 : 11 }}" class="px-6 py-12 text-center text-sm text-gray-400 dark:text-gray-500">
+                            <td colspan="10" class="px-6 py-12 text-center text-sm text-gray-400 dark:text-gray-500">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-10 h-10 mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
-                                    <p class="font-medium">Belum ada data bonus</p>
+                                    <p class="font-medium">Belum ada data</p>
                                     <p class="text-xs mt-1">Klik "Tambah Data" untuk menambahkan</p>
                                 </div>
                             </td>
@@ -169,7 +252,7 @@
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" wire:click.self="closeModal">
         <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 shadow-2xl border border-gray-100 dark:border-gray-800">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-                <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Tambah Bonus {{ $divisi }}</h3>
+                <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Tambah Data {{ $divisi }}</h3>
                 <button wire:click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
@@ -210,7 +293,7 @@
                     @error('tanggal') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="grid grid-cols-3 gap-4">
+                <div class="grid grid-cols-4 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Sold *</label>
                         <input type="number" step="0.01" min="0" wire:model.live="ach_sold" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none">
@@ -226,12 +309,10 @@
                         <input type="number" step="0.01" min="0" wire:model="peak_view" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none">
                         @error('peak_view') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi Bonus (Rp)</label>
-                    <div class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 font-semibold">
-                        Rp {{ $insentif ? number_format((float) str_replace(',', '.', $insentif), 0, ',', '.') : '0' }}
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Durasi *</label>
+                        <input type="number" wire:model="durasi" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none">
+                        @error('durasi') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
@@ -254,7 +335,7 @@
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" wire:click.self="closeModal">
         <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 shadow-2xl border border-gray-100 dark:border-gray-800">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-                <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Edit Bonus {{ $divisi }}</h3>
+                <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Edit Data {{ $divisi }}</h3>
                 <button wire:click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
@@ -295,7 +376,7 @@
                     @error('tanggal') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="grid grid-cols-3 gap-4">
+                <div class="grid grid-cols-4 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Sold *</label>
                         <input type="number" step="0.01" min="0" wire:model.live="ach_sold" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none">
@@ -311,12 +392,10 @@
                         <input type="number" step="0.01" min="0" wire:model="peak_view" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none">
                         @error('peak_view') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi Bonus (Rp)</label>
-                    <div class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 font-semibold">
-                        Rp {{ $insentif ? number_format((float) str_replace(',', '.', $insentif), 0, ',', '.') : '0' }}
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Durasi *</label>
+                        <input type="number" wire:model="durasi" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none">
+                        @error('durasi') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
@@ -341,7 +420,7 @@
             <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-2xl bg-red-50 dark:bg-red-900/20">
                 <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
             </div>
-            <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-2">Hapus Data Bonus</h3>
+            <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-2">Hapus Data</h3>
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">Apakah Anda yakin ingin menghapus data ini?</p>
             <div class="flex justify-center gap-3">
                 <button wire:click="cancelDelete" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">Batal</button>

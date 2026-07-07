@@ -1,9 +1,12 @@
+@push('topbar-left')
+    <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Jadwal Meeting</h1>
+        <p class="text-xs text-gray-400 mt-0.5">Daftar jadwal meeting</p>
+    </div>
+@endpush
+
 <x-app-layout title="Jadwal Meeting">
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Jadwal Meeting</h1>
-            <p class="text-xs text-gray-400 mt-0.5">Daftar jadwal meeting</p>
-        </div>
+    <div class="flex items-center justify-end mb-6">
         <div class="flex items-center gap-2">
             <a href="{{ route('meeting.jadwal', ['view' => 'list', 'month' => $month, 'year' => $year]) }}"
                class="btn-ghost text-xs {{ $view === 'list' ? 'bg-gray-100 dark:bg-gray-800' : '' }}">List</a>

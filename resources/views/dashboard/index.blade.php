@@ -96,7 +96,7 @@
         </div>
     </div>
 
-    @unless(auth()->user()->isStaff() || auth()->user()->isStaffCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffAdmin())
+    @unless(auth()->user()->isStaff() || auth()->user()->isStaffCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffAdmin() || auth()->user()->isStaffHostMlbb() || auth()->user()->isKoordinatorMlbb() || auth()->user()->isKoordinatorEfootball() || auth()->user()->isStaffHostEfootball())
     {{-- Quick Actions --}}
     <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 mb-6 shadow-sm">
         <h3 class="text-base font-display font-bold text-gray-900 dark:text-gray-100 mb-4">Aksi Cepat</h3>
@@ -141,7 +141,7 @@
     </div>
     @endunless
 
-    @unless(auth()->user()->isStaff() || auth()->user()->isStaffCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffAdmin())
+    @unless(auth()->user()->isStaff() || auth()->user()->isStaffCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffAdmin() || auth()->user()->isStaffHostMlbb() || auth()->user()->isKoordinatorMlbb() || auth()->user()->isKoordinatorEfootball() || auth()->user()->isStaffHostEfootball())
     {{-- Attendance Today --}}
     <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 mb-6 shadow-sm">
         <div class="flex items-center justify-between mb-4">

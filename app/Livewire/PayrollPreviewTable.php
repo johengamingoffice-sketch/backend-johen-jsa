@@ -34,7 +34,6 @@ class PayrollPreviewTable extends Component
                 $query->where(function ($q) {
                     $q->where('nik', 'like', "%{$this->search}%")
                       ->orWhere('nama', 'like', "%{$this->search}%")
-                      ->orWhere('email', 'like', "%{$this->search}%")
                       ->orWhere('divisi', 'like', "%{$this->search}%")
                       ->orWhere('jabatan', 'like', "%{$this->search}%");
                 });

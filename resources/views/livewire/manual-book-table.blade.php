@@ -1,3 +1,10 @@
+@push('topbar-left')
+    <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Manual Book</h1>
+        <p class="text-xs text-gray-400 mt-0.5">Panduan & dokumentasi</p>
+    </div>
+@endpush
+
 <div x-data="{ previewBook: null }">
     @if(session('message'))
         <div class="mb-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">

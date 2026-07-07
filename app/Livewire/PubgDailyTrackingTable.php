@@ -5,14 +5,14 @@ namespace App\Livewire;
 use App\Models\BonusPubg;
 use App\Models\Employee;
 use App\Models\Position;
+use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class BonusPubgTable extends Component
+class PubgDailyTrackingTable extends Component
 {
     use WithPagination;
 
-    public string $tab = 'saya';
     public string $search = '';
     public string $bulan = '';
 
@@ -29,6 +29,7 @@ class BonusPubgTable extends Component
     public string $ach_sold = '';
     public string $ach_view = '';
     public string $peak_view = '';
+    public string $durasi = '';
     public string $insentif = '';
     public string $catatan = '';
 
@@ -44,6 +45,7 @@ class BonusPubgTable extends Component
             'ach_sold' => 'required|numeric|min:0',
             'ach_view' => 'required|numeric|min:0',
             'peak_view' => 'required|numeric|min:0',
+            'durasi' => 'required|numeric|min:0',
             'catatan' => 'nullable|string',
         ];
     }
@@ -58,6 +60,9 @@ class BonusPubgTable extends Component
             'ach_sold.required' => 'Sold wajib diisi.',
             'ach_view.required' => 'View wajib diisi.',
             'peak_view.required' => 'Peak View wajib diisi.',
+            'durasi.required' => 'Durasi wajib diisi.',
+            'durasi.numeric' => 'Durasi harus berupa angka.',
+            'durasi.min' => 'Durasi minimal 0.',
         ];
     }
 
@@ -107,6 +112,7 @@ class BonusPubgTable extends Component
         $this->ach_sold = (string) $item->ach_sold;
         $this->ach_view = (string) $item->ach_view;
         $this->peak_view = (string) $item->peak_view;
+        $this->durasi = (string) (int) $item->durasi;
         $this->insentif = (string) ($item->ach_sold * 100000);
         $this->catatan = $item->catatan ?? '';
         $this->showEditModal = true;
@@ -141,12 +147,13 @@ class BonusPubgTable extends Component
             'ach_sold' => $sold,
             'ach_view' => str_replace(',', '.', $this->ach_view),
             'peak_view' => str_replace(',', '.', $this->peak_view),
+            'durasi' => str_replace(',', '.', $this->durasi),
             'insentif' => $sold * 100000,
             'catatan' => $this->catatan ?: null,
         ]);
 
         $this->closeModal();
-        $this->dispatch('notify', type: 'success', message: 'Data bonus berhasil ditambahkan.');
+        $this->dispatch('notify', type: 'success', message: 'Data berhasil ditambahkan.');
     }
 
     public function update(): void
@@ -162,12 +169,13 @@ class BonusPubgTable extends Component
             'ach_sold' => $sold,
             'ach_view' => str_replace(',', '.', $this->ach_view),
             'peak_view' => str_replace(',', '.', $this->peak_view),
+            'durasi' => str_replace(',', '.', $this->durasi),
             'insentif' => $sold * 100000,
             'catatan' => $this->catatan ?: null,
         ]);
 
         $this->closeModal();
-        $this->dispatch('notify', type: 'success', message: 'Data bonus berhasil diperbarui.');
+        $this->dispatch('notify', type: 'success', message: 'Data berhasil diperbarui.');
     }
 
     public function confirmDelete(int $id): void
@@ -180,7 +188,7 @@ class BonusPubgTable extends Component
     {
         if (!$this->deleteId) return;
         BonusPubg::findOrFail($this->deleteId)->delete();
-        $this->dispatch('notify', type: 'success', message: 'Data bonus berhasil dihapus.');
+        $this->dispatch('notify', type: 'success', message: 'Data berhasil dihapus.');
         $this->cancelDelete();
     }
 
@@ -212,16 +220,12 @@ class BonusPubgTable extends Component
 
         if ($user->isKoordinatorGame()) {
             if ($userEmployee) {
-                if ($this->tab === 'saya') {
-                    $query->where('employee_id', $userEmployee->id);
-                } else {
-                    $subordinateIds = $this->getSubordinateEmployeeIds();
-                    if (!empty($subordinateIds)) {
-                        $query->whereIn('employee_id', $subordinateIds);
-                    } else {
-                        $query->whereRaw('1 = 0');
-                    }
+                $employeeIds = [$userEmployee->id];
+                $subordinateIds = $this->getSubordinateEmployeeIds();
+                if (!empty($subordinateIds)) {
+                    $employeeIds = array_merge($employeeIds, $subordinateIds);
                 }
+                $query->whereIn('employee_id', $employeeIds);
             } else {
                 $query->whereRaw('1 = 0');
             }
@@ -242,35 +246,58 @@ class BonusPubgTable extends Component
         ->latest('tanggal')
         ->paginate(10);
 
-        $employees = Employee::orderBy('nama')->get();
+        $groupedItems = $items->getCollection()->groupBy(function ($item) {
+            return $item->tanggal->format('Y-m-d');
+        });
+
+        $employees = Employee::when($user->isKoordinatorGame(), function ($q) use ($userEmployee) {
+            $subordinateIds = $this->getSubordinateEmployeeIds();
+            $ids = $userEmployee ? [$userEmployee->id] : [];
+            if (!empty($subordinateIds)) {
+                $ids = array_merge($ids, $subordinateIds);
+            }
+            $q->whereIn('id', $ids);
+        })->orderBy('nama')->get();
 
         $totalSold = 0;
         $totalView = 0;
         $totalPeak = 0;
-        $totalBonus = 0;
+        $totalDurasi = 0;
+        $soldBreakdown = collect();
+        $viewBreakdown = collect();
+        $peakBreakdown = collect();
+        $durasiBreakdown = collect();
         if (($user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball() || $user->isKoordinatorGame()) && $userEmployee) {
             $statsQuery = BonusPubg::query();
-            if ($this->tab === 'saya') {
-                $statsQuery->where('employee_id', $userEmployee->id);
-            } elseif ($user->isKoordinatorGame()) {
-                $subordinateIds = $this->getSubordinateEmployeeIds();
-                if (!empty($subordinateIds)) {
-                    $statsQuery->whereIn('employee_id', $subordinateIds);
-                } else {
-                    $statsQuery->whereRaw('1 = 0');
-                }
-            } else {
-                $statsQuery->where('employee_id', $userEmployee->id);
+            $employeeIds = [$userEmployee->id];
+            $subordinateIds = $this->getSubordinateEmployeeIds();
+            if (!empty($subordinateIds)) {
+                $employeeIds = array_merge($employeeIds, $subordinateIds);
             }
+            $statsQuery->whereIn('employee_id', $employeeIds);
+
             $totalSold = (clone $statsQuery)->sum('ach_sold');
             $totalView = (clone $statsQuery)->sum('ach_view');
             $totalPeak = (clone $statsQuery)->sum('peak_view');
-            $totalBonus = (clone $statsQuery)->sum('insentif');
+            $totalDurasi = (clone $statsQuery)->sum('durasi');
+
+            $soldBreakdown = (clone $statsQuery)
+                ->selectRaw('nama, SUM(ach_sold) as total')
+                ->groupBy('nama')->orderByDesc('total')->get();
+            $viewBreakdown = (clone $statsQuery)
+                ->selectRaw('nama, SUM(ach_view) as total')
+                ->groupBy('nama')->orderByDesc('total')->get();
+            $peakBreakdown = (clone $statsQuery)
+                ->selectRaw('nama, SUM(peak_view) as total')
+                ->groupBy('nama')->orderByDesc('total')->get();
+            $durasiBreakdown = (clone $statsQuery)
+                ->selectRaw('nama, SUM(durasi) as total')
+                ->groupBy('nama')->orderByDesc('total')->get();
         }
 
         $divisi = $this->getDivisiName();
 
-        return view('livewire.bonus-pubg-table', compact('items', 'employees', 'totalSold', 'totalView', 'totalPeak', 'totalBonus', 'divisi'));
+        return view('livewire.pubg-daily-tracking-table', compact('items', 'groupedItems', 'employees', 'totalSold', 'totalView', 'totalPeak', 'totalDurasi', 'soldBreakdown', 'viewBreakdown', 'peakBreakdown', 'durasiBreakdown', 'divisi'));
     }
 
     private function getSubordinateEmployeeIds(): array
@@ -278,15 +305,37 @@ class BonusPubgTable extends Component
         $employee = auth()->user()->employee;
         if (!$employee) return [];
 
+        $ids = [];
+
         $mainPosition = $employee->mainPosition();
-        if (!$mainPosition) return [];
+        if ($mainPosition) {
+            $descendantIds = $this->getAllDescendantIds($mainPosition);
+            if (!empty($descendantIds)) {
+                $ids = Employee::whereHas('positions', function ($q) use ($descendantIds) {
+                    $q->whereIn('position_id', $descendantIds);
+                })->pluck('id')->toArray();
+            }
+        }
 
-        $descendantIds = $this->getAllDescendantIds($mainPosition);
-        if (empty($descendantIds)) return [];
+        $user = auth()->user();
+        $roleMap = [
+            'isKoordinatorFf' => User::ROLE_STAFF_HOST_FF,
+            'isKoordinatorPubg' => User::ROLE_STAFF_HOST_PUBG,
+            'isKoordinatorMlbb' => User::ROLE_STAFF_HOST_MLBB,
+            'isKoordinatorEfootball' => User::ROLE_STAFF_HOST_EFOOTBALL,
+        ];
 
-        return Employee::whereHas('positions', function ($q) use ($descendantIds) {
-            $q->whereIn('position_id', $descendantIds);
-        })->pluck('id')->toArray();
+        foreach ($roleMap as $method => $staffRole) {
+            if ($user->$method()) {
+                $roleIds = Employee::whereHas('user', function ($q) use ($staffRole) {
+                    $q->where('role', $staffRole);
+                })->pluck('id')->toArray();
+                $ids = array_merge($ids, $roleIds);
+                break;
+            }
+        }
+
+        return array_values(array_unique($ids));
     }
 
     private function getAllDescendantIds(Position $position): array
@@ -310,6 +359,7 @@ class BonusPubgTable extends Component
         $this->ach_sold = '';
         $this->ach_view = '';
         $this->peak_view = '';
+        $this->durasi = '';
         $this->insentif = '';
         $this->catatan = '';
         $this->resetErrorBag();

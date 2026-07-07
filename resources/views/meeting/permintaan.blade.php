@@ -1,9 +1,12 @@
+@push('topbar-left')
+    <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Permintaan Meeting</h1>
+        <p class="text-xs text-gray-400 mt-0.5">Daftar permintaan meeting</p>
+    </div>
+@endpush
+
 <x-app-layout title="Permintaan Meeting">
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Permintaan Meeting</h1>
-            <p class="text-xs text-gray-400 mt-0.5">Daftar permintaan meeting</p>
-        </div>
+    <div class="flex items-center justify-end mb-6">
         @if(auth()->user()->isStaff())
         <button x-data @click="$dispatch('open-pengajuan')" class="btn-primary text-xs py-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/></svg>

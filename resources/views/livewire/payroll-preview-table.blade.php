@@ -35,7 +35,6 @@
                             @endif
                         </div>
                     </th>
-                    <th class="px-3 py-3 whitespace-nowrap">Email</th>
                     <th class="px-3 py-3 whitespace-nowrap">Divisi</th>
                     <th class="px-3 py-3 whitespace-nowrap">Jabatan</th>
                     <th class="px-3 py-3 text-right whitespace-nowrap">Gaji Pokok</th>
@@ -56,7 +55,6 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-800 transition-colors">
                         <td class="px-3 py-3 font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ $detail->nik }}</td>
                         <td class="px-3 py-3 text-gray-900 dark:text-gray-100 whitespace-nowrap font-medium">{{ $detail->nama }}</td>
-                        <td class="px-3 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $detail->email }}</td>
                         <td class="px-3 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $detail->divisi }}</td>
                         <td class="px-3 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $detail->jabatan }}</td>
                         <td class="px-3 py-3 text-right text-gray-900 dark:text-gray-100 whitespace-nowrap">Rp {{ number_format($detail->gaji_pokok, 0, ',', '.') }}</td>
@@ -73,7 +71,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="16" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="15" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                             Tidak ada data karyawan ditemukan.
                         </td>
                     </tr>

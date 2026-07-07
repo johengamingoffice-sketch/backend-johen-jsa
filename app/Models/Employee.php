@@ -76,7 +76,7 @@ class Employee extends Model
 
     public function payrollDetails(): HasMany
     {
-        return $this->hasMany(PayrollDetail::class, 'nik', 'nik');
+        return $this->hasMany(PayrollDetail::class, 'employee_id');
     }
 
     public function promotions(): HasMany

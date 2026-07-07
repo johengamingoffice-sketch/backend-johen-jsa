@@ -97,7 +97,6 @@
         formPromosiNomor: '',
         hapusPromosiId: null,
         payrollList: [],
-        viewPayrollDetail: null,
         payrollStats: { gaji_pokok: 0, total_tunjangan: 0, total_potongan: 0, gaji_bersih: 0 },
         tabs: ['dasar', 'dokumen', 'kontrak', 'jabatan', 'payroll'],
         init() {
@@ -1032,11 +1031,11 @@
                                             </span>
                                         </td>
                                         <td class="px-4 py-3.5 text-center">
-                                            <button @click="viewPayrollDetail = p"
-                                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-primary-600 hover:bg-primary-50 transition-all">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
-                                                Lihat Detail
-                                            </button>
+                                            <a :href="`/payroll/detail/${p.id}/download`"
+                                               class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-primary-600 hover:bg-primary-50 transition-all">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                                Download PDF
+                                            </a>
                                         </td>
                                     </tr>
                                 </template>
@@ -1054,126 +1053,7 @@
                 </div>
             </div>
 
-            {{-- Modal Detail Payroll --}}
-            <div x-show="viewPayrollDetail" x-cloak
-                 x-transition:enter="transition-opacity ease-linear duration-200"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition-opacity ease-linear duration-200"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 class="fixed inset-0 z-[200] flex items-center justify-center p-5 bg-gray-900/50 backdrop-blur-sm"
-                 @click="viewPayrollDetail = null">
-                <div x-show="viewPayrollDetail" x-cloak
-                     x-transition:enter="transition-all ease-out duration-200"
-                     x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                     x-transition:leave="transition-all ease-in duration-150"
-                     x-transition:leave-start="opacity-100 scale-100"
-                     x-transition:leave-end="opacity-0 scale-95"
-                     @click.stop
-                     class="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
-                    <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-700">
-                        <div>
-                            <h3 class="text-base font-bold text-gray-900 dark:text-gray-100">Detail Payroll</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" x-text="viewPayrollDetail?.periode"></p>
-                        </div>
-                        <button @click="viewPayrollDetail = null" class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 transition-all">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-                    <div class="p-6 space-y-5">
-                        {{-- Ringkasan --}}
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="border border-gray-200 dark:border-gray-600 rounded-xl p-4 text-center">
-                                <span class="text-xs font-medium text-gray-400 dark:text-gray-500">Gaji Pokok</span>
-                                <p class="text-base font-extrabold text-gray-900 dark:text-gray-100 mt-1" x-text="'Rp ' + Number(viewPayrollDetail?.gaji_pokok).toLocaleString('id-ID')"></p>
-                            </div>
-                            <div class="border border-gray-200 dark:border-gray-600 rounded-xl p-4 text-center">
-                                <span class="text-xs font-medium text-gray-400 dark:text-gray-500">Gaji Bersih</span>
-                                <p class="text-base font-extrabold text-gray-900 dark:text-gray-100 mt-1" x-text="'Rp ' + Number(viewPayrollDetail?.take_home_pay).toLocaleString('id-ID')"></p>
-                            </div>
-                        </div>
 
-                        {{-- Tunjangan Breakdown --}}
-                        <div>
-                            <h4 class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-                                <span class="w-1 h-4 bg-emerald-500 rounded-full inline-block"></span>
-                                Tunjangan
-                            </h4>
-                            <div class="space-y-2.5">
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-500 dark:text-gray-400">Tambahan Upah</span>
-                                    <span class="font-semibold text-gray-900 dark:text-gray-100" x-text="'Rp ' + Number(viewPayrollDetail?.tambahan_upah || 0).toLocaleString('id-ID')"></span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-500 dark:text-gray-400">Bonus</span>
-                                    <span class="font-semibold text-gray-900 dark:text-gray-100" x-text="'Rp ' + Number(viewPayrollDetail?.bonus || 0).toLocaleString('id-ID')"></span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-500 dark:text-gray-400">THR</span>
-                                    <span class="font-semibold text-gray-900 dark:text-gray-100" x-text="'Rp ' + Number(viewPayrollDetail?.thr || 0).toLocaleString('id-ID')"></span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-500 dark:text-gray-400">Apresiasi</span>
-                                    <span class="font-semibold text-gray-900 dark:text-gray-100" x-text="'Rp ' + Number(viewPayrollDetail?.apresiasi || 0).toLocaleString('id-ID')"></span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-500 dark:text-gray-400">Tunjangan Jabatan</span>
-                                    <span class="font-semibold text-gray-900 dark:text-gray-100" x-text="'Rp ' + Number(viewPayrollDetail?.tunjangan_jabatan || 0).toLocaleString('id-ID')"></span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm font-bold text-emerald-700 dark:text-emerald-400 border-t border-gray-100 dark:border-gray-700 pt-2.5">
-                                    <span>Total Tunjangan</span>
-                                    <span x-text="'Rp ' + Number((viewPayrollDetail?.tambahan_upah || 0) + (viewPayrollDetail?.bonus || 0) + (viewPayrollDetail?.thr || 0) + (viewPayrollDetail?.apresiasi || 0) + (viewPayrollDetail?.tunjangan_jabatan || 0)).toLocaleString('id-ID')"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Potongan Breakdown --}}
-                        <div>
-                            <h4 class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-                                <span class="w-1 h-4 bg-red-500 rounded-full inline-block"></span>
-                                Potongan
-                            </h4>
-                            <div class="space-y-2.5">
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-500 dark:text-gray-400">THR Dibayarkan</span>
-                                    <span class="font-semibold text-gray-900 dark:text-gray-100" x-text="'Rp ' + Number(viewPayrollDetail?.thr_dibayarkan || 0).toLocaleString('id-ID')"></span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-500 dark:text-gray-400">Potongan Pinjaman</span>
-                                    <span class="font-semibold text-gray-900 dark:text-gray-100" x-text="'Rp ' + Number(viewPayrollDetail?.potongan_pinjaman || 0).toLocaleString('id-ID')"></span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-500 dark:text-gray-400">Potongan Absensi</span>
-                                    <span class="font-semibold text-gray-900 dark:text-gray-100" x-text="'Rp ' + Number(viewPayrollDetail?.potongan_absensi || 0).toLocaleString('id-ID')"></span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm font-bold text-red-700 dark:text-red-400 border-t border-gray-100 dark:border-gray-700 pt-2.5">
-                                    <span>Total Potongan</span>
-                                    <span x-text="'Rp ' + Number((viewPayrollDetail?.thr_dibayarkan || 0) + (viewPayrollDetail?.potongan_pinjaman || 0) + (viewPayrollDetail?.potongan_absensi || 0)).toLocaleString('id-ID')"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Status --}}
-                        <div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-4">
-                            <span class="text-sm text-gray-500 dark:text-gray-400">Status</span>
-                            <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
-                                  :class="viewPayrollDetail?.status === 'sent' ? 'bg-emerald-50 text-emerald-700' : (viewPayrollDetail?.status === 'pending' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700')">
-                                <span class="w-1.5 h-1.5 rounded-full"
-                                      :class="viewPayrollDetail?.status === 'sent' ? 'bg-emerald-600' : (viewPayrollDetail?.status === 'pending' ? 'bg-amber-600' : 'bg-red-600')"></span>
-                                <span x-text="viewPayrollDetail?.status === 'sent' ? 'Terkirim' : (viewPayrollDetail?.status === 'pending' ? 'Tertunda' : 'Gagal')"></span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-gray-100 dark:border-gray-700">
-                        <button @click="viewPayrollDetail = null"
-                                class="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
-                            Tutup
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
 
     {{-- Edit Informasi Modal --}}

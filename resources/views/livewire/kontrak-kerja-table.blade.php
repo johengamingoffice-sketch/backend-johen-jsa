@@ -1,3 +1,10 @@
+@push('topbar-left')
+    <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Kontrak Kerja</h1>
+        <p class="text-xs text-gray-400 mt-0.5">Kelola kontrak kerja karyawan</p>
+    </div>
+@endpush
+
 <div>
     {{-- Alert akan berakhir --}}
     @if($akanBerakhir > 0)

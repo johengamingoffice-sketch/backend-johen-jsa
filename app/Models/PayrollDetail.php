@@ -10,6 +10,7 @@ class PayrollDetail extends Model
 {
     protected $fillable = [
         'payroll_import_id',
+        'employee_id',
         'nik',
         'nama',
         'email',
@@ -33,6 +34,11 @@ class PayrollDetail extends Model
     public function payrollImport(): BelongsTo
     {
         return $this->belongsTo(PayrollImport::class);
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
     }
 
     public function emailLog(): HasOne

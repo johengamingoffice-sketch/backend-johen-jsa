@@ -102,6 +102,15 @@ class BonusAdminTransactionTable extends Component
     {
         Gate::authorize('create-data');
         $this->resetForm();
+
+        $user = auth()->user();
+        if ($user->employee && ($user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball())) {
+            $this->nik = $user->employee->nik;
+            $this->nama = $user->employee->nama;
+            $this->jabatan = $user->employee->position;
+            $this->divisi = $user->employee->division?->nama ?? '';
+        }
+
         $this->showCreateModal = true;
     }
 

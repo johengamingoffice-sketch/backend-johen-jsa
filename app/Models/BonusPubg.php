@@ -15,6 +15,7 @@ class BonusPubg extends Model
         'ach_sold',
         'ach_view',
         'peak_view',
+        'durasi',
         'insentif',
         'catatan',
     ];
@@ -26,6 +27,7 @@ class BonusPubg extends Model
             'ach_sold' => 'decimal:2',
             'ach_view' => 'decimal:2',
             'peak_view' => 'decimal:2',
+            'durasi' => 'decimal:2',
             'insentif' => 'decimal:2',
         ];
     }

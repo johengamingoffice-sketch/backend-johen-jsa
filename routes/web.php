@@ -193,7 +193,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::prefix('pubg')->name('pubg.')->group(function () {
-        Route::get('/bonus', App\Livewire\BonusPubgTable::class)->name('bonus');
+        Route::get('/daily-tracking', App\Livewire\PubgDailyTrackingTable::class)->name('daily-tracking');
     });
 
     Route::get('/kelola-akun', UserTable::class)->name('kelola-akun')->middleware('role:super_admin');

@@ -1,3 +1,10 @@
+@push('topbar-left')
+    <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Cuti & Izin</h1>
+        <p class="text-xs text-gray-400 mt-0.5">Kelola pengajuan cuti dan izin karyawan</p>
+    </div>
+@endpush
+
 <div x-data="{ confirmAction: false, confirmTitle: '', confirmMessage: '', confirmHandler: null }">
 
     @if(auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isKoordinatorMlbb() || auth()->user()->isKoordinatorEfootball())
