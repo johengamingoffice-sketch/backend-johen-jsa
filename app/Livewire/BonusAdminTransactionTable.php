@@ -104,7 +104,7 @@ class BonusAdminTransactionTable extends Component
         $this->resetForm();
 
         $user = auth()->user();
-        if ($user->employee && ($user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball())) {
+        if ($user->employee && ($user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball() || $user->isStaffHostValorant())) {
             $this->nik = $user->employee->nik;
             $this->nama = $user->employee->nama;
             $this->jabatan = $user->employee->position;

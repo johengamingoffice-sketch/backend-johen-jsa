@@ -104,6 +104,7 @@ class PubgDailyTrackingTable extends Component
     public function openEditModal(int $id): void
     {
         $item = BonusPubg::findOrFail($id);
+        if (!$this->canModify($item)) return;
         $this->editId = $item->id;
         $this->tanggal = $item->tanggal->format('Y-m-d');
         $this->nik = $item->nik;
@@ -138,6 +139,9 @@ class PubgDailyTrackingTable extends Component
 
         $sold = str_replace(',', '.', $this->ach_sold);
 
+        $user = auth()->user();
+        $status = $user->isKoordinatorGame() ? 'disetujui' : 'pending';
+
         BonusPubg::create([
             'employee_id' => $employee->id,
             'tanggal' => $this->tanggal,
@@ -150,10 +154,14 @@ class PubgDailyTrackingTable extends Component
             'durasi' => str_replace(',', '.', $this->durasi),
             'insentif' => $sold * 100000,
             'catatan' => $this->catatan ?: null,
+            'status' => $status,
         ]);
 
         $this->closeModal();
-        $this->dispatch('notify', type: 'success', message: 'Data berhasil ditambahkan.');
+        $message = $status === 'pending'
+            ? 'Data berhasil ditambahkan. Menunggu persetujuan koordinator.'
+            : 'Data berhasil ditambahkan.';
+        $this->dispatch('notify', type: 'success', message: $message);
     }
 
     public function update(): void
@@ -161,6 +169,7 @@ class PubgDailyTrackingTable extends Component
         $this->validate();
         $sold = str_replace(',', '.', $this->ach_sold);
         $item = BonusPubg::findOrFail($this->editId);
+        if (!$this->canModify($item)) return;
         $item->update([
             'tanggal' => $this->tanggal,
             'nik' => $this->nik,
@@ -178,8 +187,19 @@ class PubgDailyTrackingTable extends Component
         $this->dispatch('notify', type: 'success', message: 'Data berhasil diperbarui.');
     }
 
+    private function canModify(BonusPubg $item): bool
+    {
+        $user = auth()->user();
+        if ($user->isKoordinatorGame()) return true;
+        if ($item->status !== 'pending') return false;
+        $employee = $user->employee;
+        return $employee && $item->employee_id === $employee->id;
+    }
+
     public function confirmDelete(int $id): void
     {
+        $item = BonusPubg::findOrFail($id);
+        if (!$this->canModify($item)) return;
         $this->deleteId = $id;
         $this->showDeleteConfirm = true;
     }
@@ -187,7 +207,9 @@ class PubgDailyTrackingTable extends Component
     public function executeDelete(): void
     {
         if (!$this->deleteId) return;
-        BonusPubg::findOrFail($this->deleteId)->delete();
+        $item = BonusPubg::findOrFail($this->deleteId);
+        if (!$this->canModify($item)) return;
+        $item->delete();
         $this->dispatch('notify', type: 'success', message: 'Data berhasil dihapus.');
         $this->cancelDelete();
     }
@@ -198,6 +220,35 @@ class PubgDailyTrackingTable extends Component
         $this->deleteId = null;
     }
 
+    public function setujui(int $id): void
+    {
+        $user = auth()->user();
+        if (!$user->isKoordinatorGame()) return;
+
+        $item = BonusPubg::findOrFail($id);
+        $subordinateIds = $this->getSubordinateEmployeeIds();
+        if (!in_array($item->employee_id, $subordinateIds)) return;
+
+        $item->update([
+            'status' => 'disetujui',
+            'approved_by' => $user->employee->id,
+        ]);
+        $this->dispatch('notify', type: 'success', message: 'Data berhasil disetujui.');
+    }
+
+    public function tolak(int $id): void
+    {
+        $user = auth()->user();
+        if (!$user->isKoordinatorGame()) return;
+
+        $item = BonusPubg::findOrFail($id);
+        $subordinateIds = $this->getSubordinateEmployeeIds();
+        if (!in_array($item->employee_id, $subordinateIds)) return;
+
+        $item->update(['status' => 'ditolak']);
+        $this->dispatch('notify', type: 'success', message: 'Data ditolak.');
+    }
+
     public function getDivisiName(): string
     {
         $user = auth()->user();
@@ -205,6 +256,7 @@ class PubgDailyTrackingTable extends Component
         return match (true) {
             $user->isKoordinatorMlbb(), $user->isStaffHostMlbb() => 'MLBB',
             $user->isKoordinatorEfootball(), $user->isStaffHostEfootball() => 'E-football',
+            $user->isKoordinatorValorant(), $user->isStaffHostValorant() => 'Valorant',
             $user->isKoordinatorFf(), $user->isStaffHostFf() => 'Free Fire',
             $user->isKoordinatorPubg(), $user->isStaffHostPubg() => 'PUBG',
             default => 'PUBG',
@@ -267,7 +319,7 @@ class PubgDailyTrackingTable extends Component
         $viewBreakdown = collect();
         $peakBreakdown = collect();
         $durasiBreakdown = collect();
-        if (($user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball() || $user->isKoordinatorGame()) && $userEmployee) {
+        if (($user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball() || $user->isStaffHostValorant() || $user->isKoordinatorGame()) && $userEmployee) {
             $statsQuery = BonusPubg::query();
             $employeeIds = [$userEmployee->id];
             $subordinateIds = $this->getSubordinateEmployeeIds();
@@ -312,7 +364,8 @@ class PubgDailyTrackingTable extends Component
             $descendantIds = $this->getAllDescendantIds($mainPosition);
             if (!empty($descendantIds)) {
                 $ids = Employee::whereHas('positions', function ($q) use ($descendantIds) {
-                    $q->whereIn('position_id', $descendantIds);
+                    $q->whereIn('position_id', $descendantIds)
+                      ->where('is_main', true);
                 })->pluck('id')->toArray();
             }
         }
@@ -323,6 +376,7 @@ class PubgDailyTrackingTable extends Component
             'isKoordinatorPubg' => User::ROLE_STAFF_HOST_PUBG,
             'isKoordinatorMlbb' => User::ROLE_STAFF_HOST_MLBB,
             'isKoordinatorEfootball' => User::ROLE_STAFF_HOST_EFOOTBALL,
+            'isKoordinatorValorant' => User::ROLE_STAFF_HOST_VALORANT,
         ];
 
         foreach ($roleMap as $method => $staffRole) {

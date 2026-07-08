@@ -6,7 +6,7 @@
 @endpush
 
 <div>
-    @if(auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffHostMlbb() || auth()->user()->isStaffHostEfootball() || auth()->user()->isKoordinatorGame())
+    @if(auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffHostMlbb() || auth()->user()->isStaffHostEfootball() || auth()->user()->isStaffHostValorant() || auth()->user()->isKoordinatorGame())
     <div x-data="{ modal: null }" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
         <div @click="modal = 'sold'" class="stat-card group cursor-pointer">
             <div class="flex items-center justify-between mb-3">
@@ -192,7 +192,8 @@
                         <th class="px-6 py-3 text-right">Peak View</th>
                         <th class="px-6 py-3 text-center">Durasi Live</th>
                         <th class="px-6 py-3">Catatan</th>
-                        <th class="px-6 py-3 text-center w-24">Aksi</th>
+                        <th class="px-6 py-3 text-center">Status</th>
+                        <th class="px-6 py-3 text-center w-28">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
@@ -211,22 +212,59 @@
                             <td class="table-cell text-center text-gray-600 dark:text-gray-400">{{ $item->durasi ? number_format($item->durasi, 0) . ' Jam' : '-' }}</td>
                             <td class="table-cell text-gray-500 dark:text-gray-400 max-w-[150px] truncate">{{ $item->catatan ?? '-' }}</td>
                             <td class="table-cell text-center">
-                                <div class="flex items-center justify-center gap-1">
-                                    <button wire:click="openEditModal({{ $item->id }})" class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
-                                        Edit
-                                    </button>
-                                    <button wire:click="confirmDelete({{ $item->id }})" class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-                                        Hapus
-                                    </button>
-                                </div>
+                                @php
+                                    $statusBadge = match($item->status) {
+                                        'pending' => 'badge-warning',
+                                        'disetujui' => 'badge-success',
+                                        'ditolak' => 'badge-danger',
+                                        default => 'badge-info',
+                                    };
+                                    $statusLabel = match($item->status) {
+                                        'pending' => 'Menunggu',
+                                        'disetujui' => 'Disetujui',
+                                        'ditolak' => 'Ditolak',
+                                        default => $item->status,
+                                    };
+                                @endphp
+                                <span class="{{ $statusBadge }}">{{ $statusLabel }}</span>
+                            </td>
+                            <td class="table-cell text-center">
+                                @php
+                                    $isKoord = auth()->user()->isKoordinatorGame();
+                                    $isStaff = auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffHostMlbb() || auth()->user()->isStaffHostEfootball() || auth()->user()->isStaffHostValorant();
+                                    $canEdit = $isKoord || ($isStaff && $item->status === 'pending');
+                                @endphp
+                                @if($isKoord && $item->status === 'pending')
+                                    <div class="flex items-center justify-center gap-1">
+                                        <button wire:click="setujui({{ $item->id }})" class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                            Setujui
+                                        </button>
+                                        <button wire:click="tolak({{ $item->id }})" class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            Tolak
+                                        </button>
+                                    </div>
+                                @elseif($canEdit)
+                                    <div class="flex items-center justify-center gap-1">
+                                        <button wire:click="openEditModal({{ $item->id }})" class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+                                            Edit
+                                        </button>
+                                        <button wire:click="confirmDelete({{ $item->id }})" class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                                            Hapus
+                                        </button>
+                                    </div>
+                                @else
+                                    <span class="text-xs text-gray-400">-</span>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
                     @empty
                         <tr>
-                            <td colspan="10" class="px-6 py-12 text-center text-sm text-gray-400 dark:text-gray-500">
+                            <td colspan="11" class="px-6 py-12 text-center text-sm text-gray-400 dark:text-gray-500">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-10 h-10 mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
                                     <p class="font-medium">Belum ada data</p>

@@ -18,6 +18,8 @@ class BonusPubg extends Model
         'durasi',
         'insentif',
         'catatan',
+        'status',
+        'approved_by',
     ];
 
     protected function casts(): array
@@ -29,11 +31,17 @@ class BonusPubg extends Model
             'peak_view' => 'decimal:2',
             'durasi' => 'decimal:2',
             'insentif' => 'decimal:2',
+            'status' => 'string',
         ];
     }
 
     public function employee()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(Employee::class, 'approved_by');
     }
 }

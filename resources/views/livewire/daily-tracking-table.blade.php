@@ -58,7 +58,13 @@
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                 <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari NIK atau Nama..." class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 pl-9 pr-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
             </div>
-            <input type="date" wire:model.live="date" class="rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
+            <select wire:model.live="bulan" class="rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 pl-3 pr-8 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
+                <option value="">Semua Bulan</option>
+                @foreach(range(1, 12) as $m)
+                    @php $val = now()->format('Y') . '-' . str_pad($m, 2, '0', STR_PAD_LEFT); @endphp
+                    <option value="{{ $val }}">{{ \Carbon\Carbon::create()->month($m)->isoFormat('MMMM') }}</option>
+                @endforeach
+            </select>
         </div>
 
         <div class="overflow-x-auto">
@@ -91,7 +97,8 @@
                                         'Free Fire' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
                                         'MLBB' => 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
                                         'E-football' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-                                        default => 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-400',
+                                        'Valorant' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                                        default => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
                                     } }}">{{ $item->divisi }}</span>
                             </td>
                             <td class="table-cell font-mono text-xs text-gray-600 dark:text-gray-400">{{ $item->nik }}</td>

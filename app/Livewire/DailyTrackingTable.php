@@ -13,11 +13,11 @@ class DailyTrackingTable extends Component
     use WithPagination;
 
     public string $search = '';
-    public string $date = '';
+    public string $bulan = '';
 
     public function mount(): void
     {
-        $this->date = now()->format('Y-m-d');
+        $this->bulan = now()->format('Y-m');
     }
 
     public function updatingSearch(): void
@@ -25,7 +25,7 @@ class DailyTrackingTable extends Component
         $this->resetPage();
     }
 
-    public function updatingDate(): void
+    public function updatingBulan(): void
     {
         $this->resetPage();
     }
@@ -67,6 +67,7 @@ class DailyTrackingTable extends Component
             $user->isKoordinatorFf(), $user->isStaffHostFf() => 'Free Fire',
             $user->isKoordinatorMlbb(), $user->isStaffHostMlbb() => 'MLBB',
             $user->isKoordinatorEfootball(), $user->isStaffHostEfootball() => 'E-football',
+            $user->isKoordinatorValorant(), $user->isStaffHostValorant() => 'Valorant',
             default => $employee->division?->nama ?? '-',
         };
     }
@@ -95,7 +96,6 @@ class DailyTrackingTable extends Component
     {
         $user = auth()->user();
         $employee = $user->employee;
-        $today = $this->date;
 
         if (!$employee || !$user->isManager()) {
             return view('livewire.daily-tracking-table', [
@@ -105,7 +105,7 @@ class DailyTrackingTable extends Component
                 'totalView' => 0,
                 'totalPeak' => 0,
                 'totalDurasi' => 0,
-                'today' => $today,
+                'bulan' => $this->bulan,
             ]);
         }
 
@@ -118,7 +118,7 @@ class DailyTrackingTable extends Component
                 'totalView' => 0,
                 'totalPeak' => 0,
                 'totalDurasi' => 0,
-                'today' => $today,
+                'bulan' => $this->bulan,
             ]);
         }
 
@@ -134,25 +134,42 @@ class DailyTrackingTable extends Component
                         'totalView' => 0,
                         'totalPeak' => 0,
                         'totalDurasi' => 0,
-                        'today' => $today,
+                        'bulan' => $this->bulan,
                     ]);
                 }
             }
         }
 
-        $query = BonusPubg::whereIn('employee_id', $subordinateIds)
+        $query = BonusPubg::whereIn('bonus_pubgs.employee_id', $subordinateIds)
+            ->where('bonus_pubgs.status', 'disetujui')
             ->when($this->search, function ($q) {
                 $q->where(function ($q) {
-                    $q->where('nama', 'like', "%{$this->search}%")
-                      ->orWhere('nik', 'like', "%{$this->search}%");
+                    $q->where('bonus_pubgs.nama', 'like', "%{$this->search}%")
+                      ->orWhere('bonus_pubgs.nik', 'like', "%{$this->search}%");
                 });
             })
-            ->when($this->date, function ($q) {
-                $q->whereDate('tanggal', $this->date);
+            ->when($this->bulan, function ($q) {
+                $q->whereYear('bonus_pubgs.tanggal', substr($this->bulan, 0, 4))
+                  ->whereMonth('bonus_pubgs.tanggal', substr($this->bulan, 5, 2));
             })
             ->with('employee.division', 'employee.user');
 
-        $items = (clone $query)->latest('tanggal')->paginate(20);
+        $orderRaw = "CASE
+            WHEN users.role IN ('staff_host_pubg', 'koordinator_pubg') THEN 1
+            WHEN users.role IN ('staff_host_ff', 'koordinator_ff') THEN 2
+            WHEN users.role IN ('staff_host_mlbb', 'koordinator_mlbb') THEN 3
+            WHEN users.role IN ('staff_host_efootball', 'koordinator_efootball') THEN 4
+            WHEN users.role IN ('staff_host_valorant', 'koordinator_valorant') THEN 5
+            ELSE 6
+        END";
+
+        $items = (clone $query)
+            ->join('employees', 'bonus_pubgs.employee_id', '=', 'employees.id')
+            ->join('users', 'employees.user_id', '=', 'users.id')
+            ->select('bonus_pubgs.*')
+            ->orderByRaw($orderRaw)
+            ->latest('bonus_pubgs.tanggal')
+            ->paginate(20);
 
         $groupedItems = $items->getCollection()->groupBy(function ($item) {
             return $item->tanggal->format('Y-m-d');
@@ -179,7 +196,7 @@ class DailyTrackingTable extends Component
             'totalView' => $totalView,
             'totalPeak' => $totalPeak,
             'totalDurasi' => $totalDurasi,
-            'today' => $today,
+            'bulan' => $this->bulan,
         ]);
     }
 }

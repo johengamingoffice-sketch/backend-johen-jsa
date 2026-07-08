@@ -35,11 +35,13 @@
                     <option value="koordinator_ff">Koordinator FF</option>
                     <option value="koordinator_mlbb">Koordinator MLBB</option>
                     <option value="koordinator_efootball">Koordinator E-football</option>
+                    <option value="koordinator_valorant">Koordinator Valorant</option>
                     <option value="staff_creative">Staff Creative</option>
                     <option value="staff_host_pubg">Staff Host PUBG</option>
                     <option value="staff_host_ff">Staff Host FF</option>
                     <option value="staff_host_mlbb">Staff Host MLBB</option>
                     <option value="staff_host_efootball">Staff Host E-football</option>
+                    <option value="staff_host_valorant">Staff Host Valorant</option>
                     <option value="staff_admin">Staff Admin</option>
                 </select>
             </div>
@@ -96,6 +98,8 @@
                                     <span class="badge-secondary">Koordinator MLBB</span>
                                 @elseif($u->role === 'koordinator_efootball')
                                     <span class="badge-secondary">Koordinator E-football</span>
+                                @elseif($u->role === 'koordinator_valorant')
+                                    <span class="badge-secondary">Koordinator Valorant</span>
                                 @elseif($u->role === 'staff_creative')
                                     <span class="badge-secondary">Staff Creative</span>
                                 @elseif($u->role === 'staff_host_pubg')
@@ -106,6 +110,8 @@
                                     <span class="badge-secondary">Staff Host MLBB</span>
                                 @elseif($u->role === 'staff_host_efootball')
                                     <span class="badge-secondary">Staff Host E-football</span>
+                                @elseif($u->role === 'staff_host_valorant')
+                                    <span class="badge-secondary">Staff Host Valorant</span>
                                 @elseif($u->role === 'staff_admin')
                                     <span class="badge-secondary">Staff Admin</span>
                                 @else
@@ -211,11 +217,13 @@
                         <option value="koordinator_ff">Koordinator FF</option>
                         <option value="koordinator_mlbb">Koordinator MLBB</option>
                         <option value="koordinator_efootball">Koordinator E-football</option>
+                        <option value="koordinator_valorant">Koordinator Valorant</option>
                         <option value="staff_creative">Staff Creative</option>
                         <option value="staff_host_pubg">Staff Host PUBG</option>
                         <option value="staff_host_ff">Staff Host FF</option>
                         <option value="staff_host_mlbb">Staff Host MLBB</option>
                         <option value="staff_host_efootball">Staff Host E-football</option>
+                        <option value="staff_host_valorant">Staff Host Valorant</option>
                         <option value="staff_admin">Staff Admin</option>
                         <option value="koordinator">Koordinator</option>
                         <option value="manager">Manager</option>
@@ -300,11 +308,13 @@
                         <option value="koordinator_ff">Koordinator FF</option>
                         <option value="koordinator_mlbb">Koordinator MLBB</option>
                         <option value="koordinator_efootball">Koordinator E-football</option>
+                        <option value="koordinator_valorant">Koordinator Valorant</option>
                         <option value="staff_creative">Staff Creative</option>
                         <option value="staff_host_pubg">Staff Host PUBG</option>
                         <option value="staff_host_ff">Staff Host FF</option>
                         <option value="staff_host_mlbb">Staff Host MLBB</option>
                         <option value="staff_host_efootball">Staff Host E-football</option>
+                        <option value="staff_host_valorant">Staff Host Valorant</option>
                         <option value="staff_admin">Staff Admin</option>
                         <option value="koordinator">Koordinator</option>
                         <option value="manager">Manager</option>

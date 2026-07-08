@@ -81,6 +81,8 @@ class User extends Authenticatable
     public const ROLE_KOORDINATOR_MLBB = 'koordinator_mlbb';
     public const ROLE_KOORDINATOR_EFOOTBALL = 'koordinator_efootball';
     public const ROLE_STAFF_HOST_EFOOTBALL = 'staff_host_efootball';
+    public const ROLE_KOORDINATOR_VALORANT = 'koordinator_valorant';
+    public const ROLE_STAFF_HOST_VALORANT = 'staff_host_valorant';
 
     public function isSuperAdmin(): bool
     {
@@ -147,6 +149,11 @@ class User extends Authenticatable
         return $this->role === self::ROLE_KOORDINATOR_EFOOTBALL;
     }
 
+    public function isKoordinatorValorant(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_VALORANT;
+    }
+
     public function isKoordinatorGame(): bool
     {
         return in_array($this->role, [
@@ -154,6 +161,7 @@ class User extends Authenticatable
             self::ROLE_KOORDINATOR_FF,
             self::ROLE_KOORDINATOR_MLBB,
             self::ROLE_KOORDINATOR_EFOOTBALL,
+            self::ROLE_KOORDINATOR_VALORANT,
         ]);
     }
 
@@ -168,6 +176,7 @@ class User extends Authenticatable
             self::ROLE_KOORDINATOR_FF,
             self::ROLE_KOORDINATOR_MLBB,
             self::ROLE_KOORDINATOR_EFOOTBALL,
+            self::ROLE_KOORDINATOR_VALORANT,
         ]);
     }
 
@@ -259,6 +268,28 @@ class User extends Authenticatable
         return $employee->positions()->whereIn('position_id', $descendantIds)->exists();
     }
 
+    public function isStaffHostValorant(): bool
+    {
+        if ($this->role === self::ROLE_STAFF_HOST_VALORANT) {
+            return true;
+        }
+
+        if ($this->role !== self::ROLE_KOORDINATOR) {
+            return false;
+        }
+
+        $employee = $this->employee;
+        if (!$employee) return false;
+
+        $root = Position::where('nama', 'Koordinator Valorant')->first();
+        if (!$root) return false;
+
+        $descendantIds = $this->getAllDescendantIdsForPosition($root);
+        $descendantIds[] = $root->id;
+
+        return $employee->positions()->whereIn('position_id', $descendantIds)->exists();
+    }
+
     public function getAllDescendantIdsForPosition(Position $position): array
     {
         $ids = [];
@@ -277,6 +308,15 @@ class User extends Authenticatable
     public function isKoordinatorAdmin(): bool
     {
         return $this->role === self::ROLE_KOORDINATOR_ADMIN;
+    }
+
+    public function isHeadOfStore(): bool
+    {
+        $employee = $this->employee;
+        if (!$employee) return false;
+        $position = $employee->mainPosition();
+        if (!$position) return false;
+        return str_contains(strtolower($position->nama), 'head of store');
     }
 
     public function roleLevel(): int
@@ -298,9 +338,11 @@ class User extends Authenticatable
             self::ROLE_KOORDINATOR_FF => 1,
             self::ROLE_KOORDINATOR_MLBB => 1,
             self::ROLE_KOORDINATOR_EFOOTBALL => 1,
+            self::ROLE_KOORDINATOR_VALORANT => 1,
             self::ROLE_STAFF_HOST_FF => 1,
             self::ROLE_STAFF_HOST_MLBB => 1,
             self::ROLE_STAFF_HOST_EFOOTBALL => 1,
+            self::ROLE_STAFF_HOST_VALORANT => 1,
             default => 0,
         };
     }

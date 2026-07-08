@@ -96,7 +96,7 @@
         </div>
     </div>
 
-    @unless(auth()->user()->isStaff() || auth()->user()->isStaffCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffAdmin() || auth()->user()->isStaffHostMlbb() || auth()->user()->isKoordinatorMlbb() || auth()->user()->isKoordinatorEfootball() || auth()->user()->isStaffHostEfootball())
+    @unless(auth()->user()->isStaff() || auth()->user()->isStaffCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffAdmin() || auth()->user()->isStaffHostMlbb() || auth()->user()->isKoordinatorMlbb() || auth()->user()->isKoordinatorEfootball() || auth()->user()->isKoordinatorValorant() || auth()->user()->isStaffHostEfootball() || auth()->user()->isStaffHostValorant())
     {{-- Quick Actions --}}
     <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 mb-6 shadow-sm">
         <h3 class="text-base font-display font-bold text-gray-900 dark:text-gray-100 mb-4">Aksi Cepat</h3>
@@ -141,7 +141,7 @@
     </div>
     @endunless
 
-    @unless(auth()->user()->isStaff() || auth()->user()->isStaffCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffAdmin() || auth()->user()->isStaffHostMlbb() || auth()->user()->isKoordinatorMlbb() || auth()->user()->isKoordinatorEfootball() || auth()->user()->isStaffHostEfootball())
+    @unless(auth()->user()->isStaff() || auth()->user()->isStaffCreative() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffAdmin() || auth()->user()->isStaffHostMlbb() || auth()->user()->isKoordinatorMlbb() || auth()->user()->isKoordinatorEfootball() || auth()->user()->isKoordinatorValorant() || auth()->user()->isStaffHostEfootball() || auth()->user()->isStaffHostValorant())
     {{-- Attendance Today --}}
     <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 mb-6 shadow-sm">
         <div class="flex items-center justify-between mb-4">
@@ -273,33 +273,7 @@
         </div>
     </div>
 
-    {{-- Latest Payroll --}}
-    @if($karyawanData['latest_payroll'] && !auth()->user()->isStaffIt())
-        <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h3 class="text-base font-display font-bold text-gray-900 dark:text-gray-100">Slip Gaji Terakhir</h3>
-                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $karyawanData['latest_payroll']['periode'] }}</p>
-                </div>
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 text-white shadow-md">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"/></svg>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/50 p-4 text-center border border-gray-100 dark:border-gray-700">
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Gaji Pokok</p>
-                    <p class="text-lg font-bold font-display text-gray-900 dark:text-gray-100 mt-0.5">Rp {{ number_format($karyawanData['latest_payroll']['gaji_pokok'], 0, ',', '.') }}</p>
-                </div>
-                <div class="rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/10 p-4 text-center border border-emerald-100 dark:border-emerald-800/30">
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Take Home Pay</p>
-                    <p class="text-lg font-bold font-display text-emerald-600 dark:text-emerald-400 mt-0.5">Rp {{ number_format($karyawanData['latest_payroll']['take_home_pay'], 0, ',', '.') }}</p>
-                </div>
-            </div>
-            <div class="mt-3 text-center">
-                <a href="{{ route('history.index') }}" class="text-xs font-semibold text-primary-600 hover:text-primary-700 hover:underline">Lihat Riwayat Gaji &rarr;</a>
-            </div>
-        </div>
-        @endif
+
 
     @else
     {{-- No employee linked --}}
@@ -449,7 +423,7 @@
         </div>
         @endunless
 
-        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt())
+        @unless(auth()->user()->isSuperAdmin() || auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt())
         <a href="{{ route('history.index') }}" class="group rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all duration-300">
             <div class="flex items-center gap-3 mb-4">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300">
@@ -491,6 +465,19 @@
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
             </div>
         </div>
+        @endunless
+
+        @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt())
+        <a href="{{ route('hris.cuti-izin') }}" class="stat-card group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 text-white shadow-lg shadow-violet-200 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+                </div>
+                <span class="badge-warning">Menunggu</span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $pendingLeaveCount }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Pengajuan Menunggu</p>
+        </a>
         @endunless
 
         @unless(auth()->user()->isKoordinator() || auth()->user()->isStaff() || auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isStaffIt())

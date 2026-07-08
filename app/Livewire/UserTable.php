@@ -43,7 +43,7 @@ class UserTable extends Component
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'regex:/^\S*$/', 'unique:users,username' . ($this->editId ? ',' . $this->editId : '')],
             'password' => [$this->editId ? 'nullable' : 'required', 'string', 'min:4', 'confirmed'],
-            'role' => ['required', 'in:super_admin,gm_ceo,manager,koordinator,staff,koordinator_it,staff_it,koordinator_creative,koordinator_admin,koordinator_pubg,koordinator_ff,koordinator_mlbb,koordinator_efootball,staff_creative,staff_host_pubg,staff_host_ff,staff_host_mlbb,staff_host_efootball,staff_admin'],
+            'role' => ['required', 'in:super_admin,gm_ceo,manager,koordinator,staff,koordinator_it,staff_it,koordinator_creative,koordinator_admin,koordinator_pubg,koordinator_ff,koordinator_mlbb,koordinator_efootball,koordinator_valorant,staff_creative,staff_host_pubg,staff_host_ff,staff_host_mlbb,staff_host_efootball,staff_host_valorant,staff_admin'],
         ];
     }
 

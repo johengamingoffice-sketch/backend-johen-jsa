@@ -87,9 +87,11 @@ class AbsensiTable extends Component
             || $user->isStaffHostFf()
             || $user->isStaffHostMlbb()
             || $user->isStaffHostEfootball()
+            || $user->isStaffHostValorant()
             || $user->isStaffAdmin()
             || ($user->isKoordinator() && $this->tab === 'saya')
-            || (($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball()) && $this->tab === 'saya');
+            || (($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant()) && $this->tab === 'saya')
+            || ($user->isHeadOfStore() && $this->tab === 'saya');
 
         if ($ownView) {
             $employee = $user->employee;
@@ -148,7 +150,16 @@ class AbsensiTable extends Component
             }
         }
 
-        if (($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball()) && $this->tab === 'tim') {
+        if (($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant()) && $this->tab === 'tim') {
+            $subordinateIds = $this->getSubordinateEmployeeIds();
+            if (!empty($subordinateIds)) {
+                $employeeQuery->whereIn('id', $subordinateIds);
+            } else {
+                $employeeQuery->whereRaw('1 = 0');
+            }
+        }
+
+        if ($user->isHeadOfStore() && $this->tab === 'tim') {
             $subordinateIds = $this->getSubordinateEmployeeIds();
             if (!empty($subordinateIds)) {
                 $employeeQuery->whereIn('id', $subordinateIds);
@@ -199,7 +210,8 @@ class AbsensiTable extends Component
         if (empty($descendantIds)) return [];
 
         return Employee::whereHas('positions', function ($q) use ($descendantIds) {
-            $q->whereIn('position_id', $descendantIds);
+            $q->whereIn('position_id', $descendantIds)
+              ->where('is_main', true);
         })->pluck('id')->toArray();
     }
 

@@ -7,7 +7,7 @@
 
 <div x-data="{ confirmAction: false, confirmTitle: '', confirmMessage: '', confirmHandler: null }">
 
-    @if(auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isKoordinatorMlbb() || auth()->user()->isKoordinatorEfootball())
+    @if(auth()->user()->isKoordinatorIt() || auth()->user()->isKoordinatorCreative() || auth()->user()->isKoordinatorAdmin() || auth()->user()->isKoordinatorPubg() || auth()->user()->isKoordinatorFf() || auth()->user()->isKoordinatorMlbb() || auth()->user()->isKoordinatorEfootball() || auth()->user()->isKoordinatorValorant() || auth()->user()->isHeadOfStore())
     {{-- Tab Navigation --}}
     <div class="mb-6">
         <div class="inline-flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
@@ -147,7 +147,7 @@
                                 $isAtasan2 = $userEmployee && $userEmployee->id === $lr->atasan2_id;
                                 $canApproveKoor = $isAtasan;
                                 $canApproveAtasan2 = $isAtasan2;
-                                $canApproveHr = $lihatSemua && !$user->isKoordinatorIt() && !$user->isKoordinatorAdmin() && !$user->isKoordinatorPubg() && !$user->isKoordinatorFf() && !$user->isKoordinatorMlbb() && !$user->isKoordinatorEfootball() && $lr->tanggal_selesai->isPast();
+                                $canApproveHr = $lihatSemua && !$user->isKoordinatorIt() && !$user->isKoordinatorAdmin() && !$user->isKoordinatorPubg() && !$user->isKoordinatorFf() && !$user->isKoordinatorMlbb() && !$user->isKoordinatorEfootball() && !$user->isKoordinatorValorant() && $lr->tanggal_selesai->isPast();
                                 $requiresPin = $user->requiresPinApproval();
                                 $isOwnRequest = $userEmployee && $userEmployee->id === $lr->employee_id;
                                 $isPending = $lr->persetujuan_koor === 'menunggu' || ($lr->atasan2_id && $lr->persetujuan_atasan2 === 'menunggu') || $lr->persetujuan_hr === 'menunggu';
