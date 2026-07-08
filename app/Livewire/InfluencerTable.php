@@ -114,6 +114,13 @@ class InfluencerTable extends Component
     {
         $items = Influencer::latest()->paginate(10);
 
-        return view('livewire.influencer-table', compact('items'));
+        $now = now()->startOfDay();
+        $aktifCount = Influencer::where('habis_kontrak', '>', $now)->count();
+        $segeraHabisCount = Influencer::where('habis_kontrak', '>', $now)
+            ->where('habis_kontrak', '<=', $now->copy()->addDays(7))
+            ->count();
+        $tidakAktifCount = Influencer::where('habis_kontrak', '<=', $now)->count();
+
+        return view('livewire.influencer-table', compact('items', 'aktifCount', 'segeraHabisCount', 'tidakAktifCount'));
     }
 }

@@ -452,10 +452,13 @@ class CutiIzinTable extends Component
             $usedCutiQuery = LeaveRequest::where('employee_id', $userEmployee->id)
                 ->where('jenis', 'cuti_tahunan')
                 ->whereYear('tanggal_mulai', now()->year)
-                ->where('persetujuan_koor', 'disetujui')
-                ->where('persetujuan_atasan2', 'disetujui');
+                ->where('persetujuan_koor', 'disetujui');
 
-            if (!$user->isStaffHostPubg() && !$user->isStaffHostFf() && !$user->isStaffIt() && !$user->isStaffHostMlbb()) {
+            if (!$user->isAnyKoordinator()) {
+                $usedCutiQuery->where('persetujuan_atasan2', 'disetujui');
+            }
+
+            if (!$user->isAnyKoordinator() && !$user->isStaffHostPubg() && !$user->isStaffHostFf() && !$user->isStaffIt() && !$user->isStaffHostMlbb()) {
                 $usedCutiQuery->where('persetujuan_hr', 'disetujui');
             }
 
@@ -486,6 +489,11 @@ class CutiIzinTable extends Component
 
     private function getAtasan2(Employee $employee, ?Employee $atasan1 = null): ?Employee
     {
+        $user = auth()->user();
+        if ($user && $user->isAnyKoordinator()) {
+            return null;
+        }
+
         $atasan1 = $atasan1 ?? $this->getAtasan($employee);
         if ($atasan1) {
             $position = $atasan1->mainPosition();

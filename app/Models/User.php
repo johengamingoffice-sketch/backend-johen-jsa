@@ -157,6 +157,20 @@ class User extends Authenticatable
         ]);
     }
 
+    public function isAnyKoordinator(): bool
+    {
+        return in_array($this->role, [
+            self::ROLE_KOORDINATOR,
+            self::ROLE_KOORDINATOR_IT,
+            self::ROLE_KOORDINATOR_CREATIVE,
+            self::ROLE_KOORDINATOR_ADMIN,
+            self::ROLE_KOORDINATOR_PUBG,
+            self::ROLE_KOORDINATOR_FF,
+            self::ROLE_KOORDINATOR_MLBB,
+            self::ROLE_KOORDINATOR_EFOOTBALL,
+        ]);
+    }
+
     public function isStaffHostFf(): bool
     {
         if ($this->role === self::ROLE_STAFF_HOST_FF) {

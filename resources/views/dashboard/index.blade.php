@@ -274,7 +274,7 @@
     </div>
 
     {{-- Latest Payroll --}}
-    @if($karyawanData['latest_payroll'])
+    @if($karyawanData['latest_payroll'] && !auth()->user()->isStaffIt())
         <div class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-5 sm:p-6 shadow-sm">
             <div class="flex items-center justify-between mb-4">
                 <div>

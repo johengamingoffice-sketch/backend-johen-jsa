@@ -190,10 +190,14 @@ class DashboardService
         $usedCutiQuery = LeaveRequest::where('employee_id', $employeeId)
             ->where('jenis', 'cuti_tahunan')
             ->whereYear('tanggal_mulai', $tahunIni)
-            ->where('persetujuan_koor', 'disetujui')
-            ->where('persetujuan_atasan2', 'disetujui');
+            ->where('persetujuan_koor', 'disetujui');
 
-        $skipHrApproval = $employee->user && ($employee->user->isStaffHostPubg() || $employee->user->isStaffHostFf() || $employee->user->isStaffIt() || $employee->user->isStaffHostMlbb());
+        $isKoordinator = $employee->user && $employee->user->isAnyKoordinator();
+        if (!$isKoordinator) {
+            $usedCutiQuery->where('persetujuan_atasan2', 'disetujui');
+        }
+
+        $skipHrApproval = $employee->user && ($employee->user->isAnyKoordinator() || $employee->user->isStaffHostPubg() || $employee->user->isStaffHostFf() || $employee->user->isStaffIt() || $employee->user->isStaffHostMlbb());
         if (!$skipHrApproval) {
             $usedCutiQuery->where('persetujuan_hr', 'disetujui');
         }

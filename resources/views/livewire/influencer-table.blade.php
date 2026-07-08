@@ -5,6 +5,39 @@
     </div>
     @endif
 
+    <div class="mb-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="stat-card">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <span class="badge-success">Aktif</span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $aktifCount }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Kontrak Aktif</p>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                </div>
+                <span class="badge-warning">Akan Berakhir</span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $segeraHabisCount }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Kontrak Segera Habis</p>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-500 text-white shadow-lg shadow-red-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+                </div>
+                <span class="badge-danger">Tidak Aktif</span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $tidakAktifCount }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Kontrak Tidak Aktif</p>
+        </div>
+    </div>
+
     <div class="card">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-4 border-b border-gray-50 dark:border-gray-800">
             <div>
@@ -26,6 +59,7 @@
                         <th class="px-6 py-3">Nama Influencer</th>
                         <th class="px-6 py-3">Mulai Kontrak</th>
                         <th class="px-6 py-3">Habis Kontrak</th>
+                        <th class="px-6 py-3">Status</th>
                         <th class="px-6 py-3">Link Sosmed</th>
                         <th class="px-6 py-3 text-center w-24">Aksi</th>
                     </tr>
@@ -38,6 +72,18 @@
                             <td class="table-cell text-gray-600 dark:text-gray-400">{{ $item->nama }}</td>
                             <td class="table-cell text-gray-600 dark:text-gray-400">{{ $item->mulai_kontrak->isoFormat('D MMMM YYYY') }}</td>
                             <td class="table-cell text-gray-600 dark:text-gray-400">{{ $item->habis_kontrak->isoFormat('D MMMM YYYY') }}</td>
+                            <td class="table-cell">
+                                @php
+                                    $sisa = now()->startOfDay()->diffInDays($item->habis_kontrak, false);
+                                @endphp
+                                @if($sisa < 0)
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Habis</span>
+                                @elseif($sisa <= 7)
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Segera Habis</span>
+                                @else
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Aktif</span>
+                                @endif
+                            </td>
                             <td class="table-cell text-gray-600 dark:text-gray-400">
                                 @if($item->link_sosmed)
                                 <a href="{{ $item->link_sosmed }}" target="_blank" rel="noopener noreferrer" class="text-primary-600 dark:text-primary-400 hover:underline inline-flex items-center gap-1">
@@ -63,7 +109,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-400 dark:text-gray-500">
+                            <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-400 dark:text-gray-500">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-10 h-10 mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
                                     <p class="font-medium">Belum ada data influencer</p>
