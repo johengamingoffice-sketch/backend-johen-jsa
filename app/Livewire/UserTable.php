@@ -43,7 +43,7 @@ class UserTable extends Component
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'regex:/^\S*$/', 'unique:users,username' . ($this->editId ? ',' . $this->editId : '')],
             'password' => [$this->editId ? 'nullable' : 'required', 'string', 'min:4', 'confirmed'],
-            'role' => ['required', 'in:super_admin,gm_ceo,manager,koordinator,staff,koordinator_it,staff_it,koordinator_creative,koordinator_admin,koordinator_pubg,koordinator_ff,koordinator_mlbb,koordinator_efootball,koordinator_valorant,staff_creative,staff_host_pubg,staff_host_ff,staff_host_mlbb,staff_host_efootball,staff_host_valorant,staff_admin'],
+            'role' => ['required', 'in:super_admin,gm_ceo,manager,koordinator,staff,koordinator_it,staff_it,koordinator_creative,koordinator_admin,koordinator_pubg,koordinator_ff,koordinator_mlbb,koordinator_efootball,koordinator_valorant,koordinator_roblox,koordinator_monkey_pubg,staff_creative,staff_host_pubg,staff_host_ff,staff_host_mlbb,staff_host_efootball,staff_host_valorant,staff_host_roblox,staff_host_monkey_pubg,staff_admin'],
         ];
     }
 
@@ -103,7 +103,8 @@ class UserTable extends Component
         ]);
 
         if ($this->linkEmployeeId) {
-            Employee::where('id', $this->linkEmployeeId)->update(['user_id' => $user->id]);
+            $user->employee_id = $this->linkEmployeeId;
+            $user->save();
         }
 
         $this->closeModal();
@@ -133,10 +134,8 @@ class UserTable extends Component
 
         $user->update($data);
 
-        Employee::where('user_id', $user->id)->update(['user_id' => null]);
-        if ($this->linkEmployeeId) {
-            Employee::where('id', $this->linkEmployeeId)->update(['user_id' => $user->id]);
-        }
+        $user->employee_id = $this->linkEmployeeId;
+        $user->save();
 
         $this->closeModal();
         $this->dispatch('notify', type: 'success', message: 'Akun berhasil diperbarui.');
@@ -161,7 +160,6 @@ class UserTable extends Component
             return;
         }
 
-        Employee::where('user_id', $user->id)->update(['user_id' => null]);
         $user->delete();
         $this->dispatch('notify', type: 'success', message: 'Akun berhasil dihapus.');
         $this->cancelDelete();
@@ -197,11 +195,12 @@ class UserTable extends Component
                 WHEN 'koordinator_ff' THEN 4
                 WHEN 'koordinator_mlbb' THEN 4
                 WHEN 'koordinator_efootball' THEN 4
+                WHEN 'koordinator_roblox' THEN 4
+                WHEN 'koordinator_monkey_pubg' THEN 4
                 ELSE 5
             END, name")->paginate(20);
-        $unlinkedEmployees = Employee::whereNull('user_id')->where('status', 'aktif')->orderBy('nama')->get();
         $allEmployees = Employee::where('status', 'aktif')->orderBy('nama')->get();
-        return view('livewire.user-table', compact('users', 'unlinkedEmployees', 'allEmployees'));
+        return view('livewire.user-table', compact('users', 'allEmployees'));
     }
 
     private function resetForm(): void

@@ -68,6 +68,9 @@ class DailyTrackingTable extends Component
             $user->isKoordinatorMlbb(), $user->isStaffHostMlbb() => 'MLBB',
             $user->isKoordinatorEfootball(), $user->isStaffHostEfootball() => 'E-football',
             $user->isKoordinatorValorant(), $user->isStaffHostValorant() => 'Valorant',
+$user->isKoordinatorRoblox(), $user->isStaffHostRoblox() => 'Roblox',
+             $user->isKoordinatorMonkeyPubg(), $user->isStaffHostMonkeyPubg() => 'Monkey PUBG',
+             $user->isKoordinatorAdmin(), $user->isStaffAdmin() => 'Admin',
             default => $employee->division?->nama ?? '-',
         };
     }
@@ -152,7 +155,7 @@ class DailyTrackingTable extends Component
                 $q->whereYear('bonus_pubgs.tanggal', substr($this->bulan, 0, 4))
                   ->whereMonth('bonus_pubgs.tanggal', substr($this->bulan, 5, 2));
             })
-            ->with('employee.division', 'employee.user');
+            ->with('employee.division', 'employee.users');
 
         $orderRaw = "CASE
             WHEN users.role IN ('staff_host_pubg', 'koordinator_pubg') THEN 1
@@ -160,12 +163,15 @@ class DailyTrackingTable extends Component
             WHEN users.role IN ('staff_host_mlbb', 'koordinator_mlbb') THEN 3
             WHEN users.role IN ('staff_host_efootball', 'koordinator_efootball') THEN 4
             WHEN users.role IN ('staff_host_valorant', 'koordinator_valorant') THEN 5
-            ELSE 6
+            WHEN users.role IN ('staff_host_roblox', 'koordinator_roblox') THEN 6
+            WHEN users.role IN ('staff_host_monkey_pubg', 'koordinator_monkey_pubg') THEN 7
+            WHEN users.role IN ('staff_admin', 'koordinator_admin') THEN 8
+            ELSE 8
         END";
 
         $items = (clone $query)
             ->join('employees', 'bonus_pubgs.employee_id', '=', 'employees.id')
-            ->join('users', 'employees.user_id', '=', 'users.id')
+            ->join('users', 'employees.id', '=', 'users.employee_id')
             ->select('bonus_pubgs.*')
             ->orderByRaw($orderRaw)
             ->latest('bonus_pubgs.tanggal')

@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Employee extends Model
 {
     protected $fillable = [
-        'user_id',
         'nik',
         'nama',
         'email',
@@ -49,9 +48,14 @@ class Employee extends Model
         ];
     }
 
-    public function user(): BelongsTo
+    public function users(): HasMany
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(User::class, 'employee_id');
+    }
+
+    public function getUserAttribute()
+    {
+        return $this->users->first();
     }
 
     public function division(): BelongsTo

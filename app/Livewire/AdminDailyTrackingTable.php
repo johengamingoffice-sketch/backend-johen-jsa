@@ -9,7 +9,7 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class PubgDailyTrackingTable extends Component
+class AdminDailyTrackingTable extends Component
 {
     use WithPagination;
 
@@ -27,9 +27,6 @@ class PubgDailyTrackingTable extends Component
     public string $nama = '';
     public string $sesi = '';
     public string $ach_sold = '';
-    public string $ach_view = '';
-    public string $peak_view = '';
-    public string $durasi = '';
     public string $insentif = '';
     public string $catatan = '';
 
@@ -41,11 +38,8 @@ class PubgDailyTrackingTable extends Component
             'tanggal' => 'required|date',
             'nik' => 'required|string|max:255',
             'nama' => 'required|string|max:255',
-            'sesi' => 'required|string|in:Pagi,Siang,Malam,Subuh',
+            'sesi' => 'required|string|in:Pagi,Malam',
             'ach_sold' => 'required|numeric|min:0',
-            'ach_view' => 'required|numeric|min:0',
-            'peak_view' => 'required|numeric|min:0',
-            'durasi' => 'required|numeric|min:0',
             'catatan' => 'nullable|string',
         ];
     }
@@ -58,11 +52,6 @@ class PubgDailyTrackingTable extends Component
             'nama.required' => 'Nama wajib diisi.',
             'sesi.required' => 'Sesi wajib diisi.',
             'ach_sold.required' => 'Sold wajib diisi.',
-            'ach_view.required' => 'View wajib diisi.',
-            'peak_view.required' => 'Peak View wajib diisi.',
-            'durasi.required' => 'Durasi wajib diisi.',
-            'durasi.numeric' => 'Durasi harus berupa angka.',
-            'durasi.min' => 'Durasi minimal 0.',
         ];
     }
 
@@ -111,9 +100,6 @@ class PubgDailyTrackingTable extends Component
         $this->nama = $item->nama;
         $this->sesi = $item->sesi ?? '';
         $this->ach_sold = (string) $item->ach_sold;
-        $this->ach_view = (string) $item->ach_view;
-        $this->peak_view = (string) $item->peak_view;
-        $this->durasi = (string) (int) $item->durasi;
         $this->insentif = (string) ($item->ach_sold * 100000);
         $this->catatan = $item->catatan ?? '';
         $this->showEditModal = true;
@@ -140,7 +126,7 @@ class PubgDailyTrackingTable extends Component
         $sold = str_replace(',', '.', $this->ach_sold);
 
         $user = auth()->user();
-        $status = $user->isKoordinatorGame() ? 'disetujui' : 'pending';
+        $status = $user->isKoordinatorAdmin() ? 'disetujui' : 'pending';
 
         BonusPubg::create([
             'employee_id' => $employee->id,
@@ -149,9 +135,6 @@ class PubgDailyTrackingTable extends Component
             'nama' => $this->nama,
             'sesi' => $this->sesi,
             'ach_sold' => $sold,
-            'ach_view' => str_replace(',', '.', $this->ach_view),
-            'peak_view' => str_replace(',', '.', $this->peak_view),
-            'durasi' => str_replace(',', '.', $this->durasi),
             'insentif' => $sold * 100000,
             'catatan' => $this->catatan ?: null,
             'status' => $status,
@@ -159,7 +142,7 @@ class PubgDailyTrackingTable extends Component
 
         $this->closeModal();
         $message = $status === 'pending'
-            ? 'Data berhasil ditambahkan. Menunggu persetujuan koordinator.'
+            ? 'Data berhasil ditambahkan. Menunggu persetujuan koordinator admin.'
             : 'Data berhasil ditambahkan.';
         $this->dispatch('notify', type: 'success', message: $message);
     }
@@ -176,9 +159,6 @@ class PubgDailyTrackingTable extends Component
             'nama' => $this->nama,
             'sesi' => $this->sesi,
             'ach_sold' => $sold,
-            'ach_view' => str_replace(',', '.', $this->ach_view),
-            'peak_view' => str_replace(',', '.', $this->peak_view),
-            'durasi' => str_replace(',', '.', $this->durasi),
             'insentif' => $sold * 100000,
             'catatan' => $this->catatan ?: null,
         ]);
@@ -190,7 +170,7 @@ class PubgDailyTrackingTable extends Component
     private function canModify(BonusPubg $item): bool
     {
         $user = auth()->user();
-        if ($user->isKoordinatorGame()) return true;
+        if ($user->isKoordinatorAdmin()) return true;
         if ($item->status !== 'pending') return false;
         $employee = $user->employee;
         return $employee && $item->employee_id === $employee->id;
@@ -223,7 +203,7 @@ class PubgDailyTrackingTable extends Component
     public function setujui(int $id): void
     {
         $user = auth()->user();
-        if (!$user->isKoordinatorGame()) return;
+        if (!$user->isKoordinatorAdmin()) return;
 
         $item = BonusPubg::findOrFail($id);
         $subordinateIds = $this->getSubordinateEmployeeIds();
@@ -239,7 +219,7 @@ class PubgDailyTrackingTable extends Component
     public function tolak(int $id): void
     {
         $user = auth()->user();
-        if (!$user->isKoordinatorGame()) return;
+        if (!$user->isKoordinatorAdmin()) return;
 
         $item = BonusPubg::findOrFail($id);
         $subordinateIds = $this->getSubordinateEmployeeIds();
@@ -249,22 +229,6 @@ class PubgDailyTrackingTable extends Component
         $this->dispatch('notify', type: 'success', message: 'Data ditolak.');
     }
 
-    public function getDivisiName(): string
-    {
-        $user = auth()->user();
-
-        return match (true) {
-            $user->isKoordinatorMlbb(), $user->isStaffHostMlbb() => 'MLBB',
-            $user->isKoordinatorEfootball(), $user->isStaffHostEfootball() => 'E-football',
-            $user->isKoordinatorValorant(), $user->isStaffHostValorant() => 'Valorant',
-            $user->isKoordinatorRoblox(), $user->isStaffHostRoblox() => 'Roblox',
-             $user->isKoordinatorMonkeyPubg(), $user->isStaffHostMonkeyPubg() => 'Monkey PUBG',
-            $user->isKoordinatorFf(), $user->isStaffHostFf() => 'Free Fire',
-            $user->isKoordinatorPubg(), $user->isStaffHostPubg() => 'PUBG',
-            default => 'PUBG',
-        };
-    }
-
     public function render()
     {
         $user = auth()->user();
@@ -272,7 +236,7 @@ class PubgDailyTrackingTable extends Component
 
         $query = BonusPubg::query();
 
-        if ($user->isKoordinatorGame()) {
+        if ($user->isKoordinatorAdmin()) {
             if ($userEmployee) {
                 $employeeIds = [$userEmployee->id];
                 $subordinateIds = $this->getSubordinateEmployeeIds();
@@ -300,58 +264,34 @@ class PubgDailyTrackingTable extends Component
         ->latest('tanggal')
         ->paginate(10);
 
-        $groupedItems = $items->getCollection()->groupBy(function ($item) {
-            return $item->tanggal->format('Y-m-d');
-        });
+        $totalSold = 0;
+        if ($userEmployee) {
+            $statsQuery = BonusPubg::query();
+            if ($user->isKoordinatorAdmin()) {
+                $employeeIds = [$userEmployee->id];
+                $subordinateIds = $this->getSubordinateEmployeeIds();
+                if (!empty($subordinateIds)) {
+                    $employeeIds = array_merge($employeeIds, $subordinateIds);
+                }
+                $statsQuery->whereIn('employee_id', $employeeIds);
+            } else {
+                $statsQuery->where('employee_id', $userEmployee->id);
+            }
+            $totalSold = $statsQuery->sum('ach_sold');
+        }
 
-        $employees = Employee::when($user->isKoordinatorGame(), function ($q) use ($userEmployee) {
-            $subordinateIds = $this->getSubordinateEmployeeIds();
+        if ($user->isKoordinatorAdmin()) {
             $ids = $userEmployee ? [$userEmployee->id] : [];
+            $subordinateIds = $this->getSubordinateEmployeeIds();
             if (!empty($subordinateIds)) {
                 $ids = array_merge($ids, $subordinateIds);
             }
-            $q->whereIn('id', $ids);
-        })->orderBy('nama')->get();
-
-        $totalSold = 0;
-        $totalView = 0;
-        $totalPeak = 0;
-        $totalDurasi = 0;
-        $soldBreakdown = collect();
-        $viewBreakdown = collect();
-        $peakBreakdown = collect();
-        $durasiBreakdown = collect();
-        if (($user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball() || $user->isStaffHostValorant() || $user->isStaffHostRoblox() || $user->isStaffHostMonkeyPubg() || $user->isKoordinatorGame()) && $userEmployee) {
-            $statsQuery = BonusPubg::query();
-            $employeeIds = [$userEmployee->id];
-            $subordinateIds = $this->getSubordinateEmployeeIds();
-            if (!empty($subordinateIds)) {
-                $employeeIds = array_merge($employeeIds, $subordinateIds);
-            }
-            $statsQuery->whereIn('employee_id', $employeeIds);
-
-            $totalSold = (clone $statsQuery)->sum('ach_sold');
-            $totalView = (clone $statsQuery)->sum('ach_view');
-            $totalPeak = (clone $statsQuery)->sum('peak_view');
-            $totalDurasi = (clone $statsQuery)->sum('durasi');
-
-            $soldBreakdown = (clone $statsQuery)
-                ->selectRaw('nama, SUM(ach_sold) as total')
-                ->groupBy('nama')->orderByDesc('total')->get();
-            $viewBreakdown = (clone $statsQuery)
-                ->selectRaw('nama, SUM(ach_view) as total')
-                ->groupBy('nama')->orderByDesc('total')->get();
-            $peakBreakdown = (clone $statsQuery)
-                ->selectRaw('nama, SUM(peak_view) as total')
-                ->groupBy('nama')->orderByDesc('total')->get();
-            $durasiBreakdown = (clone $statsQuery)
-                ->selectRaw('nama, SUM(durasi) as total')
-                ->groupBy('nama')->orderByDesc('total')->get();
+            $employees = Employee::whereIn('id', $ids)->orderBy('nama')->get();
+        } else {
+            $employees = Employee::where('id', $userEmployee?->id)->orderBy('nama')->get();
         }
 
-        $divisi = $this->getDivisiName();
-
-        return view('livewire.pubg-daily-tracking-table', compact('items', 'groupedItems', 'employees', 'totalSold', 'totalView', 'totalPeak', 'totalDurasi', 'soldBreakdown', 'viewBreakdown', 'peakBreakdown', 'durasiBreakdown', 'divisi'));
+        return view('livewire.admin-daily-tracking-table', compact('items', 'employees', 'totalSold'));
     }
 
     private function getSubordinateEmployeeIds(): array
@@ -373,24 +313,11 @@ class PubgDailyTrackingTable extends Component
         }
 
         $user = auth()->user();
-        $roleMap = [
-            'isKoordinatorFf' => User::ROLE_STAFF_HOST_FF,
-            'isKoordinatorPubg' => User::ROLE_STAFF_HOST_PUBG,
-            'isKoordinatorMlbb' => User::ROLE_STAFF_HOST_MLBB,
-            'isKoordinatorEfootball' => User::ROLE_STAFF_HOST_EFOOTBALL,
-            'isKoordinatorValorant' => User::ROLE_STAFF_HOST_VALORANT,
-            'isKoordinatorRoblox' => User::ROLE_STAFF_HOST_ROBLOX,
-            'isKoordinatorMonkeyPubg' => User::ROLE_STAFF_HOST_MONKEY_PUBG,
-        ];
-
-        foreach ($roleMap as $method => $staffRole) {
-            if ($user->$method()) {
-                $roleIds = Employee::whereHas('users', function ($q) use ($staffRole) {
-                    $q->where('role', $staffRole);
-                })->pluck('id')->toArray();
-                $ids = array_merge($ids, $roleIds);
-                break;
-            }
+        if ($user->isKoordinatorAdmin()) {
+            $roleIds = Employee::whereHas('users', function ($q) {
+                $q->where('role', User::ROLE_STAFF_ADMIN);
+            })->pluck('id')->toArray();
+            $ids = array_merge($ids, $roleIds);
         }
 
         return array_values(array_unique($ids));
@@ -415,9 +342,6 @@ class PubgDailyTrackingTable extends Component
         $this->nama = '';
         $this->sesi = '';
         $this->ach_sold = '';
-        $this->ach_view = '';
-        $this->peak_view = '';
-        $this->durasi = '';
         $this->insentif = '';
         $this->catatan = '';
         $this->resetErrorBag();

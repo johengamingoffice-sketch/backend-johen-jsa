@@ -105,9 +105,9 @@
                             <td class="table-cell font-medium text-gray-900 dark:text-gray-100">{{ $item->nama }}</td>
                             <td class="table-cell text-gray-600 dark:text-gray-400">{{ $item->sesi ?? '-' }}</td>
                             <td class="table-cell text-right font-mono text-sm text-gray-700 dark:text-gray-300">{{ number_format($item->ach_sold, 0) }}</td>
-                            <td class="table-cell text-right font-mono text-sm text-gray-700 dark:text-gray-300">{{ number_format($item->ach_view, 0) }}</td>
-                            <td class="table-cell text-right font-mono text-sm text-gray-700 dark:text-gray-300">{{ number_format($item->peak_view, 0) }}</td>
-                            <td class="table-cell text-center text-gray-600 dark:text-gray-400">{{ $item->durasi ? number_format($item->durasi, 0) . ' Jam' : '-' }}</td>
+                            <td class="table-cell text-right font-mono text-sm text-gray-700 dark:text-gray-300">{{ $item->divisi === 'Admin' ? '-' : number_format($item->ach_view, 0) }}</td>
+                            <td class="table-cell text-right font-mono text-sm text-gray-700 dark:text-gray-300">{{ $item->divisi === 'Admin' ? '-' : number_format($item->peak_view, 0) }}</td>
+                            <td class="table-cell text-center text-gray-600 dark:text-gray-400">{{ $item->divisi === 'Admin' ? '-' : ($item->durasi ? number_format($item->durasi, 0) . ' Jam' : '-') }}</td>
                             <td class="table-cell text-gray-500 dark:text-gray-400 max-w-[150px] truncate">{{ $item->catatan ?? '-' }}</td>
                         </tr>
                         @endforeach

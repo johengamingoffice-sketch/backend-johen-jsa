@@ -99,7 +99,7 @@ class EmployeeController extends Controller
 
     public function update(StoreEmployeeRequest $request, Employee $employee)
     {
-        if ($employee->user_id !== auth()->id()) {
+        if (auth()->user()->employee_id !== $employee->id) {
             Gate::authorize('update-data');
         }
         $employee->update($request->validated());
@@ -126,7 +126,7 @@ class EmployeeController extends Controller
 
     public function uploadPhoto(Request $request, Employee $employee)
     {
-        if ($employee->user_id !== auth()->id()) {
+        if (auth()->user()->employee_id !== $employee->id) {
             Gate::authorize('update-data');
         }
         $request->validate([
@@ -150,7 +150,7 @@ class EmployeeController extends Controller
 
     public function storeDocument(Request $request, Employee $employee)
     {
-        if ($employee->user_id !== auth()->id()) {
+        if (auth()->user()->employee_id !== $employee->id) {
             Gate::authorize('create-data');
         }
         $request->validate([
@@ -190,7 +190,7 @@ class EmployeeController extends Controller
 
     public function destroyDocument(Employee $employee, EmployeeDocument $document)
     {
-        if ($employee->user_id !== auth()->id()) {
+        if (auth()->user()->employee_id !== $employee->id) {
             Gate::authorize('delete-data');
         }
         $filePath = 'documents/' . $document->file;
@@ -207,7 +207,7 @@ class EmployeeController extends Controller
 
     public function storeContract(Request $request, Employee $employee)
     {
-        if ($employee->user_id !== auth()->id()) {
+        if (auth()->user()->employee_id !== $employee->id) {
             Gate::authorize('create-data');
         }
         $request->validate([
@@ -241,7 +241,7 @@ class EmployeeController extends Controller
 
     public function destroyContract(Employee $employee, EmployeeContract $contract)
     {
-        if ($employee->user_id !== auth()->id()) {
+        if (auth()->user()->employee_id !== $employee->id) {
             Gate::authorize('delete-data');
         }
         $contract->delete();
@@ -252,7 +252,7 @@ class EmployeeController extends Controller
 
     public function storePositionHistory(Request $request, Employee $employee)
     {
-        if ($employee->user_id !== auth()->id()) {
+        if (auth()->user()->employee_id !== $employee->id) {
             Gate::authorize('create-data');
         }
         $request->validate([
@@ -280,7 +280,7 @@ class EmployeeController extends Controller
 
     public function destroyPositionHistory(Employee $employee, PositionHistory $positionHistory)
     {
-        if ($employee->user_id !== auth()->id()) {
+        if (auth()->user()->employee_id !== $employee->id) {
             Gate::authorize('delete-data');
         }
         $positionHistory->delete();
@@ -291,7 +291,7 @@ class EmployeeController extends Controller
 
     public function updateContract(Request $request, Employee $employee, EmployeeContract $contract)
     {
-        if ($employee->user_id !== auth()->id()) {
+        if (auth()->user()->employee_id !== $employee->id) {
             Gate::authorize('update-data');
         }
         $request->validate([

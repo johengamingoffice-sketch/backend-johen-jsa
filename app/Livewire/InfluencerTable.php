@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Influencer;
+use App\Models\InfluencerPembayaran;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -13,20 +14,25 @@ class InfluencerTable extends Component
     public bool $showModal = false;
     public ?int $editId = null;
 
+    public bool $showPaymentModal = false;
+    public ?int $paymentInfluencerId = null;
+
     public string $no_kontrak = '';
     public string $nama = '';
     public string $mulai_kontrak = '';
     public string $habis_kontrak = '';
     public string $link_sosmed = '';
+    public string $biaya = '';
 
     protected function rules(): array
     {
         return [
-            'no_kontrak' => 'required|string|max:255',
+            'no_kontrak' => 'nullable|string|max:255',
             'nama' => 'required|string|max:255',
             'mulai_kontrak' => 'required|date',
             'habis_kontrak' => 'required|date|after_or_equal:mulai_kontrak',
             'link_sosmed' => 'nullable|string|max:500',
+            'biaya' => 'nullable|numeric|min:0',
         ];
     }
 
@@ -56,6 +62,7 @@ class InfluencerTable extends Component
         $this->mulai_kontrak = $item->mulai_kontrak->format('Y-m-d');
         $this->habis_kontrak = $item->habis_kontrak->format('Y-m-d');
         $this->link_sosmed = $item->link_sosmed ?? '';
+        $this->biaya = $item->biaya ? (string) $item->biaya : '';
         $this->showModal = true;
     }
 
@@ -71,16 +78,19 @@ class InfluencerTable extends Component
                 'mulai_kontrak' => $this->mulai_kontrak,
                 'habis_kontrak' => $this->habis_kontrak,
                 'link_sosmed' => $this->link_sosmed ?: null,
+                'biaya' => $this->biaya ?: null,
             ]);
             session()->flash('message', 'Data influencer berhasil diperbarui.');
         } else {
-            Influencer::create([
+            $influencer = Influencer::create([
                 'no_kontrak' => $this->no_kontrak,
                 'nama' => $this->nama,
                 'mulai_kontrak' => $this->mulai_kontrak,
                 'habis_kontrak' => $this->habis_kontrak,
                 'link_sosmed' => $this->link_sosmed ?: null,
+                'biaya' => $this->biaya ?: null,
             ]);
+            $this->generatePayments($influencer);
             session()->flash('message', 'Data influencer berhasil ditambahkan.');
         }
 
@@ -91,6 +101,55 @@ class InfluencerTable extends Component
     {
         Influencer::findOrFail($id)->delete();
         session()->flash('message', 'Data influencer berhasil dihapus.');
+    }
+
+    public function openPaymentModal(int $id): void
+    {
+        $this->paymentInfluencerId = $id;
+        $influencer = Influencer::find($id);
+        if ($influencer && $influencer->payments()->count() === 0) {
+            $this->generatePayments($influencer);
+        }
+        $this->showPaymentModal = true;
+    }
+
+    public function closePaymentModal(): void
+    {
+        $this->showPaymentModal = false;
+        $this->paymentInfluencerId = null;
+    }
+
+    public function markAsPaid(int $paymentId): void
+    {
+        $payment = InfluencerPembayaran::findOrFail($paymentId);
+        $payment->update([
+            'status' => 'lunas',
+            'tanggal_bayar' => now()->format('Y-m-d'),
+        ]);
+        $this->dispatch('notify', type: 'success', message: 'Pembayaran ditandai lunas.');
+    }
+
+    private function generatePayments(Influencer $influencer): void
+    {
+        $start = $influencer->mulai_kontrak->copy();
+        $end = $influencer->habis_kontrak;
+        $jumlah = $influencer->biaya;
+
+        $totalMonths = $start->diffInMonths($end) + 1;
+
+        for ($i = 0; $i < $totalMonths; $i++) {
+            $current = $start->copy()->addMonths($i);
+            $hari = min($start->day, $current->daysInMonth);
+            $jatuhTempo = $current->copy()->day($hari);
+
+            InfluencerPembayaran::create([
+                'influencer_id' => $influencer->id,
+                'bulan_ke' => $i + 1,
+                'tanggal_jatuh_tempo' => $jatuhTempo,
+                'jumlah' => $jumlah,
+                'status' => 'pending',
+            ]);
+        }
     }
 
     public function close(): void
@@ -107,12 +166,13 @@ class InfluencerTable extends Component
         $this->mulai_kontrak = '';
         $this->habis_kontrak = '';
         $this->link_sosmed = '';
+        $this->biaya = '';
         $this->resetErrorBag();
     }
 
     public function render()
     {
-        $items = Influencer::latest()->paginate(10);
+        $items = Influencer::with('payments')->latest()->paginate(10);
 
         $now = now()->startOfDay();
         $aktifCount = Influencer::where('habis_kontrak', '>', $now)->count();
@@ -121,6 +181,20 @@ class InfluencerTable extends Component
             ->count();
         $tidakAktifCount = Influencer::where('habis_kontrak', '<=', $now)->count();
 
-        return view('livewire.influencer-table', compact('items', 'aktifCount', 'segeraHabisCount', 'tidakAktifCount'));
+        $upcomingPayments = InfluencerPembayaran::with('influencer')
+            ->where('status', 'pending')
+            ->whereBetween('tanggal_jatuh_tempo', [$now, $now->copy()->addDays(7)])
+            ->get();
+
+        $paymentRecords = $this->paymentInfluencerId
+            ? InfluencerPembayaran::where('influencer_id', $this->paymentInfluencerId)
+                ->orderBy('bulan_ke')
+                ->get()
+            : collect();
+
+        return view('livewire.influencer-table', compact(
+            'items', 'aktifCount', 'segeraHabisCount', 'tidakAktifCount',
+            'upcomingPayments', 'paymentRecords',
+        ));
     }
 }

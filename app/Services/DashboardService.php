@@ -74,7 +74,7 @@ class DashboardService
             })->count();
     }
 
-    public function getPendingLeaveRequests(int $limit = 5, $user = null): array
+    public function getPendingLeaveRequests(int $limit = 3, $user = null): array
     {
         return $this->applyAtasanFilter(LeaveRequest::with('employee'), $user)
             ->where(function ($q) {
@@ -102,7 +102,7 @@ class DashboardService
         $userEmployee = $user->employee;
         if (!$userEmployee) return $query;
 
-        if ($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf()) {
+        if ($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorRoblox() || $user->isKoordinatorMonkeyPubg()) {
             $query->where(function ($q) use ($userEmployee) {
                 $q->where('atasan_id', $userEmployee->id)
                   ->orWhere('atasan2_id', $userEmployee->id);
@@ -197,7 +197,7 @@ class DashboardService
             $usedCutiQuery->where('persetujuan_atasan2', 'disetujui');
         }
 
-        $skipHrApproval = $employee->user && ($employee->user->isAnyKoordinator() || $employee->user->isStaffHostPubg() || $employee->user->isStaffHostFf() || $employee->user->isStaffIt() || $employee->user->isStaffHostMlbb());
+        $skipHrApproval = $employee->user && ($employee->user->isAnyKoordinator() || $employee->user->isStaffAdmin() || $employee->user->isStaffHostPubg() || $employee->user->isStaffHostFf() || $employee->user->isStaffIt() || $employee->user->isStaffHostMlbb() || $employee->user->isStaffHostEfootball() || $employee->user->isStaffHostValorant() || $employee->user->isStaffHostRoblox() || $employee->user->isStaffHostMonkeyPubg());
         if (!$skipHrApproval) {
             $usedCutiQuery->where('persetujuan_hr', 'disetujui');
         }

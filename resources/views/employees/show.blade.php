@@ -229,7 +229,7 @@
                         @endif
                     </div>
                     <div class="flex items-center gap-2.5">
-                        @if(auth()->user()->can('update-data') || $employee->user_id === auth()->id())
+                        @if(auth()->user()->can('update-data') || auth()->user()->employee_id === $employee->id)
                                     <button @click="editModal = true" class="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             Edit Informasi
@@ -269,7 +269,7 @@
 
             <div class="px-7 pb-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 -mt-12 sm:-mt-20">
                 <div class="w-[120px] h-[120px] sm:w-[140px] sm:h-[140px] rounded-2xl bg-gray-100 dark:bg-gray-700 border-4 border-white dark:border-gray-800 shadow-xl flex-shrink-0 overflow-hidden relative group">
-                    @php $canEditPhoto = auth()->user()->can('update-data') || $employee->user_id === auth()->id(); @endphp
+                    @php $canEditPhoto = auth()->user()->can('update-data') || auth()->user()->employee_id === $employee->id; @endphp
                     @if($canEditPhoto)
                     <form method="POST" action="{{ route('hris.employees.upload-photo', $employee) }}" enctype="multipart/form-data" id="photo-form-{{ $employee->id }}">
                         @csrf

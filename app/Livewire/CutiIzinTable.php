@@ -98,7 +98,7 @@ class CutiIzinTable extends Component
             : $employee->mainPosition();
 
         $atasan = $this->getAtasan($employee, $selectedPosition);
-        $atasan2 = $this->getAtasan2($employee, $atasan);
+        $atasan2 = $this->getAtasan2($employee, $atasan, $selectedPosition);
 
         $hasAtasan2 = $atasan2 !== null;
 
@@ -253,7 +253,7 @@ class CutiIzinTable extends Component
                 abort(403, 'Hanya atasan 2 yang dapat menyetujui pengajuan ini.');
             }
         } elseif ($level === 'persetujuan_hr') {
-            if ($user->isKoordinatorIt() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant() || (!$user->isSuperAdmin() && !$user->isGmCeo() && $user->id !== 4 && !$this->isHr($user))) {
+            if ($user->isKoordinatorIt() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant() || $user->isKoordinatorRoblox() || $user->isKoordinatorMonkeyPubg() || (!$user->isSuperAdmin() && !$user->isGmCeo() && $user->id !== 4 && !$this->isHr($user))) {
                 abort(403, 'Hanya HR yang dapat menyetujui persetujuan HR.');
             }
         } else {
@@ -265,14 +265,14 @@ class CutiIzinTable extends Component
     {
         $user = auth()->user();
 
-        if ($user->isStaff() || $user->isStaffCreative() || $user->isKoordinatorCreative() || $user->isKoordinatorIt() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant() || $user->isStaffIt() || $user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball() || $user->isStaffHostValorant() || $user->isStaffAdmin()) {
+        if ($user->isStaff() || $user->isStaffCreative() || $user->isKoordinatorCreative() || $user->isKoordinatorIt() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant() || $user->isKoordinatorRoblox() || $user->isKoordinatorMonkeyPubg() || $user->isStaffIt() || $user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball() || $user->isStaffHostValorant() || $user->isStaffHostRoblox() || $user->isStaffHostMonkeyPubg() || $user->isStaffAdmin()) {
             $employee = $user->employee;
             if (!$employee) {
                 $this->dispatch('notify', type: 'error', message: 'Akun Anda tidak terhubung ke data karyawan.');
                 return;
             }
 
-            if ($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant()) {
+            if ($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant() || $user->isKoordinatorRoblox() || $user->isKoordinatorMonkeyPubg()) {
                 $subordinateIds = $this->getSubordinateEmployeeIds();
                 $allowedIds = array_merge([$employee->id], $subordinateIds);
                 $lr = LeaveRequest::where('id', $id)->whereIn('employee_id', $allowedIds)->first();
@@ -303,13 +303,13 @@ class CutiIzinTable extends Component
         $user = auth()->user();
         $lr = LeaveRequest::findOrFail($this->deleteId);
 
-        if ($user->isStaff() || $user->isStaffCreative() || $user->isKoordinatorCreative() || $user->isKoordinatorIt() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant() || $user->isStaffIt() || $user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball() || $user->isStaffHostValorant() || $user->isStaffAdmin()) {
+        if ($user->isStaff() || $user->isStaffCreative() || $user->isKoordinatorCreative() || $user->isKoordinatorIt() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant() || $user->isKoordinatorRoblox() || $user->isKoordinatorMonkeyPubg() || $user->isStaffIt() || $user->isStaffHostPubg() || $user->isStaffHostFf() || $user->isStaffHostMlbb() || $user->isStaffHostEfootball() || $user->isStaffHostValorant() || $user->isStaffHostRoblox() || $user->isStaffHostMonkeyPubg() || $user->isStaffAdmin()) {
             $employee = $user->employee;
             if (!$employee) {
                 abort(403);
             }
 
-            if ($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant()) {
+            if ($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant() || $user->isKoordinatorRoblox() || $user->isKoordinatorMonkeyPubg()) {
                 $subordinateIds = $this->getSubordinateEmployeeIds();
                 $allowedIds = array_merge([$employee->id], $subordinateIds);
                 if (!in_array($lr->employee_id, $allowedIds)) {
@@ -380,7 +380,7 @@ class CutiIzinTable extends Component
         if (!$position) return null;
         $atasan1 = $this->getAtasan(auth()->user()->employee, $position);
         if (!$atasan1) return null;
-        $atasan2 = $this->getAtasan2(auth()->user()->employee, $atasan1);
+        $atasan2 = $this->getAtasan2(auth()->user()->employee, $atasan1, $position);
         return $atasan2?->nama;
     }
 
@@ -396,12 +396,23 @@ class CutiIzinTable extends Component
 
         $baseQuery = LeaveRequest::query();
 
-        if ($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant()) {
+        if ($user->isKoordinatorIt() || $user->isKoordinatorCreative() || $user->isKoordinatorAdmin() || $user->isKoordinatorPubg() || $user->isKoordinatorFf() || $user->isKoordinatorMlbb() || $user->isKoordinatorEfootball() || $user->isKoordinatorValorant() || $user->isKoordinatorRoblox() || $user->isKoordinatorMonkeyPubg()) {
             if ($userEmployee) {
                 if ($this->tab === 'saya') {
                     $baseQuery->where('employee_id', $userEmployee->id);
                 } else {
                     $baseQuery->where('atasan_id', $userEmployee->id);
+
+                    $positionName = $this->getRolePositionName();
+                    if ($positionName) {
+                        $position = Position::where('nama', $positionName)->first();
+                        if ($position) {
+                            $descendantIds = $this->getAllDescendantIds($position);
+                            if (!empty($descendantIds)) {
+                                $baseQuery->whereIn('selected_position_id', $descendantIds);
+                            }
+                        }
+                    }
                 }
             } else {
                 $baseQuery->whereRaw('1 = 0');
@@ -473,7 +484,7 @@ class CutiIzinTable extends Component
                 $usedCutiQuery->where('persetujuan_atasan2', 'disetujui');
             }
 
-            if (!$user->isAnyKoordinator() && !$user->isStaffHostPubg() && !$user->isStaffHostFf() && !$user->isStaffIt() && !$user->isStaffHostMlbb() && !$user->isStaffHostEfootball() && !$user->isStaffHostValorant()) {
+            if (!$user->isAnyKoordinator() && !$user->isStaffAdmin() && !$user->isStaffHostPubg() && !$user->isStaffHostFf() && !$user->isStaffIt() && !$user->isStaffHostMlbb() && !$user->isStaffHostEfootball() && !$user->isStaffHostValorant() && !$user->isStaffHostRoblox() && !$user->isStaffHostMonkeyPubg()) {
                 $usedCutiQuery->where('persetujuan_hr', 'disetujui');
             }
 
@@ -502,24 +513,32 @@ class CutiIzinTable extends Component
         return null;
     }
 
-    private function getAtasan2(Employee $employee, ?Employee $atasan1 = null): ?Employee
+    private function getAtasan2(Employee $employee, ?Employee $atasan1 = null, ?Position $position = null): ?Employee
     {
         $user = auth()->user();
         if ($user && $user->isAnyKoordinator()) {
             return null;
         }
 
-        $atasan1 = $atasan1 ?? $this->getAtasan($employee);
-        if ($atasan1) {
-            $position = $atasan1->mainPosition();
-            if ($position && $position->parent_id) {
-                $current = $position->parent;
+        $atasan1 = $atasan1 ?? $this->getAtasan($employee, $position);
+        if (!$atasan1) return null;
+
+        $pos = $position ?? $employee->mainPosition();
+        if (!$pos) return null;
+
+        $current = $pos->parent;
+        while ($current) {
+            $emp = $current->employees()->first();
+            if ($emp && $emp->id === $atasan1->id) {
+                $current = $current->parent;
                 while ($current) {
                     $atasan2 = $current->employees()->first();
                     if ($atasan2) return $atasan2;
                     $current = $current->parent;
                 }
+                break;
             }
+            $current = $current->parent;
         }
 
         $atasan2Field = trim($employee->atasan2 ?? '');
@@ -546,6 +565,24 @@ class CutiIzinTable extends Component
             $q->whereIn('position_id', $descendantIds)
               ->where('is_main', true);
         })->pluck('id')->toArray();
+    }
+
+    private function getRolePositionName(): ?string
+    {
+        $user = auth()->user();
+        return match (true) {
+            $user->isKoordinatorPubg() => 'Koordinator Johen PUBG',
+            $user->isKoordinatorFf() => 'Koordinator Free Fire',
+            $user->isKoordinatorMlbb() => 'Koordinator MLBB',
+            $user->isKoordinatorEfootball() => 'Koordinator E-football',
+            $user->isKoordinatorValorant() => 'Koordinator Valorant',
+            $user->isKoordinatorRoblox() => 'Koordinator Roblox',
+            $user->isKoordinatorMonkeyPubg() => 'Koordinator Monkey PUBG',
+            $user->isKoordinatorIt() => 'Koordinator IT',
+            $user->isKoordinatorCreative() => 'Koordinator Creative',
+            $user->isKoordinatorAdmin() => 'Koordinator Admin',
+            default => null,
+        };
     }
 
     private function getAllDescendantIds(Position $position): array

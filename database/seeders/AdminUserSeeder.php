@@ -35,27 +35,25 @@ class AdminUserSeeder extends Seeder
         User::where('username', 'gm')->where('role', 'staff')->update(['role' => 'gm_ceo']);
 
         if (!$admin->employee) {
-            Employee::firstOrCreate(
-                ['user_id' => $admin->id],
-                [
-                    'nik' => 'ADM001',
-                    'nama' => $admin->name,
-                    'email' => $admin->email,
-                    'status' => 'aktif',
-                ]
-            );
+            $emp = Employee::create([
+                'nik' => 'ADM001',
+                'nama' => $admin->name,
+                'email' => $admin->email,
+                'status' => 'aktif',
+            ]);
+            $admin->employee_id = $emp->id;
+            $admin->save();
         }
 
         if (!$gm->employee) {
-            Employee::firstOrCreate(
-                ['user_id' => $gm->id],
-                [
-                    'nik' => 'GM001',
-                    'nama' => $gm->name,
-                    'email' => $gm->email,
-                    'status' => 'aktif',
-                ]
-            );
+            $emp = Employee::create([
+                'nik' => 'GM001',
+                'nama' => $gm->name,
+                'email' => $gm->email,
+                'status' => 'aktif',
+            ]);
+            $gm->employee_id = $emp->id;
+            $gm->save();
         }
     }
 }

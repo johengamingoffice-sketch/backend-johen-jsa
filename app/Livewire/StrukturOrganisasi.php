@@ -308,6 +308,8 @@ class StrukturOrganisasi extends Component
         $allPositions = Position::where('is_active', true)->with('employees')->get();
 
         $roots = $this->buildTree($allPositions, null);
+        $roots = $this->splitMonkeyDexNodes($roots);
+        $roots = $this->sortTreeByName($roots);
 
         $flatPositions = $allPositions->mapWithKeys(function ($pos) {
             $emp = $pos->employees->first();
@@ -350,6 +352,32 @@ class StrukturOrganisasi extends Component
                     'children' => $this->buildTree($positions, $pos->id),
                 ];
             })->values();
+    }
+
+    private function splitMonkeyDexNodes($nodes)
+    {
+        $result = collect();
+
+        foreach ($nodes as $node) {
+            $node['children'] = $this->splitMonkeyDexNodes($node['children']);
+
+            if ($node['nama'] === 'Admin Monkey & Dex') {
+                $result->push(array_merge($node, ['nama' => 'Admin Monkey & Dex (Pagi)']));
+                $result->push(array_merge($node, ['nama' => 'Admin Monkey & Dex (Malam)']));
+            } else {
+                $result->push($node);
+            }
+        }
+
+        return $result;
+    }
+
+    private function sortTreeByName($nodes)
+    {
+        return $nodes->sortBy('nama')->values()->map(function ($node) {
+            $node['children'] = $this->sortTreeByName($node['children']);
+            return $node;
+        });
     }
 
     private function getMyPositionId(): ?int

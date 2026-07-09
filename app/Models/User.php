@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -20,9 +21,9 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    public function employee(): HasOne
+    public function employee(): BelongsTo
     {
-        return $this->hasOne(Employee::class);
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
 
     public function hasPin(): bool
@@ -83,6 +84,12 @@ class User extends Authenticatable
     public const ROLE_STAFF_HOST_EFOOTBALL = 'staff_host_efootball';
     public const ROLE_KOORDINATOR_VALORANT = 'koordinator_valorant';
     public const ROLE_STAFF_HOST_VALORANT = 'staff_host_valorant';
+    public const ROLE_KOORDINATOR_ROBLOX = 'koordinator_roblox';
+    public const ROLE_STAFF_HOST_ROBLOX = 'staff_host_roblox';
+    public const ROLE_KOORDINATOR_MONKEY_PUBG = 'koordinator_monkey_pubg';
+    public const ROLE_STAFF_HOST_MONKEY_PUBG = 'staff_host_monkey_pubg';
+    public const ROLE_KOORDINATOR_STOCK = 'koordinator_stock';
+    public const ROLE_STAFF_STOCK = 'staff_stock';
 
     public function isSuperAdmin(): bool
     {
@@ -129,6 +136,13 @@ class User extends Authenticatable
         return $this->role === self::ROLE_STAFF_CREATIVE;
     }
 
+    public function canSeeBiaya(): bool
+    {
+        if ($this->isKoordinatorCreative()) return true;
+        if ($this->isStaffCreative() && $this->employee?->mainPosition()?->nama === 'Admin KOL') return true;
+        return false;
+    }
+
     public function isKoordinatorPubg(): bool
     {
         return $this->role === self::ROLE_KOORDINATOR_PUBG;
@@ -154,6 +168,16 @@ class User extends Authenticatable
         return $this->role === self::ROLE_KOORDINATOR_VALORANT;
     }
 
+    public function isKoordinatorRoblox(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_ROBLOX;
+    }
+
+    public function isKoordinatorMonkeyPubg(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_MONKEY_PUBG;
+    }
+
     public function isKoordinatorGame(): bool
     {
         return in_array($this->role, [
@@ -162,6 +186,8 @@ class User extends Authenticatable
             self::ROLE_KOORDINATOR_MLBB,
             self::ROLE_KOORDINATOR_EFOOTBALL,
             self::ROLE_KOORDINATOR_VALORANT,
+            self::ROLE_KOORDINATOR_ROBLOX,
+            self::ROLE_KOORDINATOR_MONKEY_PUBG,
         ]);
     }
 
@@ -177,6 +203,9 @@ class User extends Authenticatable
             self::ROLE_KOORDINATOR_MLBB,
             self::ROLE_KOORDINATOR_EFOOTBALL,
             self::ROLE_KOORDINATOR_VALORANT,
+            self::ROLE_KOORDINATOR_ROBLOX,
+            self::ROLE_KOORDINATOR_MONKEY_PUBG,
+            self::ROLE_KOORDINATOR_STOCK,
         ]);
     }
 
@@ -290,6 +319,50 @@ class User extends Authenticatable
         return $employee->positions()->whereIn('position_id', $descendantIds)->exists();
     }
 
+    public function isStaffHostRoblox(): bool
+    {
+        if ($this->role === self::ROLE_STAFF_HOST_ROBLOX) {
+            return true;
+        }
+
+        if ($this->role !== self::ROLE_KOORDINATOR) {
+            return false;
+        }
+
+        $employee = $this->employee;
+        if (!$employee) return false;
+
+        $root = Position::where('nama', 'Koordinator Roblox')->first();
+        if (!$root) return false;
+
+        $descendantIds = $this->getAllDescendantIdsForPosition($root);
+        $descendantIds[] = $root->id;
+
+        return $employee->positions()->whereIn('position_id', $descendantIds)->exists();
+    }
+
+    public function isStaffHostMonkeyPubg(): bool
+    {
+        if ($this->role === self::ROLE_STAFF_HOST_MONKEY_PUBG) {
+            return true;
+        }
+
+        if ($this->role !== self::ROLE_KOORDINATOR) {
+            return false;
+        }
+
+        $employee = $this->employee;
+        if (!$employee) return false;
+
+        $root = Position::where('nama', 'Koordinator Monkey PUBG')->first();
+        if (!$root) return false;
+
+        $descendantIds = $this->getAllDescendantIdsForPosition($root);
+        $descendantIds[] = $root->id;
+
+        return $employee->positions()->whereIn('position_id', $descendantIds)->exists();
+    }
+
     public function getAllDescendantIdsForPosition(Position $position): array
     {
         $ids = [];
@@ -308,6 +381,16 @@ class User extends Authenticatable
     public function isKoordinatorAdmin(): bool
     {
         return $this->role === self::ROLE_KOORDINATOR_ADMIN;
+    }
+
+    public function isKoordinatorStock(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_STOCK;
+    }
+
+    public function isStaffStock(): bool
+    {
+        return $this->role === self::ROLE_STAFF_STOCK;
     }
 
     public function isHeadOfStore(): bool
@@ -343,6 +426,12 @@ class User extends Authenticatable
             self::ROLE_STAFF_HOST_MLBB => 1,
             self::ROLE_STAFF_HOST_EFOOTBALL => 1,
             self::ROLE_STAFF_HOST_VALORANT => 1,
+            self::ROLE_KOORDINATOR_ROBLOX => 1,
+            self::ROLE_STAFF_HOST_ROBLOX => 1,
+            self::ROLE_KOORDINATOR_MONKEY_PUBG => 1,
+            self::ROLE_STAFF_HOST_MONKEY_PUBG => 1,
+            self::ROLE_KOORDINATOR_STOCK => 1,
+            self::ROLE_STAFF_STOCK => 1,
             default => 0,
         };
     }

@@ -12,6 +12,7 @@ class Position extends Model
     protected $fillable = [
         'nama',
         'parent_id',
+        'division_id',
         'deskripsi',
         'is_active',
     ];
@@ -32,6 +33,11 @@ class Position extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Position::class, 'parent_id');
+    }
+
+    public function division(): BelongsTo
+    {
+        return $this->belongsTo(Division::class);
     }
 
     public function employees(): BelongsToMany

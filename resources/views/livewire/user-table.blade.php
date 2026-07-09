@@ -36,12 +36,16 @@
                     <option value="koordinator_mlbb">Koordinator MLBB</option>
                     <option value="koordinator_efootball">Koordinator E-football</option>
                     <option value="koordinator_valorant">Koordinator Valorant</option>
+                    <option value="koordinator_roblox">Koordinator Roblox</option>
+                    <option value="koordinator_monkey_pubg">Koordinator Monkey PUBG</option>
                     <option value="staff_creative">Staff Creative</option>
                     <option value="staff_host_pubg">Staff Host PUBG</option>
                     <option value="staff_host_ff">Staff Host FF</option>
                     <option value="staff_host_mlbb">Staff Host MLBB</option>
                     <option value="staff_host_efootball">Staff Host E-football</option>
                     <option value="staff_host_valorant">Staff Host Valorant</option>
+                    <option value="staff_host_roblox">Staff Host Roblox</option>
+                    <option value="staff_host_monkey_pubg">Staff Host Monkey PUBG</option>
                     <option value="staff_admin">Staff Admin</option>
                 </select>
             </div>
@@ -112,6 +116,14 @@
                                     <span class="badge-secondary">Staff Host E-football</span>
                                 @elseif($u->role === 'staff_host_valorant')
                                     <span class="badge-secondary">Staff Host Valorant</span>
+                                @elseif($u->role === 'koordinator_roblox')
+                                    <span class="badge-secondary">Koordinator Roblox</span>
+                                @elseif($u->role === 'staff_host_roblox')
+                                    <span class="badge-secondary">Staff Host Roblox</span>
+                                @elseif($u->role === 'koordinator_monkey_pubg')
+                                    <span class="badge-secondary">Koordinator Monkey PUBG</span>
+                                @elseif($u->role === 'staff_host_monkey_pubg')
+                                    <span class="badge-secondary">Staff Host Monkey PUBG</span>
                                 @elseif($u->role === 'staff_admin')
                                     <span class="badge-secondary">Staff Admin</span>
                                 @else
@@ -218,12 +230,16 @@
                         <option value="koordinator_mlbb">Koordinator MLBB</option>
                         <option value="koordinator_efootball">Koordinator E-football</option>
                         <option value="koordinator_valorant">Koordinator Valorant</option>
+                        <option value="koordinator_roblox">Koordinator Roblox</option>
+                        <option value="koordinator_monkey_pubg">Koordinator Monkey PUBG</option>
                         <option value="staff_creative">Staff Creative</option>
                         <option value="staff_host_pubg">Staff Host PUBG</option>
                         <option value="staff_host_ff">Staff Host FF</option>
                         <option value="staff_host_mlbb">Staff Host MLBB</option>
                         <option value="staff_host_efootball">Staff Host E-football</option>
                         <option value="staff_host_valorant">Staff Host Valorant</option>
+                        <option value="staff_host_roblox">Staff Host Roblox</option>
+                        <option value="staff_host_monkey_pubg">Staff Host Monkey PUBG</option>
                         <option value="staff_admin">Staff Admin</option>
                         <option value="koordinator">Koordinator</option>
                         <option value="manager">Manager</option>
@@ -237,7 +253,7 @@
                     <x-input-label for="create-employee" value="Hubungkan ke Karyawan" />
                     <select id="create-employee" wire:model="linkEmployeeId" class="mt-1 block w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200">
                         <option value="">-- Tidak terhubung --</option>
-                        @foreach($unlinkedEmployees as $emp)
+                        @foreach($allEmployees as $emp)
                             <option value="{{ $emp->id }}">{{ $emp->nama }} ({{ $emp->nik }})</option>
                         @endforeach
                     </select>
@@ -309,12 +325,16 @@
                         <option value="koordinator_mlbb">Koordinator MLBB</option>
                         <option value="koordinator_efootball">Koordinator E-football</option>
                         <option value="koordinator_valorant">Koordinator Valorant</option>
+                        <option value="koordinator_roblox">Koordinator Roblox</option>
+                        <option value="koordinator_monkey_pubg">Koordinator Monkey PUBG</option>
                         <option value="staff_creative">Staff Creative</option>
                         <option value="staff_host_pubg">Staff Host PUBG</option>
                         <option value="staff_host_ff">Staff Host FF</option>
                         <option value="staff_host_mlbb">Staff Host MLBB</option>
                         <option value="staff_host_efootball">Staff Host E-football</option>
                         <option value="staff_host_valorant">Staff Host Valorant</option>
+                        <option value="staff_host_roblox">Staff Host Roblox</option>
+                        <option value="staff_host_monkey_pubg">Staff Host Monkey PUBG</option>
                         <option value="staff_admin">Staff Admin</option>
                         <option value="koordinator">Koordinator</option>
                         <option value="manager">Manager</option>

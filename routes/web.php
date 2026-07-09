@@ -43,7 +43,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('employees', EmployeeController::class);
         Route::get('/employees/creative', [EmployeeController::class, 'creative'])->name('employees.creative');
         Route::get('/influencer', function () { return view('influencer.index'); })->name('influencer');
-        Route::get('/kalender-event', function () { return view('kalender-event.index'); })->name('kalender-event');
+        Route::get('/influencer/pengajuan', function () { return view('influencer.pengajuan'); })->name('influencer-pengajuan');
+        Route::get('/kalender-event', App\Livewire\KalenderEventTable::class)->name('kalender-event');
         Route::post('/employees/{employee}/photo', [EmployeeController::class, 'uploadPhoto'])->name('employees.upload-photo');
         Route::post('/employees/{employee}/documents', [EmployeeController::class, 'storeDocument'])->name('employees.store-document');
         Route::get('/employees/{employee}/documents/{document}/download', [EmployeeController::class, 'downloadDocument'])->name('employees.download-document');
@@ -73,7 +74,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/jobdesk', [JobdeskController::class, 'index'])->name('jobdesk');
         Route::get('/weekly-report', [WeeklyReportController::class, 'index'])->name('weekly-report');
         Route::get('/daily-tracking', [DailyTrackingController::class, 'index'])->name('daily-tracking');
+        Route::get('/daily-tracking-admin', App\Livewire\AdminDailyTrackingTable::class)->name('daily-tracking-admin');
         Route::get('/activity-competitor', [App\Http\Controllers\ActivityCompetitorController::class, 'index'])->name('activity-competitor');
+        Route::get('/content-plan', App\Livewire\ContentPlanTable::class)->name('content-plan');
 
         Route::prefix('export')->name('export.')->group(function () {
             Route::get('/employees', [ExportController::class, 'employees'])->name('employees');
@@ -197,6 +200,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/kelola-akun', UserTable::class)->name('kelola-akun')->middleware('role:super_admin');
+    Route::get('/kelola-jabatan', App\Livewire\PositionTable::class)->name('kelola-jabatan')->middleware('role:super_admin');
 });
 
 Route::middleware('auth')->group(function () {

@@ -1,12 +1,12 @@
 @push('topbar-left')
     <div>
-        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Daily Tracking PUBG</h1>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Daily Tracking {{ $divisi }}</h1>
         <p class="text-xs text-gray-400 mt-0.5">Tracking harian pemain</p>
     </div>
 @endpush
 
 <div>
-    @if(auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffHostMlbb() || auth()->user()->isStaffHostEfootball() || auth()->user()->isStaffHostValorant() || auth()->user()->isKoordinatorGame())
+    @if(auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffHostMlbb() || auth()->user()->isStaffHostEfootball() || auth()->user()->isStaffHostValorant() || auth()->user()->isStaffHostRoblox() || auth()->user()->isStaffHostMonkeyPubg() || auth()->user()->isKoordinatorGame())
     <div x-data="{ modal: null }" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
         <div @click="modal = 'sold'" class="stat-card group cursor-pointer">
             <div class="flex items-center justify-between mb-3">
@@ -231,7 +231,7 @@
                             <td class="table-cell text-center">
                                 @php
                                     $isKoord = auth()->user()->isKoordinatorGame();
-                                    $isStaff = auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffHostMlbb() || auth()->user()->isStaffHostEfootball() || auth()->user()->isStaffHostValorant();
+                                    $isStaff = auth()->user()->isStaffHostPubg() || auth()->user()->isStaffHostFf() || auth()->user()->isStaffHostMlbb() || auth()->user()->isStaffHostEfootball() || auth()->user()->isStaffHostValorant() || auth()->user()->isStaffHostRoblox() || auth()->user()->isStaffHostMonkeyPubg();
                                     $canEdit = $isKoord || ($isStaff && $item->status === 'pending');
                                 @endphp
                                 @if($isKoord && $item->status === 'pending')
