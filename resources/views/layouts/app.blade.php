@@ -41,8 +41,21 @@
                 :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
             >
                 <div class="flex h-16 items-center gap-3 px-6 border-b border-gray-50 dark:border-gray-800">
-                    <div class="flex items-center justify-center">
-                        <img src="{{ asset('logo.png') }}" alt="Johen Sukses Abadi" class="h-7 w-auto">
+                    <div x-data="logoAnimation()" class="relative flex items-center justify-center cursor-pointer select-none"
+                        @mouseenter="glowIntensity = 0.5"
+                        @mouseleave="glowIntensity = 0.2">
+                        <div class="absolute inset-0 rounded-lg transition-all duration-1000 ease-out"
+                            x-bind:style="`background: radial-gradient(circle, rgba(9,135,245,${glowIntensity}), rgba(124,58,237,${glowIntensity * 0.5}), transparent 70%); filter: blur(6px); transform: scale(${1 + glowIntensity * 0.25})`">
+                        </div>
+                        <div class="absolute inset-0 rounded-lg overflow-hidden">
+                            <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                                x-bind:style="`transform: translateX(${sweepX}%); transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)`">
+                            </div>
+                        </div>
+                        <div class="relative transition-transform duration-700 ease-out"
+                            x-bind:style="`transform: perspective(400px) rotateY(${flipAngle}deg)`">
+                            <img src="{{ asset('logo.png') }}" alt="Johen Sukses Abadi" class="h-7 w-auto relative">
+                        </div>
                     </div>
                     <div>
                         <span class="text-sm font-bold text-gray-900 dark:text-gray-100">Johen Application</span>
@@ -702,6 +715,34 @@ $activeMenu = match (true) {
                         this.isDark = !this.isDark;
                         document.documentElement.classList.toggle('dark', this.isDark);
                         localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
+                    }
+                }
+            }
+
+            function logoAnimation() {
+                return {
+                    glowIntensity: 0.2,
+                    flipAngle: 0,
+                    sweepX: -150,
+                    init() {
+                        this.startSweep();
+                        this.startFlipCycle();
+                    },
+                    startSweep() {
+                        setInterval(() => {
+                            this.sweepX = 150;
+                            this.$nextTick(() => {
+                                setTimeout(() => { this.sweepX = -150; }, 100);
+                            });
+                        }, 4000);
+                    },
+                    startFlipCycle() {
+                        setInterval(() => {
+                            this.flipAngle = 360;
+                            this.$nextTick(() => {
+                                setTimeout(() => { this.flipAngle = 0; }, 800);
+                            });
+                        }, 6000);
                     }
                 }
             }
