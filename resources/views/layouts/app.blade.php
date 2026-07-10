@@ -583,9 +583,9 @@ $activeMenu = match (true) {
                         <div x-data="{ open: false }" class="relative">
                             <button @click="open = !open" @click.outside="open = false" class="flex items-center gap-2.5 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-800 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
                                 <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-xs shadow-sm shrink-0 overflow-hidden">
-                                    @php $foto = Auth::user()->employee?->foto; @endphp
-                                    @if($foto)
-                                        <img src="{{ asset('storage/employees/' . $foto) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                                    @php $fotoUrl = Auth::user()->employee?->foto_url; @endphp
+                                    @if($fotoUrl)
+                                        <img src="{{ $fotoUrl }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
                                     @else
                                         {{ substr(Auth::user()->name, 0, 1) }}
                                     @endif

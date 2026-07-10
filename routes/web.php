@@ -45,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/influencer', function () { return view('influencer.index'); })->name('influencer');
         Route::get('/influencer/pengajuan', function () { return view('influencer.pengajuan'); })->name('influencer-pengajuan');
         Route::get('/kalender-event', App\Livewire\KalenderEventTable::class)->name('kalender-event');
+        Route::get('/employees/{employee}/photo', [EmployeeController::class, 'showPhoto'])->name('employees.photo');
         Route::post('/employees/{employee}/photo', [EmployeeController::class, 'uploadPhoto'])->name('employees.upload-photo');
         Route::post('/employees/{employee}/documents', [EmployeeController::class, 'storeDocument'])->name('employees.store-document');
         Route::get('/employees/{employee}/documents/{document}/download', [EmployeeController::class, 'downloadDocument'])->name('employees.download-document');
