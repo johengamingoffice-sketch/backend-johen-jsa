@@ -90,7 +90,7 @@
                 {{ $slot }}
             </div>
 
-            <p class="mt-8 text-xs text-gray-600 relative z-10">&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
+            <p class="mt-8 text-xs text-gray-600 relative z-10">&copy; {{ date('Y') }} PT. Johen Sukses Abadi. All rights reserved.</p>
         </div>
 
         <style>

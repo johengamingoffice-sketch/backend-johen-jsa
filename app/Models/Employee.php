@@ -63,7 +63,7 @@ class Employee extends Model
         if (!$this->foto) return null;
 
         if (str_starts_with($this->foto, 'base64:')) {
-            return route('hris.employees.photo', $this);
+            return route('hris.employees.photo', $this) . '?' . $this->updated_at->timestamp;
         }
 
         return asset('storage/employees/' . $this->foto);
